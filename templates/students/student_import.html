@@ -29,6 +29,24 @@
                 </a>
             </form>
 
+            <!-- ✅ SUCCESS / FAIL COUNT -->
+            {% if success_count or failed_count %}
+            <div class="alert alert-info mt-3">
+                ✅ Success: {{ success_count }} |
+                ❌ Failed: {{ failed_count }}
+            </div>
+            {% endif %}
+
+            <!-- ❌ ERROR LIST -->
+            {% if errors %}
+            <div class="alert alert-danger mt-3">
+                <h5>⚠ Import Errors:</h5>
+                {% for e in errors %}
+                    <div>{{ e }}</div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             <hr>
 
             <h5>📌 Excel Format Guide:</h5>
@@ -36,7 +54,7 @@
                 <li>student_name</li>
                 <li>admission_no</li>
                 <li>admission_date</li>
-                <li>class_id</li>
+                <li>class_id OR class_name</li>
                 <li>roll_no</li>
                 <li>father_name</li>
                 <li>mother_name</li>
@@ -45,7 +63,7 @@
                 <li>gender</li>
                 <li>date_of_birth</li>
                 <li>aadhaar_number</li>
-                <li>transport_required (True/False)</li>
+                <li>transport_required (Yes/No)</li>
                 <li>transport_details</li>
                 <li>previous_school</li>
                 <li>address</li>
