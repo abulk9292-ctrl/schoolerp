@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card card-box shadow-sm">
+        <div class="card-body">
+
+            <h3 class="mb-3">👀 Student Import Preview</h3>
+
+            <div class="alert alert-info">
+                Total Rows Found: <b>{{ total_rows }}</b><br>
+                Showing first 20 rows only. Confirm করলে সব students import হবে।
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-sm table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Student Name</th>
+                            <th>Admission No</th>
+                            <th>Class ID</th>
+                            <th>Class Name</th>
+                            <th>Roll</th>
+                            <th>Father</th>
+                            <th>Phone</th>
+                            <th>Gender</th>
+                            <th>Aadhaar</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for row in preview_data %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ row.student_name|default:"-" }}</td>
+                            <td>{{ row.admission_no|default:"-" }}</td>
+                            <td>{{ row.class_id|default:"-" }}</td>
+                            <td>{{ row.class_name|default:"-" }}</td>
+                            <td>{{ row.roll_no|default:"-" }}</td>
+                            <td>{{ row.father_name|default:"-" }}</td>
+                            <td>{{ row.phone|default:"-" }}</td>
+                            <td>{{ row.gender|default:"-" }}</td>
+                            <td>{{ row.aadhaar_number|default:"-" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center">No data found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-3 d-flex gap-2">
+                <form method="POST" action="{% url 'student_import_confirm' %}">
+                    {% csrf_token %}
+                    <button type="submit"
+                            onclick="return confirm('Are you sure you want to import all students?')"
+                            class="btn btn-success">
+                        ✅ Confirm Import
+                    </button>
+                </form>
+
+                <a href="{% url 'student_import' %}" class="btn btn-secondary">
+                    ❌ Cancel
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

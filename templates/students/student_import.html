@@ -2,34 +2,40 @@
 {% block content %}
 
 <div class="container mt-4">
-    <div class="card card-box">
+    <div class="card card-box shadow-sm">
         <div class="card-body">
 
-            <h3 class="mb-3">📥 Import Students (Excel)</h3>
-
-            <!-- 🔥 Demo Download -->
-            <a href="{% url 'download_student_demo' %}" class="btn btn-success mb-3">
-                ⬇ Download Demo Excel
-            </a>
-
-            <form method="POST" enctype="multipart/form-data">
-                {% csrf_token %}
-
-                <div class="mb-3">
-                    <label class="form-label">Upload Excel File</label>
-                    {{ form.excel_file }}
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    🚀 Import Students
-                </button>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="mb-0">📥 Import Students (Excel)</h3>
 
                 <a href="{% url 'student_list' %}" class="btn btn-secondary">
                     Back
                 </a>
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>Note:</strong>
+                Excel file-এ <b>student_id</b> এবং <b>registration_no</b> দিতে হবে না।
+                এগুলো automatic generate হবে।
+            </div>
+
+            <a href="{% url 'download_student_demo' %}" class="btn btn-success mb-3">
+                ⬇ Download Demo Excel
+            </a>
+
+            <form method="POST" enctype="multipart/form-data" action="{% url 'student_import_preview' %}">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Upload Excel File</label>
+                    {{ form.excel_file }}
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    👀 Preview Data
+                </button>
             </form>
 
-            <!-- ✅ SUCCESS / FAIL COUNT -->
             {% if success_count or failed_count %}
             <div class="alert alert-info mt-3">
                 ✅ Success: {{ success_count }} |
@@ -37,7 +43,6 @@
             </div>
             {% endif %}
 
-            <!-- ❌ ERROR LIST -->
             {% if errors %}
             <div class="alert alert-danger mt-3">
                 <h5>⚠ Import Errors:</h5>
@@ -50,24 +55,34 @@
             <hr>
 
             <h5>📌 Excel Format Guide:</h5>
-            <ul>
-                <li>student_name</li>
-                <li>admission_no</li>
-                <li>admission_date</li>
-                <li>class_id OR class_name</li>
-                <li>roll_no</li>
-                <li>father_name</li>
-                <li>mother_name</li>
-                <li>guardian_name</li>
-                <li>phone</li>
-                <li>gender</li>
-                <li>date_of_birth</li>
-                <li>aadhaar_number</li>
-                <li>transport_required (Yes/No)</li>
-                <li>transport_details</li>
-                <li>previous_school</li>
-                <li>address</li>
-            </ul>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <ul>
+                        <li>student_name <b class="text-danger">*</b></li>
+                        <li>admission_no</li>
+                        <li>admission_date</li>
+                        <li>class_id OR class_name <b class="text-danger">*</b></li>
+                        <li>roll_no</li>
+                        <li>father_name</li>
+                        <li>mother_name</li>
+                        <li>guardian_name</li>
+                    </ul>
+                </div>
+
+                <div class="col-md-6">
+                    <ul>
+                        <li>phone</li>
+                        <li>gender</li>
+                        <li>date_of_birth</li>
+                        <li>aadhaar_number</li>
+                        <li>transport_required — Yes/No</li>
+                        <li>transport_details</li>
+                        <li>previous_school</li>
+                        <li>address</li>
+                    </ul>
+                </div>
+            </div>
 
         </div>
     </div>

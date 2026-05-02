@@ -559,3 +559,281 @@ def download_student_demo(request):
     df.to_excel(response, index=False)
 
     return response
+
+# ==============================
+# 🔥 UPGRADED STUDENT EXCEL IMPORT SYSTEM
+# ==============================
+
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.shortcuts import render, redirect
+from django.http import HttpResponse
+
+import pandas as pd
+
+from .models import Student
+from .forms import StudentImportForm
+from academics.models import Class, AcademicSession
+
+
+def clean_excel_value(value, default=''):
+    if pd.notna(value):
+        return value
+    return default
+
+
+@login_required
+def student_import(request):
+    errors = []
+    success_count = 0
+    failed_count = 0
+
+    if request.method == 'POST':
+        form = StudentImportForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            excel_file = request.FILES.get('excel_file')
+
+            try:
+                df = pd.read_excel(excel_file)
+                active_session = AcademicSession.objects.filter(is_active=True).first()
+
+                for index, row in df.iterrows():
+                    row_no = index + 2
+
+                    student_name = str(row.get('student_name', '')).strip()
+                    admission_no = str(row.get('admission_no', '')).strip()
+
+                    if not student_name:
+                        failed_count += 1
+                        errors.append(f"Row {row_no}: Student name is required.")
+                        continue
+
+                    if admission_no and Student.objects.filter(admission_no=admission_no).exists():
+                        failed_count += 1
+                        errors.append(f"Row {row_no}: Admission No already exists.")
+                        continue
+
+                    class_obj = None
+
+                    class_id = row.get('class_id')
+                    class_name = row.get('class_name')
+
+                    if pd.notna(class_id):
+                        try:
+                            class_obj = Class.objects.filter(id=int(class_id)).first()
+                        except Exception:
+                            class_obj = None
+
+                    if not class_obj and pd.notna(class_name):
+                        class_obj = Class.objects.filter(
+                            class_name__iexact=str(class_name).strip()
+                        ).first()
+
+                    if not class_obj:
+                        failed_count += 1
+                        errors.append(f"Row {row_no}: Class not found.")
+                        continue
+
+                    Student.objects.create(
+                        # ✅ student_id / registration_no দিচ্ছি না
+                        # ✅ তাই model.save() auto-generate করবে
+
+                        student_name=student_name,
+                        admission_no=admission_no,
+                        admission_date=clean_excel_value(row.get('admission_date'), None),
+                        current_session=active_session,
+                        class_assigned=class_obj,
+                        roll_no=clean_excel_value(row.get('roll_no'), None),
+
+                        father_name=clean_excel_value(row.get('father_name'), ''),
+                        mother_name=clean_excel_value(row.get('mother_name'), ''),
+                        guardian_name=clean_excel_value(row.get('guardian_name'), ''),
+                        phone=str(clean_excel_value(row.get('phone'), '')).strip(),
+
+                        gender=clean_excel_value(row.get('gender'), ''),
+                        date_of_birth=clean_excel_value(row.get('date_of_birth'), None),
+                        aadhaar_number=str(clean_excel_value(row.get('aadhaar_number'), '')).strip(),
+
+                        transport_required=str(row.get('transport_required', '')).lower() in ['true', 'yes', '1'],
+                        transport_details=clean_excel_value(row.get('transport_details'), ''),
+                        previous_school=clean_excel_value(row.get('previous_school'), ''),
+                        address=clean_excel_value(row.get('address'), ''),
+
+                        is_active=True,
+                    )
+
+                    success_count += 1
+
+                messages.success(
+                    request,
+                    f"{success_count} students imported successfully. {failed_count} failed."
+                )
+
+            except Exception as e:
+                messages.error(request, f"Import Error: {e}")
+
+    else:
+        form = StudentImportForm()
+
+    return render(request, 'students/student_import.html', {
+        'form': form,
+        'errors': errors,
+        'success_count': success_count,
+        'failed_count': failed_count,
+    })
+
+
+@login_required
+def download_student_demo(request):
+    data = [{
+        'student_name': 'Rahim',
+        'admission_no': 'ADM001',
+        'admission_date': '2024-01-10',
+        'class_id': 1,
+        'class_name': 'Class I',
+        'roll_no': 1,
+        'father_name': 'Karim',
+        'mother_name': 'Salma',
+        'guardian_name': 'Karim',
+        'phone': '9999999999',
+        'gender': 'Male',
+        'date_of_birth': '2010-05-01',
+        'aadhaar_number': '123456789012',
+        'transport_required': 'Yes',
+        'transport_details': 'Van',
+        'previous_school': 'ABC School',
+        'address': 'Village XYZ'
+    }]
+
+    df = pd.DataFrame(data)
+
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="student_import_demo.xlsx"'
+
+    df.to_excel(response, index=False)
+
+    return response
+
+
+@login_required
+def student_import_preview(request):
+    if request.method == 'POST':
+        excel_file = request.FILES.get('excel_file')
+
+        if not excel_file:
+            messages.error(request, "Please upload a file.")
+            return redirect('student_import')
+
+        try:
+            df = pd.read_excel(excel_file)
+            request.session['import_data'] = df.to_json()
+
+            preview_data = df.head(20).to_dict(orient='records')
+
+            return render(request, 'students/student_import_preview.html', {
+                'preview_data': preview_data,
+                'total_rows': len(df)
+            })
+
+        except Exception as e:
+            messages.error(request, f"Preview Error: {e}")
+            return redirect('student_import')
+
+    return redirect('student_import')
+
+
+@login_required
+def student_import_confirm(request):
+    data_json = request.session.get('import_data')
+
+    if not data_json:
+        messages.error(request, "No import data found.")
+        return redirect('student_import')
+
+    df = pd.read_json(data_json)
+
+    success_count = 0
+    failed_count = 0
+    errors = []
+
+    active_session = AcademicSession.objects.filter(is_active=True).first()
+
+    for index, row in df.iterrows():
+        row_no = index + 2
+
+        try:
+            student_name = str(row.get('student_name', '')).strip()
+            admission_no = str(row.get('admission_no', '')).strip()
+
+            if not student_name:
+                failed_count += 1
+                errors.append(f"Row {row_no}: Student name is required.")
+                continue
+
+            if admission_no and Student.objects.filter(admission_no=admission_no).exists():
+                failed_count += 1
+                errors.append(f"Row {row_no}: Admission No already exists.")
+                continue
+
+            class_obj = None
+
+            if pd.notna(row.get('class_id')):
+                try:
+                    class_obj = Class.objects.filter(id=int(row.get('class_id'))).first()
+                except Exception:
+                    class_obj = None
+
+            if not class_obj and pd.notna(row.get('class_name')):
+                class_obj = Class.objects.filter(
+                    class_name__iexact=str(row.get('class_name')).strip()
+                ).first()
+
+            if not class_obj:
+                failed_count += 1
+                errors.append(f"Row {row_no}: Class not found.")
+                continue
+
+            Student.objects.create(
+                # ✅ student_id / registration_no ফাঁকা থাকলে auto-generate হবে
+
+                student_name=student_name,
+                admission_no=admission_no,
+                admission_date=clean_excel_value(row.get('admission_date'), None),
+                current_session=active_session,
+                class_assigned=class_obj,
+                roll_no=clean_excel_value(row.get('roll_no'), None),
+
+                father_name=clean_excel_value(row.get('father_name'), ''),
+                mother_name=clean_excel_value(row.get('mother_name'), ''),
+                guardian_name=clean_excel_value(row.get('guardian_name'), ''),
+                phone=str(clean_excel_value(row.get('phone'), '')).strip(),
+
+                gender=clean_excel_value(row.get('gender'), ''),
+                date_of_birth=clean_excel_value(row.get('date_of_birth'), None),
+                aadhaar_number=str(clean_excel_value(row.get('aadhaar_number'), '')).strip(),
+
+                transport_required=str(row.get('transport_required', '')).lower() in ['true', 'yes', '1'],
+                transport_details=clean_excel_value(row.get('transport_details'), ''),
+                previous_school=clean_excel_value(row.get('previous_school'), ''),
+                address=clean_excel_value(row.get('address'), ''),
+
+                is_active=True,
+            )
+
+            success_count += 1
+
+        except Exception as e:
+            failed_count += 1
+            errors.append(f"Row {row_no}: {e}")
+
+    request.session.pop('import_data', None)
+
+    messages.success(request, f"{success_count} imported, {failed_count} failed.")
+
+    return render(request, 'students/student_import.html', {
+        'errors': errors,
+        'success_count': success_count,
+        'failed_count': failed_count,
+        'form': StudentImportForm()
+    })
