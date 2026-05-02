@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 class="mb-3">Student Attendance</h2>
+
+<div class="card card-box mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Date</label>
+                <input type="date" name="date" value="{{ attendance_date }}" class="form-control">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Class</label>
+                <select name="class_id" class="form-select">
+                    <option value="">All Classes</option>
+                    {% for c in classes %}
+                        <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>
+                            {{ c.class_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">Load Attendance</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card card-box">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="attendance_date" value="{{ attendance_date }}">
+            <input type="hidden" name="class_id" value="{{ selected_class|default:'' }}">
+
+            <div class="table-responsive">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Photo</th>
+                            <th>Roll No</th>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Class</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in students %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>
+                                {% if s.photo %}
+                                    <img src="{{ s.photo.url }}" width="45" height="45" style="object-fit: cover; border-radius: 6px;">
+                                {% else %}
+                                    No Photo
+                                {% endif %}
+                            </td>
+                            <td>{{ s.roll_no }}</td>
+                            <td>{{ s.student_id }}</td>
+                            <td>{{ s.student_name }}</td>
+                            <td>{{ s.class_assigned }}</td>
+                            <td>
+                                <select name="status_{{ s.id }}" class="form-select">
+                                    <option value="Present" {% if s.current_status == 'Present' %}selected{% endif %}>Present</option>
+                                    <option value="Absent" {% if s.current_status == 'Absent' %}selected{% endif %}>Absent</option>
+                                    <option value="Late" {% if s.current_status == 'Late' %}selected{% endif %}>Late</option>
+                                </select>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">No students found for this filter.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <button type="submit" class="btn btn-success">
+                {% if is_update %}Update Attendance{% else %}Save Attendance{% endif %}
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

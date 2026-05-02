@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+@page {
+    size: A4;
+    margin: 8mm;
+}
+
+.print-area {
+    width: 210mm;
+    min-height: 297mm;
+    margin: auto;
+    background: white;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6mm;
+}
+
+.id-card {
+    height: 52mm;
+    border: 1.5px dashed #333;
+    border-radius: 8px;
+    padding: 6px;
+    position: relative;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: #fff;
+}
+
+.school-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: #0c9b57;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 3px;
+}
+
+.card-body-box {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.student-photo {
+    width: 55px;
+    height: 65px;
+    object-fit: cover;
+    border: 1px solid #999;
+    border-radius: 5px;
+}
+
+.info {
+    font-size: 11px;
+    line-height: 1.45;
+    flex: 1;
+}
+
+.cut-text {
+    position: absolute;
+    right: 6px;
+    bottom: 3px;
+    font-size: 8px;
+    color: #777;
+}
+
+.print-btn {
+    margin-bottom: 15px;
+}
+
+@media print {
+    .sidebar,
+    .topbar,
+    .print-btn,
+    .no-print {
+        display: none !important;
+    }
+
+    .content-area {
+        padding: 0 !important;
+    }
+
+    .print-area {
+        margin: 0;
+    }
+}
+</style>
+
+<div class="no-print print-btn text-center">
+    <button onclick="window.print()" class="btn btn-primary">
+        Print 10 ID Cards
+    </button>
+</div>
+
+<div class="print-area">
+
+    {% for student in students %}
+    <div class="id-card">
+        <div class="school-title">AL RAHMAN MISSION</div>
+
+        <div class="card-body-box">
+            <div>
+                {% if student.photo %}
+                    <img src="{{ student.photo.url }}" class="student-photo">
+                {% else %}
+                    <div class="student-photo d-flex align-items-center justify-content-center">
+                        No Photo
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="info">
+                <b>Name:</b> {{ student.student_name }}<br>
+                <b>ID:</b> {{ student.student_id }}<br>
+                <b>Reg:</b> {{ student.registration_no }}<br>
+                <b>Class:</b> {{ student.class_assigned }}<br>
+                <b>Roll:</b> {{ student.roll_no }}<br>
+                <b>Phone:</b> {{ student.phone }}
+            </div>
+        </div>
+
+        <div class="cut-text">✂ Cut Here</div>
+    </div>
+    {% empty %}
+    <p>No active students found.</p>
+    {% endfor %}
+
+</div>
+
+{% endblock %}

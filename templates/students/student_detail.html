@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow mb-4">
+        <div class="card-body d-flex align-items-center">
+            <div>
+                {% if student.photo %}
+                    <img src="{{ student.photo.url }}" width="120" height="120" style="border-radius:12px; object-fit:cover;">
+                {% else %}
+                    <div style="width:120px;height:120px;background:#ddd;border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                        No Photo
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="ms-4">
+                <h3>{{ student.student_name }}</h3>
+
+                {% if student.is_active %}
+                    <span class="badge bg-success mb-2">Active</span>
+                {% else %}
+                    <span class="badge bg-danger mb-2">Discontinued</span>
+                {% endif %}
+
+                <p><b>ID:</b> {{ student.student_id }}</p>
+                <p><b>Reg No:</b> {{ student.registration_no }}</p>
+                <p><b>Class:</b> {{ student.class_assigned }}</p>
+                <p><b>Roll:</b> {{ student.roll_no }}</p>
+            </div>
+
+            <div class="ms-auto">
+                <a href="{% url 'student_edit' student.id %}" class="btn btn-primary mb-2">Edit</a><br>
+                <a href="{% url 'student_delete' student.id %}" class="btn btn-danger mb-2">Delete</a><br>
+                <a href="{% url 'add_sibling' student.id %}" class="btn btn-success mb-2">Add Sibling</a><br>
+                <a href="{% url 'complaint_add' student.id %}" class="btn btn-warning mb-2">Add Complaint</a><br>
+
+                {% if student.is_active %}
+                    <a href="{% url 'student_discontinue' student.id %}" class="btn btn-dark mb-2">Discontinue</a><br>
+                {% else %}
+                    <a href="{% url 'student_readmit' student.id %}" class="btn btn-success mb-2">Re-Admit</a><br>
+                {% endif %}
+
+                <a href="{% url 'student_promote' student.id %}" class="btn btn-info mb-2">Promote</a><br>
+                <a href="{% url 'student_demote' student.id %}" class="btn btn-secondary mb-2">De-Promote</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-6">
+            <div class="card shadow mb-3">
+                <div class="card-header bg-primary text-white">Student Details</div>
+                <div class="card-body">
+                    <p><b>Father:</b> {{ student.father_name }}</p>
+                    <p><b>Mother:</b> {{ student.mother_name }}</p>
+                    <p><b>Guardian:</b> {{ student.guardian_name }}</p>
+                    <p><b>Phone:</b> {{ student.phone }}</p>
+                    <p><b>DOB:</b> {{ student.date_of_birth }}</p>
+                    <p><b>Aadhaar:</b> {{ student.aadhaar_number }}</p>
+                    <p><b>Address:</b> {{ student.address }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow mb-3">
+                <div class="card-header bg-success text-white">Transport Details</div>
+                <div class="card-body">
+                    <p><b>Transport Required:</b> {{ student.transport_required }}</p>
+                    <p><b>Transport Details:</b> {{ student.transport_details }}</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-info text-white">Siblings</div>
+        <div class="card-body">
+            {% if siblings %}
+                {% for sib in siblings %}
+                    <a href="{% url 'student_detail' sib.id %}" class="btn btn-outline-primary btn-sm mb-2">
+                        {{ sib.student_name }} - {{ sib.student_id }}
+                    </a>
+                {% endfor %}
+            {% else %}
+                <p>No sibling added.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-dark text-white">Complaints</div>
+        <div class="card-body">
+
+            <a href="{% url 'complaint_add' student.id %}" class="btn btn-warning mb-3">
+                + Add Complaint
+            </a>
+
+            <table class="table table-bordered table-sm">
+                <tr>
+                    <th>Title</th>
+                    <th>Parent</th>
+                    <th>Status</th>
+                    <th>Solution</th>
+                    <th>Action</th>
+                </tr>
+
+                {% for c in complaints %}
+                <tr>
+                    <td>{{ c.title }}</td>
+                    <td>{{ c.parent_name }}</td>
+                    <td>
+                        {% if c.status == 'Solved' %}
+                            <span class="badge bg-success">Solved</span>
+                        {% else %}
+                            <span class="badge bg-danger">Pending</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if c.solution %}
+                            {{ c.solution }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if c.status == 'Pending' %}
+                            <a href="{% url 'complaint_solve' c.id %}" class="btn btn-sm btn-success">
+                                Solve
+                            </a>
+                        {% else %}
+                            ✔
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No complaints</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-warning">Attendance Performance</div>
+        <div class="card-body">
+            <h4>{{ attendance_percentage }}%</h4>
+            <p><b>Total Days:</b> {{ attendance_total }}</p>
+            <p><b>Present:</b> {{ attendance_present }}</p>
+            <p><b>Absent:</b> {{ attendance_absent }}</p>
+
+            <div class="progress">
+                <div class="progress-bar bg-success" style="width: {{ attendance_percentage }}%;">
+                    {{ attendance_percentage }}%
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-danger text-white">Fees Details</div>
+        <div class="card-body">
+            <p><b>Monthly Fee:</b> ₹{{ monthly_fee }}</p>
+            <p><b>Total Paid:</b> ₹{{ total_paid }}</p>
+            <p><b>Total Due:</b> ₹{{ total_due }}</p>
+
+            <hr>
+
+            <h6>Fee Payment History</h6>
+            <table class="table table-bordered table-sm">
+                <tr>
+                    <th>Month</th>
+                    <th>Paid Amount</th>
+                    <th>Date</th>
+                </tr>
+                {% for fee in fee_records %}
+                <tr>
+                    <td>{{ fee.month }}</td>
+                    <td>₹{{ fee.amount_paid }}</td>
+                    <td>{{ fee.date }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center">No fee record found.</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow mb-4">
+        <div class="card-header bg-secondary text-white">Exam Details</div>
+        <div class="card-body">
+            <table class="table table-bordered table-sm">
+                <tr>
+                    <th>Exam</th>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                </tr>
+
+                {% for exam in exam_records %}
+                <tr>
+                    <td>{{ exam.exam }}</td>
+                    <td>{{ exam.subject }}</td>
+                    <td>{{ exam.marks }}</td>
+                    <td>{{ exam.grade }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center">No exam record found.</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

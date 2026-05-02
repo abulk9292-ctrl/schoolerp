@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+    <h2>All Employees</h2>
+    <a href="/teachers/add/" class="btn btn-success">Add New</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Photo</th>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Designation</th>
+                <th>Phone</th>
+                <th>Salary</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in employees %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                    {% if e.photo %}
+                        <img src="{{ e.photo.url }}" width="40" height="40" style="object-fit: cover;">
+                    {% else %}
+                        No Photo
+                    {% endif %}
+                </td>
+                <td>{{ e.employee_id }}</td>
+                <td>{{ e.name }}</td>
+                <td>{{ e.designation }}</td>
+                <td>{{ e.phone }}</td>
+                <td>{{ e.salary }}</td>
+                <td>
+                    {% if e.is_active %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="/teachers/edit/{{ e.id }}/" class="btn btn-warning btn-sm">Edit</a>
+                    <a href="/teachers/delete/{{ e.id }}/" class="btn btn-danger btn-sm">Delete</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" class="text-center">No employees found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

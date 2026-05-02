@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+.print-actions{margin-bottom:10px}
+.a4-page{width:210mm;min-height:297mm;margin:auto;background:#fff;padding:5mm;box-sizing:border-box}
+.salary-slip{height:138mm;border:1.5px solid #0b2f5b;margin-bottom:3mm;position:relative;overflow:hidden;box-sizing:border-box}
+.left-copy{position:absolute;left:0;top:0;width:13mm;height:100%;border-right:1px dashed #777;display:flex;align-items:center;justify-content:center}
+.left-copy span{transform:rotate(-90deg);font-weight:900;color:#0b2f5b;font-size:14px;white-space:nowrap}
+.slip-body{margin-left:13mm;padding:4mm}
+.header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #ddd;padding-bottom:4px}
+.school{display:flex;gap:8px;align-items:center}
+.logo{width:48px;height:48px;object-fit:contain}
+.school-name{font-size:18px;font-weight:900;color:#0b2f5b;line-height:1}
+.school-sub{font-size:8.5px;color:#333}
+.title{text-align:right;color:#0b2f5b}
+.title h3{font-size:16px;margin:0;font-weight:900}
+.title p{font-size:10px;margin:3px 0}
+.pay-date{background:#0b2f5b;color:#fff;padding:3px 12px;border-radius:5px;font-size:10px;font-weight:800}
+.info-box{border:1px solid #ccc;border-radius:6px;margin-top:5px;padding:5px;display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:9.5px}
+.info-row{display:grid;grid-template-columns:95px 8px 1fr;margin-bottom:2px}
+.section-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:9.5px}
+.section-table th{background:#0b2f5b;color:#fff;padding:4px;border:1px solid #0b2f5b}
+.section-table td{padding:3px 5px;border:1px solid #ccc}
+.total-row td{font-weight:900;background:#eee6d8;color:#0b2f5b}
+.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.summary-box,.payment-box{border:1px solid #ccc;border-radius:6px;padding:5px;font-size:9.5px}
+.net-line{background:#0b2f5b;color:#fff;font-weight:900;padding:5px;margin-top:4px;display:flex;justify-content:space-between}
+.due-line{background:#ffe8e8;color:#b00020;font-weight:900;padding:5px;margin-top:4px;display:flex;justify-content:space-between}
+.advance-line{background:#e7f5ff;color:#055160;font-weight:900;padding:5px;margin-top:4px;display:flex;justify-content:space-between}
+.payment-title{font-weight:900;color:#0b2f5b;margin-bottom:3px}
+.note{font-size:8.5px;margin-top:5px}
+.sign-area{display:flex;justify-content:space-between;align-items:flex-end;margin-top:18px;font-size:9px}
+.sign-box{width:30%;text-align:center;border-top:1px solid #111;padding-top:4px}
+.principal-sign{height:28px;object-fit:contain;display:block;margin:0 auto 2px}
+.footer-blue{position:absolute;bottom:0;left:13mm;right:0;background:#0b2f5b;color:#fff;text-align:center;font-size:9px;padding:4px}
+.cut-line{text-align:center;font-size:8px;color:#777;border-top:1px dashed #777;margin:0 0 2mm}
+
+@media print{
+    @page{size:A4 portrait;margin:4mm}
+    .sidebar,.topbar,.print-actions,.no-print{display:none!important}
+    .content-area{padding:0!important;margin:0!important}
+    .a4-page{width:100%;padding:0;margin:0}
+    .salary-slip{height:138mm;page-break-inside:avoid}
+}
+</style>
+
+<div class="print-actions no-print">
+    <button onclick="window.print()" class="btn btn-dark btn-sm">🖨 Print / Save PDF</button>
+    <a href="{% url 'salary_list' %}" class="btn btn-secondary btn-sm">Back</a>
+</div>
+
+<div class="a4-page">
+
+<!-- OFFICE COPY -->
+<div class="salary-slip">
+    <div class="left-copy"><span>OFFICE COPY</span></div>
+    <div class="slip-body">
+        <div class="header">
+            <div class="school">
+                <img src="{% static 'images/logo.png' %}" class="logo">
+                <div>
+                    <div class="school-name">AL RAHMAN MISSION</div>
+                    <div class="school-sub">Bangla + English Medium</div>
+                    <div class="school-sub">Uttar Dinajpur, West Bengal</div>
+                    <div class="school-sub">Printed By: {{ request.user.username }}</div>
+                </div>
+            </div>
+            <div class="title">
+                <h3>TEACHER SALARY PAYMENT SLIP</h3>
+                <p>For <b>{{ salary.month }} {{ salary.year }}</b></p>
+                <div class="pay-date">DATE: {{ salary.payment_date }}</div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div>
+                <div class="info-row"><b>Teacher ID</b><span>:</span><span>{{ salary.employee.employee_id|default:"-" }}</span></div>
+                <div class="info-row"><b>Name</b><span>:</span><span>{{ salary.employee.name }}</span></div>
+                <div class="info-row"><b>Designation</b><span>:</span><span>{{ salary.employee.designation|default:"-" }}</span></div>
+                <div class="info-row"><b>Status</b><span>:</span><span>{{ salary.status }}</span></div>
+            </div>
+            <div>
+                <div class="info-row"><b>Month Days</b><span>:</span><span>{{ salary.month_days }}</span></div>
+                <div class="info-row"><b>Absent Days</b><span>:</span><span>{{ salary.absent_days }}</span></div>
+                <div class="info-row"><b>Payable Absent</b><span>:</span><span>{{ salary.payable_absent_days }}</span></div>
+                <div class="info-row"><b>Per Day</b><span>:</span><span>₹{{ salary.per_day_salary }}</span></div>
+            </div>
+        </div>
+
+        <table class="section-table">
+            <tr>
+                <th>EARNINGS</th><th>AMOUNT</th>
+                <th>DEDUCTIONS</th><th>AMOUNT</th>
+            </tr>
+            <tr>
+                <td>Basic Salary</td><td>₹{{ salary.basic_salary }}</td>
+                <td>Attendance Deduction</td><td>₹{{ salary.attendance_deduction }}</td>
+            </tr>
+            <tr>
+                <td>Bonus</td><td>₹{{ salary.bonus }}</td>
+                <td>Extra Deduction</td><td>₹{{ salary.extra_deduction }}</td>
+            </tr>
+            <tr class="total-row">
+                <td>Current Net Salary</td>
+                <td>₹{{ salary.net_salary }}</td>
+                <td>Previous Due</td>
+                <td>₹{{ salary.previous_due|default:"0.00" }}</td>
+            </tr>
+        </table>
+
+        <div class="summary-grid">
+            <div class="summary-box">
+                <div>Current Net Salary <span style="float:right">₹{{ salary.net_salary }}</span></div>
+                <div>Previous Due <span style="float:right">₹{{ salary.previous_due|default:"0.00" }}</span></div>
+                <div class="net-line"><span>Total Payable</span><span>₹{{ salary.payable_amount|default:salary.net_salary }}</span></div>
+                <div>Paid Amount <span style="float:right">₹{{ salary.paid_amount }}</span></div>
+                <div class="due-line"><span>Due Balance</span><span>₹{{ salary.due_amount }}</span></div>
+                {% if salary.advance_amount > 0 %}
+                <div class="advance-line"><span>Advance</span><span>₹{{ salary.advance_amount }}</span></div>
+                {% endif %}
+            </div>
+            <div class="payment-box">
+                <div class="payment-title">PAYMENT DETAILS</div>
+                <div class="info-row"><b>Mode</b><span>:</span><span>Cash / Bank</span></div>
+                <div class="info-row"><b>Reference</b><span>:</span><span>ARM-SAL-{{ salary.id }}</span></div>
+                <div class="info-row"><b>Total Paid</b><span>:</span><span>₹{{ salary.paid_amount }}</span></div>
+                <div class="info-row"><b>Balance Due</b><span>:</span><span>₹{{ salary.due_amount }}</span></div>
+                <div class="info-row"><b>Generated</b><span>:</span><span>{% now "d M Y" %}</span></div>
+            </div>
+        </div>
+
+        <div class="note">
+            <b>Note:</b> This salary slip includes current salary, previous due, paid amount, due balance and advance amount.
+        </div>
+
+        <div class="sign-area">
+            <div class="sign-box">Employee Signature</div>
+            <div class="sign-box">Accountant Signature</div>
+            <div class="sign-box">
+                <img src="{% static 'images/principal_sign.png' %}" class="principal-sign" onerror="this.style.display='none'">
+                Principal Signature
+            </div>
+        </div>
+    </div>
+    <div class="footer-blue">Thank you for your dedication and contribution to education.</div>
+</div>
+
+<div class="cut-line">✂ CUT HERE</div>
+
+<!-- TEACHER COPY -->
+<div class="salary-slip">
+    <div class="left-copy"><span>TEACHER COPY</span></div>
+    <div class="slip-body">
+        <div class="header">
+            <div class="school">
+                <img src="{% static 'images/logo.png' %}" class="logo">
+                <div>
+                    <div class="school-name">AL RAHMAN MISSION</div>
+                    <div class="school-sub">Bangla + English Medium</div>
+                    <div class="school-sub">Uttar Dinajpur, West Bengal</div>
+                    <div class="school-sub">Printed By: {{ request.user.username }}</div>
+                </div>
+            </div>
+            <div class="title">
+                <h3>TEACHER SALARY PAYMENT SLIP</h3>
+                <p>For <b>{{ salary.month }} {{ salary.year }}</b></p>
+                <div class="pay-date">DATE: {{ salary.payment_date }}</div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <div>
+                <div class="info-row"><b>Teacher ID</b><span>:</span><span>{{ salary.employee.employee_id|default:"-" }}</span></div>
+                <div class="info-row"><b>Name</b><span>:</span><span>{{ salary.employee.name }}</span></div>
+                <div class="info-row"><b>Designation</b><span>:</span><span>{{ salary.employee.designation|default:"-" }}</span></div>
+                <div class="info-row"><b>Status</b><span>:</span><span>{{ salary.status }}</span></div>
+            </div>
+            <div>
+                <div class="info-row"><b>Month Days</b><span>:</span><span>{{ salary.month_days }}</span></div>
+                <div class="info-row"><b>Absent Days</b><span>:</span><span>{{ salary.absent_days }}</span></div>
+                <div class="info-row"><b>Payable Absent</b><span>:</span><span>{{ salary.payable_absent_days }}</span></div>
+                <div class="info-row"><b>Per Day</b><span>:</span><span>₹{{ salary.per_day_salary }}</span></div>
+            </div>
+        </div>
+
+        <table class="section-table">
+            <tr>
+                <th>EARNINGS</th><th>AMOUNT</th>
+                <th>DEDUCTIONS</th><th>AMOUNT</th>
+            </tr>
+            <tr>
+                <td>Basic Salary</td><td>₹{{ salary.basic_salary }}</td>
+                <td>Attendance Deduction</td><td>₹{{ salary.attendance_deduction }}</td>
+            </tr>
+            <tr>
+                <td>Bonus</td><td>₹{{ salary.bonus }}</td>
+                <td>Extra Deduction</td><td>₹{{ salary.extra_deduction }}</td>
+            </tr>
+            <tr class="total-row">
+                <td>Current Net Salary</td>
+                <td>₹{{ salary.net_salary }}</td>
+                <td>Previous Due</td>
+                <td>₹{{ salary.previous_due|default:"0.00" }}</td>
+            </tr>
+        </table>
+
+        <div class="summary-grid">
+            <div class="summary-box">
+                <div>Current Net Salary <span style="float:right">₹{{ salary.net_salary }}</span></div>
+                <div>Previous Due <span style="float:right">₹{{ salary.previous_due|default:"0.00" }}</span></div>
+                <div class="net-line"><span>Total Payable</span><span>₹{{ salary.payable_amount|default:salary.net_salary }}</span></div>
+                <div>Paid Amount <span style="float:right">₹{{ salary.paid_amount }}</span></div>
+                <div class="due-line"><span>Due Balance</span><span>₹{{ salary.due_amount }}</span></div>
+                {% if salary.advance_amount > 0 %}
+                <div class="advance-line"><span>Advance</span><span>₹{{ salary.advance_amount }}</span></div>
+                {% endif %}
+            </div>
+            <div class="payment-box">
+                <div class="payment-title">PAYMENT DETAILS</div>
+                <div class="info-row"><b>Mode</b><span>:</span><span>Cash / Bank</span></div>
+                <div class="info-row"><b>Reference</b><span>:</span><span>ARM-SAL-{{ salary.id }}</span></div>
+                <div class="info-row"><b>Total Paid</b><span>:</span><span>₹{{ salary.paid_amount }}</span></div>
+                <div class="info-row"><b>Balance Due</b><span>:</span><span>₹{{ salary.due_amount }}</span></div>
+                <div class="info-row"><b>Generated</b><span>:</span><span>{% now "d M Y" %}</span></div>
+            </div>
+        </div>
+
+        <div class="note">
+            <b>Note:</b> This salary slip includes current salary, previous due, paid amount, due balance and advance amount.
+        </div>
+
+        <div class="sign-area">
+            <div class="sign-box">Employee Signature</div>
+            <div class="sign-box">Accountant Signature</div>
+            <div class="sign-box">
+                <img src="{% static 'images/principal_sign.png' %}" class="principal-sign" onerror="this.style.display='none'">
+                Principal Signature
+            </div>
+        </div>
+    </div>
+    <div class="footer-blue">Thank you for your dedication and contribution to education.</div>
+</div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>{{ title }}</h3>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Student</th>
+        <th>Title</th>
+        <th>Parent</th>
+        <th>Status</th>
+        <th>Solution</th>
+    </tr>
+
+    {% for r in records %}
+    <tr>
+        <td>{{ r.student }}</td>
+        <td>{{ r.title }}</td>
+        <td>{{ r.parent_name }}</td>
+        <td>{{ r.status }}</td>
+        <td>{{ r.solution|default:"-" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" class="text-center">No complaint found</td></tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

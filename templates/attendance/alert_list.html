@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h3 class="mb-3">📢 Attendance Alerts / উপস্থিতি সতর্কতা</h3>
+
+    <div class="mb-3">
+        <a href="?status=Pending" class="btn btn-warning btn-sm">Pending</a>
+        <a href="?status=Approved" class="btn btn-success btn-sm">Approved</a>
+        <a href="?status=Rejected" class="btn btn-danger btn-sm">Rejected</a>
+        <a href="?status=" class="btn btn-dark btn-sm">All</a>
+    </div>
+
+    <div class="card shadow">
+        <div class="card-body">
+
+            <table class="table table-bordered table-striped table-sm">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Message (EN)</th>
+                        <th>Message (BN)</th>
+                        <th>Approval</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for alert in alerts %}
+                    <tr>
+                        <td>{{ alert.date }}</td>
+
+                        <td>
+                            {% if alert.alert_type == 'Student' %}
+                                <span class="badge bg-primary">Student</span>
+                            {% else %}
+                                <span class="badge bg-info">Teacher</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if alert.student %}
+                                {{ alert.student.student_name }}
+                            {% elif alert.employee %}
+                                {{ alert.employee.name }}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if alert.student %}
+                                {{ alert.student.phone|default:"No Phone" }}
+                            {% elif alert.employee %}
+                                {{ alert.employee.phone|default:"No Phone" }}
+                            {% else %}
+                                No Phone
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if alert.status == 'Absent' %}
+                                <span class="badge bg-danger">Absent</span>
+                            {% elif alert.status == 'Late' %}
+                                <span class="badge bg-warning text-dark">Late</span>
+                            {% else %}
+                                {{ alert.status }}
+                            {% endif %}
+                        </td>
+
+                        <td>{{ alert.message_en }}</td>
+                        <td>{{ alert.message_bn }}</td>
+
+                        <td>
+                            {% if alert.approval_status == 'Pending' %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% elif alert.approval_status == 'Approved' %}
+                                <span class="badge bg-success">Approved</span>
+                            {% else %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if alert.approval_status == 'Pending' %}
+                                <a href="{% url 'attendance_alert_approve' alert.id %}" class="btn btn-sm btn-success mb-1">
+                                    Approve
+                                </a>
+
+                                <a href="{% url 'attendance_alert_reject' alert.id %}" class="btn btn-sm btn-danger mb-1">
+                                    Reject
+                                </a>
+
+                            {% elif alert.approval_status == 'Approved' %}
+
+                                {% if alert.student and alert.student.phone %}
+                                    <button type="button"
+                                            class="btn btn-success btn-sm mb-1"
+                                            onclick="openWhatsApp('{{ alert.student.phone|escapejs }}', '{{ alert.message_bn|escapejs }}\n{{ alert.message_en|escapejs }}')">
+                                        WhatsApp
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-secondary btn-sm mb-1"
+                                            onclick="copyText('{{ alert.message_bn|escapejs }} {{ alert.message_en|escapejs }}')">
+                                        Copy
+                                    </button>
+
+                                {% elif alert.employee and alert.employee.phone %}
+                                    <button type="button"
+                                            class="btn btn-success btn-sm mb-1"
+                                            onclick="openWhatsApp('{{ alert.employee.phone|escapejs }}', '{{ alert.message_bn|escapejs }}\n{{ alert.message_en|escapejs }}')">
+                                        WhatsApp
+                                    </button>
+
+                                    <button type="button"
+                                            class="btn btn-secondary btn-sm mb-1"
+                                            onclick="copyText('{{ alert.message_bn|escapejs }} {{ alert.message_en|escapejs }}')">
+                                        Copy
+                                    </button>
+
+                                {% else %}
+                                    <span class="text-danger">No Phone</span>
+                                {% endif %}
+
+                            {% else %}
+                                ✔ Rejected
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="9" class="text-center">
+                            No alerts found / কোনো সতর্কতা নেই
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+function cleanPhone(phone){
+    phone = String(phone || "").replace(/\D/g, "");
+
+    if(phone.startsWith("91") && phone.length === 12){
+        return phone;
+    }
+
+    if(phone.length === 10){
+        return "91" + phone;
+    }
+
+    return phone;
+}
+
+function openWhatsApp(phone, message){
+    const clean = cleanPhone(phone);
+
+    if(!clean || clean.length < 10){
+        alert("Phone number missing or invalid!");
+        return;
+    }
+
+    const url = "https://wa.me/" + clean + "?text=" + encodeURIComponent(message);
+    window.open(url, "_blank");
+}
+
+function copyText(text){
+    navigator.clipboard.writeText(text);
+    alert("Message copied!");
+}
+</script>
+
+{% endblock %}

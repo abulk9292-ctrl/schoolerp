@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>{{ title }}</h3>
+
+<div id="oldPaymentAlert" class="alert alert-warning d-none"></div>
+
+<div class="card card-box p-4">
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label>Employee</label>
+                {{ form.employee }}
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label>Month</label>
+                {{ form.month }}
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label>Year</label>
+                {{ form.year }}
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label>Basic Salary</label>
+                {{ form.basic_salary }}
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label>Bonus</label>
+                {{ form.bonus }}
+                <small class="text-success">Absent 0 হলে 1 দিনের bonus auto add হবে</small>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label>Absent Days</label>
+                {{ form.absent_days }}
+                <small class="text-muted">Attendance থেকে auto আসবে, চাইলে manual edit করতে পারবে</small>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label>Extra Deduction</label>
+                {{ form.extra_deduction }}
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label>New Paid Amount</label>
+                {{ form.paid_amount }}
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <label>Payment Date</label>
+                {{ form.payment_date }}
+            </div>
+        </div>
+
+        <div class="card mt-2 mb-3">
+            <div class="card-body">
+                <h5>Live Salary Calculation</h5>
+
+                <p>Month Days: <b id="monthDays">30</b></p>
+                <p>Per Day Salary: ₹<b id="perDaySalary">0</b></p>
+                <p>Absent Days: <b id="absentShow">0</b></p>
+                <p>Payable Absent Days: <b id="payableAbsentDays">0</b></p>
+                <p>Attendance Deduction: ₹<b id="attendanceDeduction">0</b></p>
+
+                <hr>
+
+                <p>Net Salary: ₹<b id="netSalary">0</b></p>
+                <p>Previous Due: ₹<b id="previousDue">0</b></p>
+                <p>Total Payable: ₹<b id="payable">0</b></p>
+
+                <hr>
+
+                <p>Already Paid: ₹<b id="alreadyPaid">0</b></p>
+                <p>New Payment: ₹<b id="newPayment">0</b></p>
+                <p>Total Paid: ₹<b id="totalPaid">0</b></p>
+
+                <p class="text-danger">Due After Save: ₹<b id="due">0</b></p>
+            </div>
+        </div>
+
+        <button class="btn btn-primary">Save Salary</button>
+        <a href="{% url 'salary_list' %}" class="btn btn-secondary">Back</a>
+    </form>
+</div>
+
+<script>
+const employeeSalaryMap = {
+    {% for emp in employees %}
+        "{{ emp.id }}": "{{ emp.salary|default:0 }}",
+    {% endfor %}
+};
+
+const existingSalaryMap = {
+    {% for s in salary_records %}
+        "{{ s.employee.id }}_{{ s.month }}_{{ s.year }}": {
+            paid: "{{ s.paid_amount|default:0 }}",
+            due: "{{ s.due_amount|default:0 }}",
+            payable: "{{ s.payable_amount|default:0 }}"
+        },
+    {% endfor %}
+};
+
+const employee = document.getElementById("id_employee");
+const month = document.getElementById("id_month");
+const year = document.getElementById("id_year");
+const basic = document.getElementById("id_basic_salary");
+const bonus = document.getElementById("id_bonus");
+const absent = document.getElementById("id_absent_days");
+const deduction = document.getElementById("id_extra_deduction");
+const paid = document.getElementById("id_paid_amount");
+const date = document.getElementById("id_payment_date");
+const alertBox = document.getElementById("oldPaymentAlert");
+
+function val(el){
+    if(!el) return 0;
+    return parseFloat(el.value) || 0;
+}
+
+function getMonthNumber(monthName){
+    const months = {
+        "January": 0, "February": 1, "March": 2,
+        "April": 3, "May": 4, "June": 5,
+        "July": 6, "August": 7, "September": 8,
+        "October": 9, "November": 10, "December": 11
+    };
+    return months[monthName] ?? 0;
+}
+
+function getDaysInMonth(monthName, yearValue){
+    const m = getMonthNumber(monthName);
+    const y = parseInt(yearValue) || new Date().getFullYear();
+    return new Date(y, m + 1, 0).getDate();
+}
+
+function setDefault(){
+    const now = new Date();
+    const months = ["January","February","March","April","May","June",
+    "July","August","September","October","November","December"];
+
+    if(month && !month.value) month.value = months[now.getMonth()];
+    if(year && !year.value) year.value = now.getFullYear();
+
+    if(date && !date.value){
+        date.value = now.toISOString().split('T')[0];
+    }
+
+    if(absent && !absent.value){
+        absent.value = 0;
+    }
+}
+
+function setSalary(){
+    const emp = employee.value;
+    if(employeeSalaryMap[emp]){
+        basic.value = employeeSalaryMap[emp];
+    }
+}
+
+function loadAbsentDays(){
+    if(!employee || !month || !year || !absent) return;
+    if(!employee.value || !month.value || !year.value) return;
+
+    fetch(`/payroll/get-employee-absent-days/?employee_id=${employee.value}&month=${month.value}&year=${year.value}`)
+        .then(response => response.json())
+        .then(data => {
+            absent.value = data.absent_days || 0;
+            calculate();
+        })
+        .catch(() => {
+            calculate();
+        });
+}
+
+function calculate(){
+    const key = `${employee.value}_${month.value}_${year.value}`;
+
+    const monthDays = getDaysInMonth(month.value, year.value);
+    const perDay = val(basic) / monthDays;
+
+    let absentDays = val(absent);
+    let payableAbsent = 0;
+    let attendanceDeduction = 0;
+    let autoBonus = 0;
+
+    if(absentDays === 0){
+        payableAbsent = 0;
+        autoBonus = perDay;
+    }else if(absentDays === 1){
+        payableAbsent = 0;
+        autoBonus = 0;
+    }else{
+        payableAbsent = absentDays - 1;
+        autoBonus = 0;
+    }
+
+    attendanceDeduction = perDay * payableAbsent;
+
+    if(bonus){
+        bonus.value = autoBonus.toFixed(2);
+    }
+
+    let net = val(basic) + autoBonus - attendanceDeduction - val(deduction);
+    if(net < 0) net = 0;
+
+    let prevDue = 0;
+    let alreadyPaid = 0;
+
+    if(existingSalaryMap[key]){
+        prevDue = parseFloat(existingSalaryMap[key].due) || 0;
+        alreadyPaid = parseFloat(existingSalaryMap[key].paid) || 0;
+
+        alertBox.classList.remove("d-none");
+        alertBox.innerHTML =
+        `⚠️ এই মাসে আগেও payment হয়েছে → Paid: ₹${alreadyPaid.toFixed(2)} | Due: ₹${prevDue.toFixed(2)}`;
+    }else{
+        alertBox.classList.add("d-none");
+    }
+
+    const payable = net + prevDue;
+    const totalPaid = alreadyPaid + val(paid);
+
+    let due = payable - totalPaid;
+    if(due < 0) due = 0;
+
+    document.getElementById("monthDays").innerText = monthDays;
+    document.getElementById("perDaySalary").innerText = perDay.toFixed(2);
+    document.getElementById("absentShow").innerText = absentDays;
+    document.getElementById("payableAbsentDays").innerText = payableAbsent;
+    document.getElementById("attendanceDeduction").innerText = attendanceDeduction.toFixed(2);
+    document.getElementById("netSalary").innerText = net.toFixed(2);
+    document.getElementById("previousDue").innerText = prevDue.toFixed(2);
+    document.getElementById("payable").innerText = payable.toFixed(2);
+    document.getElementById("alreadyPaid").innerText = alreadyPaid.toFixed(2);
+    document.getElementById("newPayment").innerText = val(paid).toFixed(2);
+    document.getElementById("totalPaid").innerText = totalPaid.toFixed(2);
+    document.getElementById("due").innerText = due.toFixed(2);
+}
+
+document.addEventListener("DOMContentLoaded", ()=>{
+    setDefault();
+    setSalary();
+    loadAbsentDays();
+    calculate();
+});
+
+employee.addEventListener("change", ()=>{ setSalary(); loadAbsentDays(); });
+month.addEventListener("change", ()=>{ loadAbsentDays(); });
+year.addEventListener("input", ()=>{ loadAbsentDays(); });
+
+basic.addEventListener("input", calculate);
+bonus.addEventListener("input", calculate);
+if(absent){ absent.addEventListener("input", calculate); }
+deduction.addEventListener("input", calculate);
+paid.addEventListener("input", calculate);
+</script>
+
+{% endblock %}

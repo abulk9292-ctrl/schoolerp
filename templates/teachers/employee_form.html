@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">{{ page_title }}</h2>
+
+<div class="card card-box">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Name</label>
+                    {{ form.name }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Designation</label>
+                    {{ form.designation }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Qualification</label>
+                    {{ form.qualification }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Subject Specialization</label>
+                    {{ form.subject_specialization }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Phone</label>
+                    {{ form.phone }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Aadhaar Number</label>
+                    {{ form.aadhaar_number }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Joining Date</label>
+                    {{ form.joining_date }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Salary</label>
+                    {{ form.salary }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Photo</label>
+                    {{ form.photo }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Active Status</label>
+                    <div class="form-check mt-2">
+                        {{ form.is_active }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">Save Employee</button>
+                <a href="/teachers/" class="btn btn-secondary">Back</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

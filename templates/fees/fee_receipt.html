@@ -1,0 +1,574 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Receipt</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background: #fff;
+        }
+
+        .print-btn {
+            margin: 10px;
+        }
+
+        .page {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            background: #fff;
+        }
+
+        .half {
+            height: 144mm;
+            padding: 4mm 5mm;
+            box-sizing: border-box;
+        }
+
+        .second-copy {
+            margin-top: 6mm;
+        }
+
+        .receipt {
+            border: 2px solid #111;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .copy-label {
+            text-align: right;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 6px 0 0;
+        }
+
+        .receipt-top {
+            border-bottom: 2px solid #111;
+        }
+
+        .brand-row {
+            display: grid;
+            grid-template-columns: 95px 1fr 190px;
+            align-items: stretch;
+            border-bottom: 2px solid #22aa22;
+        }
+
+        .logo-cell {
+            border-right: 1px solid #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            background: #fff;
+        }
+
+        .logo-cell img {
+            max-width: 78px;
+            max-height: 78px;
+            object-fit: contain;
+        }
+
+        .title-cell {
+            text-align: center;
+            padding: 4px 6px 2px 6px;
+            background: #fff;
+        }
+
+        .site-line {
+            color: #c81919;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .school-name {
+            font-size: 28px;
+            line-height: 1;
+            font-weight: 900;
+            color: #3d2aa8;
+            letter-spacing: 1px;
+            margin: 0;
+            white-space: nowrap;
+        }
+
+        .reg-line {
+            color: #b44;
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .address-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            background: linear-gradient(to right, #f3b6ff, #ffd6ef);
+            border-top: 1px solid #111;
+            padding: 2px 8px;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .office-no {
+            color: #c96a00;
+            font-style: italic;
+            font-weight: 800;
+        }
+
+        .info-row {
+            display: grid;
+            grid-template-columns: 220px 1fr 120px;
+            min-height: 92px;
+        }
+
+        .info-left,
+        .info-middle,
+        .info-right {
+            border-right: 1px solid #111;
+            padding: 4px 6px;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .info-right {
+            border-right: 0;
+            text-align: center;
+            padding: 4px;
+        }
+
+        .label-blue {
+            color: #0b49b2;
+            font-weight: 800;
+        }
+
+        .label-red {
+            color: #c62828;
+            font-weight: 800;
+        }
+
+        .student-photo {
+            width: 82px;
+            height: 92px;
+            object-fit: cover;
+            border: 1px solid #555;
+            margin-top: 2px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .particulars-table th,
+        .particulars-table td,
+        .bottom-table td {
+            border: 1px solid #111;
+            padding: 3px 5px;
+            font-size: 12px;
+        }
+
+        .particulars-table thead th {
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .sn-col {
+            width: 42px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .amount-col {
+            width: 100px;
+            text-align: right;
+            font-weight: 700;
+        }
+
+        .particular-text {
+            padding-left: 20px !important;
+        }
+
+        .bottom-table {
+            margin-top: auto;
+        }
+
+        .qr-box {
+            width: 110px;
+            text-align: center;
+            vertical-align: top;
+        }
+
+        .qr-placeholder {
+            width: 82px;
+            height: 82px;
+            border: 2px solid #111;
+            margin: 4px auto 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 13px;
+        }
+
+        .pay-box {
+            vertical-align: top;
+            font-size: 12px;
+            line-height: 1.3;
+            padding-top: 6px !important;
+        }
+
+        .summary-box {
+            width: 230px;
+            vertical-align: top;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .summary-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .net-fee {
+            color: #0b49b2;
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .amount-received {
+            color: #0d8f44;
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .balance {
+            color: #b3261e;
+            font-size: 14px;
+            font-weight: 900;
+        }
+
+        .received-by {
+            text-align: center;
+            margin-top: 14px;
+            font-size: 12px;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+
+        @media print {
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="print-btn">
+    <button onclick="window.print()">Print</button>
+</div>
+
+<div class="page">
+
+    <!-- TOP COPY -->
+    <div class="half">
+        <div class="receipt">
+            <div class="copy-label">School Copy</div>
+
+            <div class="receipt-top">
+                <div class="brand-row">
+                    <div class="logo-cell">
+                        <img src="{% static 'images/logo.png' %}" alt="School Logo">
+                    </div>
+
+                    <div class="title-cell">
+                        <div class="site-line">www.alrahmanmission.in</div>
+                        <h1 class="school-name">AL RAHMAN MISSION</h1>
+                        <div class="reg-line">আল রাহমান মিশন</div>
+                    </div>
+
+                    <div class="title-cell" style="display:flex;align-items:flex-end;justify-content:center;">
+                        <div class="office-no">Office No-9091215171</div>
+                    </div>
+                </div>
+
+                <div class="address-row">
+                    <div>At-Sapatbari More, P.O. Amalia, P.S. Chakulia, U/D, 733208</div>
+                    <div></div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-left">
+                        <div><span class="label-blue">Receipt No</span> : {{ fee.id }}</div>
+                        <div><span class="label-blue">Date</span> : {{ fee.payment_date|date:"d M Y" }}</div>
+                        <div><span class="label-blue">Class</span> : {{ fee.student.class_assigned }}</div>
+                        <div><span class="label-blue">Section</span> : N/A</div>
+                        <div><span class="label-red">Session</span> : N/A</div>
+                    </div>
+
+                    <div class="info-middle">
+                        <div><span class="label-blue">Name</span> : {{ fee.student.student_name }}</div>
+                        <div><span class="label-blue">Father's Name</span> : {{ fee.student.father_name|default:"N/A" }}</div>
+                        <div><span class="label-blue">Mother's Name</span> : {{ fee.student.mother_name|default:"N/A" }}</div>
+                        <div>
+                            : {{ fee.student.phone|default:"N/A" }}
+                            &nbsp;&nbsp;
+                            <span class="label-red">SID</span> : {{ fee.student.student_id }}
+                            &nbsp;&nbsp;
+                            <span class="label-red">Reg.</span> : {{ fee.student.registration_no }}
+                        </div>
+                        <div><span class="label-blue">Fee Month</span> : {{ fee.fees_month }}</div>
+                    </div>
+
+                    <div class="info-right">
+                        {% if fee.student.photo %}
+                            <img src="{{ fee.student.photo.url }}" alt="Student Photo" class="student-photo">
+                        {% else %}
+                            <img src="{% static 'images/logo.png' %}" alt="Logo" class="student-photo">
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <table class="particulars-table">
+                <thead>
+                    <tr>
+                        <th class="sn-col">S.No.</th>
+                        <th>PARTICULARS</th>
+                        <th class="amount-col">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if fee.monthly_fee > 0 %}
+                    <tr><td class="sn-col">1</td><td class="particular-text">Monthly Fee</td><td class="amount-col">{{ fee.monthly_fee }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.transport_fee > 0 %}
+                    <tr><td class="sn-col">2</td><td class="particular-text">Transport Fee</td><td class="amount-col">{{ fee.transport_fee }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.admission_fee > 0 %}
+                    <tr><td class="sn-col">3</td><td class="particular-text">Admission Fee</td><td class="amount-col">{{ fee.admission_fee }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.registration_fee > 0 %}
+                    <tr><td class="sn-col">4</td><td class="particular-text">Registration Fee</td><td class="amount-col">{{ fee.registration_fee }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.art_material > 0 %}
+                    <tr><td class="sn-col">5</td><td class="particular-text">Art Material</td><td class="amount-col">{{ fee.art_material }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.books_fee > 0 %}
+                    <tr><td class="sn-col">6</td><td class="particular-text">Books Fee</td><td class="amount-col">{{ fee.books_fee }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.uniform_fee > 0 %}
+                    <tr><td class="sn-col">7</td><td class="particular-text">Uniform Fee</td><td class="amount-col">{{ fee.uniform_fee }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.fine > 0 %}
+                    <tr><td class="sn-col">8</td><td class="particular-text">Fine</td><td class="amount-col">{{ fee.fine }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.others > 0 %}
+                    <tr><td class="sn-col">9</td><td class="particular-text">Others</td><td class="amount-col">{{ fee.others }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.previous_balance > 0 %}
+                    <tr><td class="sn-col">10</td><td class="particular-text">Old Balance</td><td class="amount-col">{{ fee.previous_balance }}</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+            <table class="bottom-table">
+                <tr>
+                    <td class="qr-box">
+                        <div class="qr-placeholder">QR</div>
+                    </td>
+
+                    <td class="pay-box">
+                        <div><strong>Payment Mode</strong> : {{ fee.payment_mode }}</div>
+                        <div><strong>Total Paid Amount</strong> : ₹ {{ fee.deposit_amount }}</div>
+                        <div><strong>Amount in Word</strong> : ₹ {{ fee.deposit_amount }} only</div>
+
+                        <div class="received-by">
+                            Received By : ....................................
+                        </div>
+                    </td>
+
+                    <td class="summary-box">
+                        <div class="summary-line"><span>Total Fee</span><span>{{ fee.total_amount }}</span></div>
+                        <div class="summary-line"><span>(+) Old Balance</span><span>{{ fee.previous_balance }}</span></div>
+                        <div class="summary-line"><span>(+) Additional/Late Fee</span><span>{{ fee.fine }}</span></div>
+                        <div class="summary-line"><span>(-) Concession</span><span>- {{ fee.discount_amount }}</span></div>
+                        <div class="summary-line net-fee"><span>Net Fee</span><span>{{ fee.total_amount }}</span></div>
+                        <div class="summary-line amount-received"><span>Amount Received</span><span>{{ fee.deposit_amount }}</span></div>
+                        <div class="summary-line balance"><span>Balance</span><span>{{ fee.due_balance }}</span></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- BOTTOM COPY -->
+    <div class="half second-copy">
+        <div class="receipt">
+            <div class="copy-label">Guardian Copy</div>
+
+            <div class="receipt-top">
+                <div class="brand-row">
+                    <div class="logo-cell">
+                        <img src="{% static 'images/logo.png' %}" alt="School Logo">
+                    </div>
+
+                    <div class="title-cell">
+                        <div class="site-line">www.alrahmanmission.in</div>
+                        <h1 class="school-name">AL RAHMAN MISSION</h1>
+                        <div class="reg-line">আল রাহমান মিশন</div>
+                    </div>
+
+                    <div class="title-cell" style="display:flex;align-items:flex-end;justify-content:center;">
+                        <div class="office-no">Office No-9091215171</div>
+                    </div>
+                </div>
+
+                <div class="address-row">
+                    <div>At-Sapatbari More, P.O. Amalia, P.S. Chakulia, U/D, 733208</div>
+                    <div></div>
+                </div>
+
+                <div class="info-row">
+                    <div class="info-left">
+                        <div><span class="label-blue">Receipt No</span> : {{ fee.id }}</div>
+                        <div><span class="label-blue">Date</span> : {{ fee.payment_date|date:"d M Y" }}</div>
+                        <div><span class="label-blue">Class</span> : {{ fee.student.class_assigned }}</div>
+                        <div><span class="label-blue">Section</span> : N/A</div>
+                        <div><span class="label-red">Session</span> : N/A</div>
+                    </div>
+
+                    <div class="info-middle">
+                        <div><span class="label-blue">Name</span> : {{ fee.student.student_name }}</div>
+                        <div><span class="label-blue">Father's Name</span> : {{ fee.student.father_name|default:"N/A" }}</div>
+                        <div><span class="label-blue">Mother's Name</span> : {{ fee.student.mother_name|default:"N/A" }}</div>
+                        <div>
+                            : {{ fee.student.phone|default:"N/A" }}
+                            &nbsp;&nbsp;
+                            <span class="label-red">SID</span> : {{ fee.student.student_id }}
+                            &nbsp;&nbsp;
+                            <span class="label-red">Reg.</span> : {{ fee.student.registration_no }}
+                        </div>
+                        <div><span class="label-blue">Fee Month</span> : {{ fee.fees_month }}</div>
+                    </div>
+
+                    <div class="info-right">
+                        {% if fee.student.photo %}
+                            <img src="{{ fee.student.photo.url }}" alt="Student Photo" class="student-photo">
+                        {% else %}
+                            <img src="{% static 'images/logo.png' %}" alt="Logo" class="student-photo">
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <table class="particulars-table">
+                <thead>
+                    <tr>
+                        <th class="sn-col">S.No.</th>
+                        <th>PARTICULARS</th>
+                        <th class="amount-col">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if fee.monthly_fee > 0 %}
+                    <tr><td class="sn-col">1</td><td class="particular-text">Monthly Fee</td><td class="amount-col">{{ fee.monthly_fee }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.transport_fee > 0 %}
+                    <tr><td class="sn-col">2</td><td class="particular-text">Transport Fee</td><td class="amount-col">{{ fee.transport_fee }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.admission_fee > 0 %}
+                    <tr><td class="sn-col">3</td><td class="particular-text">Admission Fee</td><td class="amount-col">{{ fee.admission_fee }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.registration_fee > 0 %}
+                    <tr><td class="sn-col">4</td><td class="particular-text">Registration Fee</td><td class="amount-col">{{ fee.registration_fee }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.art_material > 0 %}
+                    <tr><td class="sn-col">5</td><td class="particular-text">Art Material</td><td class="amount-col">{{ fee.art_material }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.books_fee > 0 %}
+                    <tr><td class="sn-col">6</td><td class="particular-text">Books Fee</td><td class="amount-col">{{ fee.books_fee }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.uniform_fee > 0 %}
+                    <tr><td class="sn-col">7</td><td class="particular-text">Uniform Fee</td><td class="amount-col">{{ fee.uniform_fee }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.fine > 0 %}
+                    <tr><td class="sn-col">8</td><td class="particular-text">Fine</td><td class="amount-col">{{ fee.fine }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.others > 0 %}
+                    <tr><td class="sn-col">9</td><td class="particular-text">Others</td><td class="amount-col">{{ fee.others }}</td></tr>
+                    {% endif %}
+
+                    {% if fee.previous_balance > 0 %}
+                    <tr><td class="sn-col">10</td><td class="particular-text">Old Balance</td><td class="amount-col">{{ fee.previous_balance }}</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+
+            <table class="bottom-table">
+                <tr>
+                    <td class="qr-box">
+                        <div class="qr-placeholder">QR</div>
+                    </td>
+
+                    <td class="pay-box">
+                        <div><strong>Payment Mode</strong> : {{ fee.payment_mode }}</div>
+                        <div><strong>Total Paid Amount</strong> : ₹ {{ fee.deposit_amount }}</div>
+                        <div><strong>Amount in Word</strong> : ₹ {{ fee.deposit_amount }} only</div>
+
+                        <div class="received-by">
+                            Received By : ....................................
+                        </div>
+                    </td>
+
+                    <td class="summary-box">
+                        <div class="summary-line"><span>Total Fee</span><span>{{ fee.total_amount }}</span></div>
+                        <div class="summary-line"><span>(+) Old Balance</span><span>{{ fee.previous_balance }}</span></div>
+                        <div class="summary-line"><span>(+) Additional/Late Fee</span><span>{{ fee.fine }}</span></div>
+                        <div class="summary-line"><span>(-) Concession</span><span>- {{ fee.discount_amount }}</span></div>
+                        <div class="summary-line net-fee"><span>Net Fee</span><span>{{ fee.total_amount }}</span></div>
+                        <div class="summary-line amount-received"><span>Amount Received</span><span>{{ fee.deposit_amount }}</span></div>
+                        <div class="summary-line balance"><span>Balance</span><span>{{ fee.due_balance }}</span></div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

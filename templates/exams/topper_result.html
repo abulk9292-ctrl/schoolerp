@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card card-box p-4">
+    <h3 class="fw-bold mb-3">Topper List</h3>
+
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-4">
+            <select name="exam" class="form-control" required>
+                <option value="">Select Exam</option>
+                {% for e in exams %}
+                <option value="{{ e.id }}" {% if selected_exam and selected_exam.id == e.id %}selected{% endif %}>
+                    {{ e.name }} - {{ e.academic_session }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-success w-100">Show</button>
+        </div>
+    </form>
+
+    {% if selected_exam %}
+    <div class="row">
+        {% for t in toppers %}
+        <div class="col-md-4 mb-3">
+            <div class="card text-center p-3 shadow-sm">
+                <h2 class="fw-bold text-success">
+                    Rank {{ t.rank }}
+                </h2>
+                <h5>{{ t.student.student_name|default:t.student }}</h5>
+                <p class="mb-1">Total: <b>{{ t.total_marks }}/{{ t.max_total_marks }}</b></p>
+                <p class="mb-1">Percentage: <b>{{ t.percentage }}%</b></p>
+                <p>Grade: <span class="badge bg-success">{{ t.grade }}</span></p>
+            </div>
+        </div>
+        {% empty %}
+        <p>No topper data found.</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card shadow-sm border-danger">
+        <div class="card-body">
+            <h4 class="text-danger">Delete Salary Record</h4>
+
+            <p>
+                Are you sure you want to delete salary record of
+                <b>{{ salary.employee.name }}</b>
+                for <b>{{ salary.month }} {{ salary.year }}</b>?
+            </p>
+
+            <form method="POST">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                <a href="{% url 'salary_list' %}" class="btn btn-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

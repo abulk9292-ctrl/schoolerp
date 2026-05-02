@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Subjects</h2>
+
+<form method="POST" class="mb-3">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-6">
+            <input type="text" name="subject_name" class="form-control" placeholder="Enter Subject Name">
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-success">Add Subject</button>
+        </div>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Subject Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in subjects %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ s.subject_name }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

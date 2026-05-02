@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>Auto Generate Payroll</h3>
+
+<div class="card p-4">
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label>Month</label>
+            <select name="month" class="form-control" required>
+                <option value="">Select Month</option>
+                <option>January</option>
+                <option>February</option>
+                <option>March</option>
+                <option>April</option>
+                <option>May</option>
+                <option>June</option>
+                <option>July</option>
+                <option>August</option>
+                <option>September</option>
+                <option>October</option>
+                <option>November</option>
+                <option>December</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label>Year</label>
+            <input type="number" name="year" value="{{ current_year }}" class="form-control" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Payment Date</label>
+            <input type="date" name="payment_date" class="form-control" required>
+        </div>
+
+        <button class="btn btn-success">Generate Salary For All Employees</button>
+        <a href="{% url 'salary_list' %}" class="btn btn-secondary">Back</a>
+    </form>
+</div>
+
+{% endblock %}

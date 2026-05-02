@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white">
+            All Complaints
+        </div>
+
+        <div class="card-body">
+
+            <table class="table table-bordered">
+                <tr>
+                    <th>Student</th>
+                    <th>Title</th>
+                    <th>Parent</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+
+                {% for c in complaints %}
+                <tr>
+                    <td>{{ c.student.student_name }}</td>
+                    <td>{{ c.title }}</td>
+                    <td>{{ c.parent_name }}</td>
+
+                    <td>
+                        {% if c.status == 'Solved' %}
+                            <span class="text-success">Solved</span>
+                        {% else %}
+                            <span class="text-danger">Pending</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if c.status == 'Pending' %}
+                            <a href="{% url 'complaint_solve' c.id %}" class="btn btn-sm btn-success">Solve</a>
+                        {% else %}
+                            ✔ Done
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No complaints</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

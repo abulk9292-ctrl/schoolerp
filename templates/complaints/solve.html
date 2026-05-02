@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-success text-white">
+            Solve Complaint
+        </div>
+
+        <div class="card-body">
+
+            <p><b>Student:</b> {{ complaint.student.student_name }}</p>
+            <p><b>Title:</b> {{ complaint.title }}</p>
+            <p><b>Description:</b> {{ complaint.description }}</p>
+
+            <hr>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label>Solution</label>
+                    <textarea name="solution" class="form-control" rows="4" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Mark as Solved</button>
+                <a href="{% url 'complaint_list' %}" class="btn btn-secondary">Back</a>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

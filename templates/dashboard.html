@@ -1,0 +1,463 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+body{background:#eef7f1;}
+.dash-wrap{padding:10px;}
+.top-card,.stat-card,.graph-card,.list-card{
+    background:#fff;border-radius:18px;padding:18px;
+    box-shadow:0 8px 22px rgba(0,0,0,.08);
+    border:1px solid #dfeee5;margin-bottom:22px;
+}
+.hero{
+    background:linear-gradient(135deg,#0b6b3a,#159957);
+    color:white;border-radius:20px;padding:25px;margin-bottom:22px;
+}
+.hero h1{font-weight:900;letter-spacing:1px;}
+
+.backup-btn{
+    background:#dc3545;
+    color:#fff;
+    padding:11px 16px;
+    border-radius:12px;
+    font-weight:900;
+    text-decoration:none;
+    display:inline-block;
+    margin-top:10px;
+    box-shadow:0 6px 16px rgba(0,0,0,.18);
+}
+.backup-btn:hover{
+    background:#b02a37;
+    color:#fff;
+    text-decoration:none;
+}
+
+.stat-icon{
+    width:52px;height:52px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:28px;margin-bottom:12px;color:white;
+}
+.green{background:#198754}.red{background:#dc3545}.yellow{background:#ffc107;color:#111}.blue{background:#0d6efd}.darkgreen{background:#0b6b3a}
+.stat-card h6{color:#0b6b3a;font-weight:800}
+.stat-card h2{color:#006b3b;font-weight:900}
+.section-title{color:#0b6b3a;font-weight:900;margin-bottom:15px}
+.click-card{text-decoration:none;color:inherit;display:block}
+.click-card:hover{transform:translateY(-3px);transition:.2s}
+.small-row{border-bottom:1px solid #edf2ef;padding:9px 0}
+.badge-green{background:#e7f7ee;color:#198754;padding:5px 10px;border-radius:20px;font-weight:700}
+.badge-red{background:#fdeaea;color:#dc3545;padding:5px 10px;border-radius:20px;font-weight:700}
+.chart-small{
+    height:260px!important;
+    max-height:260px!important;
+}
+.graph-card canvas{
+    width:100%!important;
+    height:260px!important;
+}
+</style>
+
+<div class="dash-wrap">
+
+    <div class="hero">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1>AL RAHMAN MISSION</h1>
+                <p class="mb-0">Dashboard | Bangla + English Medium | Session {{ selected_session }}</p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <b>Today:</b> {% now "d M Y" %}
+                <br>
+                <a href="{% url 'manual_backup' %}" class="backup-btn">
+                    🔥 Download Full Backup
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="top-card">
+        <form method="get" class="row align-items-center">
+            <div class="col-md-4">
+                <label><b>Select Session</b></label>
+                <select name="session" class="form-control" onchange="this.form.submit()">
+                    {% for s in sessions %}
+                        <option value="{{ s }}" {% if selected_session == s %}selected{% endif %}>{{ s }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-8 mt-3">
+                <b>Session:</b> {{ selected_session }} |
+                <b>From:</b> {{ session_start }} |
+                <b>To:</b> {{ session_end }}
+            </div>
+        </form>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <a href="{% url 'student_list' %}" class="click-card">
+                <div class="stat-card">
+                    <div class="stat-icon green">🎓</div>
+                    <h6>Total Students</h6>
+                    <h2>{{ total_students }}</h2>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a href="/teachers/" class="click-card">
+                <div class="stat-card">
+                    <div class="stat-icon blue">👨‍🏫</div>
+                    <h6>Total Employees</h6>
+                    <h2>{{ total_employees }}</h2>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a href="{% url 'today_attendance_report' %}" class="click-card">
+                <div class="stat-card">
+                    <div class="stat-icon darkgreen">✅</div>
+                    <h6>Today Attendance</h6>
+                    <h2>{{ attendance_percentage }}%</h2>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a href="{% url 'complaint_report' %}" class="click-card">
+                <div class="stat-card">
+                    <div class="stat-icon red">📩</div>
+                    <h6>Pending Complaints</h6>
+                    <h2>{{ pending_complaints }}</h2>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3">
+            <a href="{% url 'today_attendance_report' %}" class="click-card">
+                <div class="stat-card"><div class="stat-icon green">🟢</div><h6>Present Today</h6><h2>{{ present }}</h2></div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a href="{% url 'today_attendance_report' %}" class="click-card">
+                <div class="stat-card"><div class="stat-icon red">❌</div><h6>Absent Today</h6><h2>{{ absent }}</h2></div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a href="{% url 'today_attendance_report' %}" class="click-card">
+                <div class="stat-card"><div class="stat-icon yellow">⏰</div><h6>Late Today</h6><h2>{{ late }}</h2></div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a href="{% url 'fees_report' %}" class="click-card">
+                <div class="stat-card"><div class="stat-icon green">₹</div><h6>Today Collection</h6><h2>₹{{ today_collection }}</h2></div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <a href="{% url 'today_attendance_report' %}" class="click-card">
+                <div class="graph-card">
+                    <h5 class="section-title">Student Attendance</h5>
+                    <canvas id="studentAttendanceChart" class="chart-small"></canvas>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% url 'teacher_attendance_report' %}" class="click-card">
+                <div class="graph-card">
+                    <h5 class="section-title">Teacher Attendance</h5>
+                    <canvas id="teacherAttendanceChart" class="chart-small"></canvas>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% url 'fees_report' %}" class="click-card">
+                <div class="graph-card text-center">
+                    <h5 class="section-title">Estimated Fee This Month</h5>
+                    <canvas id="feeEstimateChart" class="chart-small"></canvas>
+                    <div class="row mt-3">
+                        <div class="col-6">
+                            <h4>₹{{ monthly_collection }}</h4>
+                            <span class="badge-green">Collections</span>
+                        </div>
+                        <div class="col-6">
+                            <h4>₹{{ remaining_month_fee }}</h4>
+                            <span class="badge-red">Remaining</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <a href="{% url 'fees_report' %}" class="click-card">
+                <div class="graph-card">
+                    <h5 class="section-title">Monthly Income & Expenses</h5>
+                    <canvas id="monthlyFeeChart" style="height:300px!important;"></canvas>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a href="{% url 'profit_loss_report' %}" class="click-card">
+                <div class="graph-card">
+                    <h5 class="section-title">Profit / Loss</h5>
+                    <canvas id="profitLossChart" class="chart-small"></canvas>
+                    <p class="mt-3"><b>Total Collection:</b> ₹{{ total_collection }}</p>
+                    <p><b>Salary Expense:</b> ₹{{ total_salary_expense }}</p>
+                    <p><b>Profit:</b> ₹{{ total_profit }}</p>
+                    <p><b>Loss:</b> ₹{{ total_loss }}</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <a href="{% url 'low_performance_report' %}" class="click-card">
+                <div class="list-card">
+                    <h5 class="section-title">Smart Performance</h5>
+
+                    <div class="small-row">
+                        <b>Most Present Student:</b><br>
+                        {% if most_present %}
+                            {{ most_present.student__student_name }} ({{ most_present.student__student_id }})
+                            <span class="badge-green">{{ most_present.total }} Present</span>
+                        {% else %}
+                            No Data
+                        {% endif %}
+                    </div>
+
+                    <div class="small-row">
+                        <b>Most Absent Student:</b><br>
+                        {% if most_absent %}
+                            {{ most_absent.student__student_name }} ({{ most_absent.student__student_id }})
+                            <span class="badge-red">{{ most_absent.total }} Absent</span>
+                        {% else %}
+                            No Data
+                        {% endif %}
+                    </div>
+
+                    <div class="small-row">
+                        <b>Low Performance Students:</b><br>
+                        {% for s in low_students %}
+                            <div>{{ s.student.student_name }} - {{ s.percent }}%</div>
+                        {% empty %}
+                            No low performer
+                        {% endfor %}
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <a href="{% url 'complaint_report' %}" class="click-card">
+                <div class="list-card">
+                    <h5 class="section-title">Recent Complaints</h5>
+                    {% for c in recent_complaints %}
+                        <div class="small-row">
+                            <b>{{ c.student.student_name }}</b><br>
+                            {{ c.title }} |
+                            {% if c.status == 'Solved' %}
+                                <span class="badge-green">Solved</span>
+                            {% else %}
+                                <span class="badge-red">Pending</span>
+                            {% endif %}
+                        </div>
+                    {% empty %}
+                        No complaints found
+                    {% endfor %}
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="list-card">
+        <h5 class="section-title">Recent Students</h5>
+        <table class="table table-sm">
+            <tr>
+                <th>Name</th>
+                <th>Class</th>
+                <th>Status</th>
+            </tr>
+            {% for student in recent_students %}
+            <tr>
+                <td>
+                    <a href="{% url 'student_detail' student.id %}">
+                        {{ student.student_name }}
+                    </a>
+                </td>
+                <td>{{ student.class_assigned }}</td>
+                <td><span class="badge bg-success">Active</span></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="3">No student found</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+// ================= STUDENT ATTENDANCE =================
+const studentCtx = document.getElementById('studentAttendanceChart');
+if (studentCtx) {
+    new Chart(studentCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Present', 'Absent', 'Late'],
+            datasets: [{
+                data: [
+                    {{ present|default:0 }},
+                    {{ absent|default:0 }},
+                    {{ late|default:0 }}
+                ],
+                backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+// ================= TEACHER ATTENDANCE =================
+const teacherCtx = document.getElementById('teacherAttendanceChart');
+if (teacherCtx) {
+    new Chart(teacherCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Present', 'Absent', 'Late'],
+            datasets: [{
+                data: [
+                    {{ teacher_present|default:0 }},
+                    {{ teacher_absent|default:0 }},
+                    {{ teacher_late|default:0 }}
+                ],
+                backgroundColor: ['#0d6efd', '#dc3545', '#ffc107'],
+                borderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+// ================= FEE ESTIMATE =================
+const feeEstimateCtx = document.getElementById('feeEstimateChart');
+if (feeEstimateCtx) {
+    new Chart(feeEstimateCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Collection', 'Remaining'],
+            datasets: [{
+                data: [
+                    {{ monthly_collection|default:0 }},
+                    {{ remaining_month_fee|default:0 }}
+                ],
+                backgroundColor: ['#20c997', '#ff6b81'],
+                borderWidth: 4
+            }]
+        },
+        options: {
+            cutout: '70%',
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+// ================= MONTHLY COLLECTION =================
+const monthlyCtx = document.getElementById('monthlyFeeChart');
+if (monthlyCtx) {
+    new Chart(monthlyCtx, {
+        type: 'line',
+        data: {
+            labels: {{ month_labels|safe }},
+            datasets: [
+                {
+                    label: 'Income',
+                    data: {{ monthly_fee_data|safe }},
+                    borderColor: '#4c6ef5',
+                    backgroundColor: 'rgba(76,110,245,0.45)',
+                    fill: true,
+                    tension: 0.45,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                },
+                {
+                    label: 'Expenses',
+                    data: {{ monthly_expense_data|safe }},
+                    borderColor: '#ff6b7a',
+                    backgroundColor: 'rgba(255,107,122,0.35)',
+                    fill: true,
+                    tension: 0.45,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+// ================= PROFIT LOSS =================
+const profitCtx = document.getElementById('profitLossChart');
+if (profitCtx) {
+    new Chart(profitCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Profit', 'Loss'],
+            datasets: [{
+                data: [
+                    {{ total_profit|default:0 }},
+                    {{ total_loss|default:0 }}
+                ],
+                backgroundColor: ['#198754', '#dc3545'],
+                borderWidth: 4
+            }]
+        },
+        options: {
+            cutout: '65%',
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+</script>
+
+{% endblock %}

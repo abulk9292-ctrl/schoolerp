@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    .register-box {
+        background: #fff;
+        padding: 12px;
+        border-radius: 8px;
+        overflow-x: auto;
+    }
+
+    .attendance-table {
+        border-collapse: collapse;
+        width: max-content;
+        min-width: 100%;
+        font-size: 10px;
+    }
+
+    .attendance-table th,
+    .attendance-table td {
+        border: 1px solid #555;
+        padding: 3px 5px;
+        text-align: center;
+        white-space: nowrap;
+    }
+
+    .attendance-table th {
+        background: #f1f1f1;
+        font-weight: bold;
+    }
+
+    .student-name {
+        text-align: left !important;
+        min-width: 160px;
+        font-weight: 600;
+    }
+
+    .roll-col {
+        width: 45px;
+        font-weight: 600;
+    }
+
+    .p { color: green; font-weight: bold; }
+    .a { color: red; font-weight: bold; }
+    .l { color: orange; font-weight: bold; }
+
+    @media print {
+        .no-print { display: none !important; }
+        .content-area { padding: 0 !important; }
+        .attendance-table { font-size: 8px; }
+        .register-box { padding: 0; }
+    }
+</style>
+
+<div class="no-print mb-3">
+    <h3>Attendance Register</h3>
+
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label>Class</label>
+            <select name="class_id" class="form-select">
+                <option value="">All Classes</option>
+                {% for c in classes %}
+                    <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>
+                        {{ c.class_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label>Start Date</label>
+            <input type="date" name="start_date" value="{{ start_date }}" class="form-control">
+        </div>
+
+        <div class="col-md-3">
+            <label>End Date</label>
+            <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
+        </div>
+
+        <div class="col-md-3">
+            <button class="btn btn-primary w-100">SHOW</button>
+        </div>
+    </form>
+
+    <button onclick="window.print()" class="btn btn-success mt-3">Print Register</button>
+</div>
+
+<div class="register-box">
+    <h6>
+        Attendance Register :
+        From {{ start_date }} To {{ end_date }}
+        {% if selected_class_obj %}
+            || Class : {{ selected_class_obj.class_name }}
+        {% else %}
+            || Class : All
+        {% endif %}
+    </h6>
+
+    <table class="attendance-table">
+        <thead>
+            <tr>
+                <th class="roll-col">Roll</th>
+                <th class="student-name">Name</th>
+
+                {% for d in date_headers %}
+                    <th>{{ d|date:"d" }}</th>
+                {% endfor %}
+
+                <th>P</th>
+                <th>A</th>
+                <th>L</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for row in report_rows %}
+            <tr>
+                <td class="roll-col">{{ row.student.roll_no }}</td>
+                <td class="student-name">{{ row.student.student_name }}</td>
+
+                {% for s in row.day_statuses %}
+                    <td class="{% if s == 'P' %}p{% elif s == 'A' %}a{% elif s == 'L' %}l{% endif %}">
+                        {{ s }}
+                    </td>
+                {% endfor %}
+
+                <td class="p">{{ row.present }}</td>
+                <td class="a">{{ row.absent }}</td>
+                <td class="l">{{ row.late }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="50" class="text-center">
+                    No attendance data found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

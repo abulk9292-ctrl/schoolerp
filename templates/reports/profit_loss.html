@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>{{ title }}</h3>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card p-3 text-center">
+            <h5>Total Fee Collection</h5>
+            <h3>₹{{ total_fee }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 text-center">
+            <h5>Total Salary Expense</h5>
+            <h3>₹{{ total_salary }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 text-center">
+            <h5>Profit</h5>
+            <h3 class="text-success">₹{{ profit }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3 text-center">
+            <h5>Loss</h5>
+            <h3 class="text-danger">₹{{ loss }}</h3>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

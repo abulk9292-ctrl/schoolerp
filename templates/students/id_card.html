@@ -1,0 +1,288 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+@page { size: 54mm 85.6mm; margin: 0; }
+
+.sidebar,.topbar{display:none!important;}
+.flex-grow-1{width:100%!important;}
+
+.content-area{
+    padding:0!important;
+    margin:0!important;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#e9eef5;
+}
+
+.print-btn{
+    position:fixed;
+    top:10px;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:999;
+}
+
+.id-wrap{
+    width:54mm;
+    height:85.6mm;
+    background:#fff;
+    border-radius:4mm;
+    overflow:hidden;
+    position:relative;
+    font-family:Arial, sans-serif;
+    box-shadow:0 10px 25px rgba(0,0,0,.28);
+}
+
+/* TOP CURVE */
+.top-blue{
+    height:20mm;
+    background:#062b63;
+    position:relative;
+    border-bottom-left-radius:50% 28%;
+    border-bottom-right-radius:50% 28%;
+}
+
+.logo{
+    position:absolute;
+    top:2mm;
+    left:50%;
+    transform:translateX(-50%);
+    width:14mm;
+    height:14mm;
+    border-radius:50%;
+    background:#fff;
+    padding:1mm;
+    border:.6mm solid #d9a51c;
+}
+
+.logo img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+/* SCHOOL */
+.school-name{
+    text-align:center;
+    margin-top:1.5mm;
+    font-size:14px;
+    font-weight:900;
+    color:#062b63;
+    line-height:1;
+}
+
+.tagline{
+    text-align:center;
+    margin-top:.8mm;
+    font-size:5.8px;
+    font-weight:700;
+    color:#062b63;
+}
+
+/* PHOTO */
+.photo-box{
+    width:19mm;
+    height:19mm;
+    margin:2mm auto .8mm auto;
+    border-radius:50%;
+    border:1.3mm solid #0b4b91;
+    padding:.6mm;
+    background:#fff;
+    overflow:hidden;
+}
+
+.photo-box img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:50%;
+}
+
+/* NAME */
+.name-strip{
+    width:37mm;
+    margin:0 auto;
+    background:#062b63;
+    color:#fff;
+    text-align:center;
+    font-size:8.5px;
+    font-weight:900;
+    padding:1mm;
+    border-radius:1.3mm;
+    text-transform:uppercase;
+    line-height:1;
+}
+
+.role{
+    width:17mm;
+    margin:0 auto;
+    background:#0b8fd3;
+    color:#fff;
+    text-align:center;
+    font-size:6px;
+    font-weight:800;
+    padding:.45mm;
+    border-radius:0 0 1.5mm 1.5mm;
+}
+
+/* INFO */
+.info{
+    width:42mm;
+    margin:1.6mm auto 0 auto;
+    font-size:6.2px;
+    font-weight:700;
+    color:#111;
+}
+
+.same-line{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1.5mm;
+    border-bottom:.25mm solid #ccc;
+    padding:.45mm 0;
+}
+
+.info-row{
+    display:grid;
+    grid-template-columns:12mm 2mm 1fr;
+    align-items:center;
+    border-bottom:.25mm solid #ccc;
+    padding:.45mm 0;
+}
+
+.label{
+    color:#062b63;
+    font-weight:900;
+}
+
+/* BARCODE + QR */
+.bottom{
+    width:42mm;
+    margin:1.5mm auto 0 auto;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+}
+
+.barcode{
+    width:26mm;
+    height:7mm;
+    background:repeating-linear-gradient(
+        90deg,
+        #000 0,
+        #000 .35mm,
+        #fff .35mm,
+        #fff .75mm,
+        #000 .75mm,
+        #000 1mm,
+        #fff 1mm,
+        #fff 1.6mm
+    );
+}
+
+.qr img{
+    width:12mm;
+    height:12mm;
+    border:.5mm solid #0b4b91;
+    border-radius:1mm;
+    padding:.4mm;
+    background:#fff;
+}
+
+/* BOTTOM CURVE */
+.footer{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:0;
+    background:#062b63;
+    color:#fff;
+    text-align:center;
+    font-size:5.6px;
+    line-height:1.25;
+    padding:3mm 2mm 2mm 2mm;
+    border-top-left-radius:50% 25%;
+    border-top-right-radius:50% 25%;
+}
+
+@media print{
+    body{margin:0!important;background:#fff!important;}
+    .print-btn{display:none!important;}
+    .content-area{display:block!important;background:#fff!important;}
+    .id-wrap{box-shadow:none!important;margin:0!important;}
+}
+</style>
+
+<div class="print-btn">
+    <button onclick="window.print()" class="btn btn-primary">Print ID Card</button>
+</div>
+
+<div class="id-wrap">
+
+    <div class="top-blue">
+        <div class="logo">
+            <img src="/static/images/logo.png">
+        </div>
+    </div>
+
+    <div class="school-name">AL RAHMAN MISSION</div>
+    <div class="tagline">Discipline | English | Excellence</div>
+
+    <div class="photo-box">
+        {% if student.photo %}
+            <img src="{{ student.photo.url }}">
+        {% else %}
+            <img src="/static/images/logo.png">
+        {% endif %}
+    </div>
+
+    <div class="name-strip">{{ student.student_name }}</div>
+    <div class="role">STUDENT</div>
+
+    <div class="info">
+        <div class="same-line">
+            <div><span class="label">ID:</span> {{ student.student_id }}</div>
+            <div><span class="label">Roll:</span> {{ student.roll_no }}</div>
+        </div>
+
+        <div class="info-row">
+            <span class="label">Class</span><span>:</span><span>{{ student.class_assigned }}</span>
+        </div>
+
+        <div class="info-row">
+            <span class="label">DOB</span><span>:</span><span>{{ student.date_of_birth|date:"d M Y" }}</span>
+        </div>
+
+        <div class="info-row">
+            <span class="label">DOA</span><span>:</span><span>{{ student.admission_date|date:"d M Y" }}</span>
+        </div>
+
+        <div class="info-row">
+            <span class="label">Father</span><span>:</span><span>{{ student.father_name }}</span>
+        </div>
+
+        <div class="info-row">
+            <span class="label">Phone</span><span>:</span><span>{{ student.phone }}</span>
+        </div>
+    </div>
+
+    <div class="bottom">
+        <div class="barcode"></div>
+
+        <div class="qr">
+            <img src="data:image/png;base64,{{ qr_code }}">
+        </div>
+    </div>
+
+    <div class="footer">
+        Mission More, Sapatbari, PO Amalia<br>
+        Uttar Dinajpur, West Bengal<br>
+        +91 9091215171
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>Salary Records</h3>
+
+<a href="{% url 'salary_add' %}" class="btn btn-success mb-3">Add Salary</a>
+<a href="{% url 'auto_generate_salary' %}" class="btn btn-warning mb-3">Auto Generate Payroll</a>
+
+<table class="table table-bordered table-striped">
+    <tr>
+        <th>Employee</th>
+        <th>Month</th>
+        <th>Year</th>
+        <th>Absent</th>
+        <th>Bonus</th>
+        <th>Deduction</th>
+        <th>Net Salary</th>
+        <th>Paid</th>
+        <th>Due</th>
+        <th>Advance</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+
+    {% for r in records %}
+    <tr>
+        <td>{{ r.employee.name }}</td>
+        <td>{{ r.month }}</td>
+        <td>{{ r.year }}</td>
+        <td>{{ r.absent_days }}</td>
+        <td>₹{{ r.bonus }}</td>
+        <td>₹{{ r.attendance_deduction|add:r.extra_deduction }}</td>
+        <td><b>₹{{ r.net_salary }}</b></td>
+        <td class="text-success"><b>₹{{ r.paid_amount }}</b></td>
+        <td class="text-danger"><b>₹{{ r.due_amount }}</b></td>
+        <td class="text-primary"><b>₹{{ r.advance_amount }}</b></td>
+
+        <td>
+            {% if r.status == 'Paid' %}
+                <span class="badge bg-success">Paid</span>
+            {% elif r.status == 'Partial' %}
+                <span class="badge bg-warning text-dark">Partial</span>
+            {% elif r.status == 'Advance' %}
+                <span class="badge bg-info text-dark">Advance</span>
+            {% else %}
+                <span class="badge bg-danger">Unpaid</span>
+            {% endif %}
+        </td>
+
+        <td>
+            <a href="{% url 'salary_detail' r.id %}" class="btn btn-sm btn-primary">View</a>
+            <a href="{% url 'salary_print' r.id %}" class="btn btn-sm btn-dark">Print</a>
+            <a href="{% url 'salary_edit' r.id %}" class="btn btn-sm btn-info">Edit</a>
+            <a href="{% url 'salary_delete' r.id %}" class="btn btn-sm btn-danger">Delete</a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="12" class="text-center">No salary record found.</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+
+    <div class="card shadow-sm border-0">
+        <div class="card-body">
+
+            <h3 class="fw-bold mb-2">💰 Payroll Management</h3>
+            <p class="text-muted mb-4">
+                Manage employee salary, payments, and reports.
+            </p>
+
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white shadow-sm">
+                        <div class="card-body">
+                            <h6>Total Employees</h6>
+                            <h3>{{ total_employees|default:0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card bg-success text-white shadow-sm">
+                        <div class="card-body">
+                            <h6>Paid Salary</h6>
+                            <h3>₹{{ total_paid|default:0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark shadow-sm">
+                        <div class="card-body">
+                            <h6>Pending Salary</h6>
+                            <h3>₹{{ total_unpaid|default:0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="card bg-danger text-white shadow-sm">
+                        <div class="card-body">
+                            <h6>This Month Expense</h6>
+                            <h3>₹{{ this_month_expense|default:0 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+
+            <h5 class="fw-bold mt-4">Payroll Options</h5>
+
+            <div class="d-flex flex-wrap gap-2 mt-3">
+                <a href="{% url 'salary_add' %}" class="btn btn-outline-primary">
+                    Add Salary
+                </a>
+
+                <a href="{% url 'salary_list' %}" class="btn btn-outline-success">
+                    Salary List / Payment
+                </a>
+
+                <a href="{% url 'salary_list' %}?status=Unpaid" class="btn btn-outline-warning">
+                    Pending Salary
+                </a>
+
+                <a href="{% url 'salary_list' %}" class="btn btn-outline-dark">
+                    Salary Report
+                </a>
+
+                <a href="{% url 'auto_generate_salary' %}" class="btn btn-outline-info">
+                    Auto Generate Salary
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

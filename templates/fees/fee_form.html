@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 class="mb-4">{{ page_title }}</h2>
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<div class="card card-box">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <label class="form-label">Student</label>
+                    {{ form.student }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Fees Month</label>
+                    {{ form.fees_month }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Date</label>
+                    {{ form.payment_date }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Monthly Fee</label>
+                    {{ form.monthly_fee }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Admission Fee</label>
+                    {{ form.admission_fee }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Registration Fee</label>
+                    {{ form.registration_fee }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Art Material</label>
+                    {{ form.art_material }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Transport</label>
+                    {{ form.transport_fee }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Books</label>
+                    {{ form.books_fee }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Uniform</label>
+                    {{ form.uniform_fee }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Fine</label>
+                    {{ form.fine }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Others</label>
+                    {{ form.others }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Old Dues / Previous Balance</label>
+                    {{ form.previous_balance }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Discount in Fee %</label>
+                    {{ form.discount_percent }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Deposit</label>
+                    {{ form.deposit_amount }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Payment Mode</label>
+                    {{ form.payment_mode }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Operator</label>
+                    {{ form.operator_name }}
+                </div>
+
+            </div>
+
+            <hr class="my-4">
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Live Gross Total</label>
+                    <input type="text" id="gross_total_preview" class="form-control" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Live Discount Amount</label>
+                    <input type="text" id="discount_amount_preview" class="form-control" readonly>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Live Due Balance</label>
+                    <input type="text" id="due_balance_preview" class="form-control" readonly>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">Submit Fees</button>
+                <a href="/fees/" class="btn btn-secondary">Back</a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('.student-select').select2({
+        placeholder: "Search Student...",
+        allowClear: true,
+        width: '100%'
+    });
+
+    $('#id_student').on('change', function() {
+        const studentId = $(this).val();
+
+        if (studentId) {
+            fetch(`/fees/get-student-old-due/?student_id=${studentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('id_previous_balance').value = data.previous_balance;
+                    calculateLiveTotals();
+                });
+
+            fetch(`/fees/get-student-fee-structure/?student_id=${studentId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('id_monthly_fee').value = data.monthly_fee;
+                    document.getElementById('id_admission_fee').value = data.admission_fee;
+                    document.getElementById('id_registration_fee').value = data.registration_fee;
+                    document.getElementById('id_art_material').value = data.art_material;
+                    document.getElementById('id_transport_fee').value = data.transport_fee;
+                    document.getElementById('id_books_fee').value = data.books_fee;
+                    document.getElementById('id_uniform_fee').value = data.uniform_fee;
+                    calculateLiveTotals();
+                });
+        } else {
+            document.getElementById('id_previous_balance').value = '0.00';
+            document.getElementById('id_monthly_fee').value = '0.00';
+            document.getElementById('id_admission_fee').value = '0.00';
+            document.getElementById('id_registration_fee').value = '0.00';
+            document.getElementById('id_art_material').value = '0.00';
+            document.getElementById('id_transport_fee').value = '0.00';
+            document.getElementById('id_books_fee').value = '0.00';
+            document.getElementById('id_uniform_fee').value = '0.00';
+            calculateLiveTotals();
+        }
+    });
+});
+
+function getValue(id) {
+    const el = document.getElementById(id);
+    const val = parseFloat(el.value);
+    return isNaN(val) ? 0 : val;
+}
+
+function calculateLiveTotals() {
+    const monthly_fee = getValue('id_monthly_fee');
+    const admission_fee = getValue('id_admission_fee');
+    const registration_fee = getValue('id_registration_fee');
+    const art_material = getValue('id_art_material');
+    const transport_fee = getValue('id_transport_fee');
+    const books_fee = getValue('id_books_fee');
+    const uniform_fee = getValue('id_uniform_fee');
+    const fine = getValue('id_fine');
+    const others = getValue('id_others');
+    const previous_balance = getValue('id_previous_balance');
+    const discount_percent = getValue('id_discount_percent');
+    const deposit_amount = getValue('id_deposit_amount');
+
+    const grossTotal = monthly_fee + admission_fee + registration_fee + art_material + transport_fee + books_fee + uniform_fee + fine + others + previous_balance;
+    const discountAmount = (grossTotal * discount_percent) / 100;
+    const finalTotal = grossTotal - discountAmount;
+    const dueBalance = finalTotal - deposit_amount;
+
+    document.getElementById('gross_total_preview').value = grossTotal.toFixed(2);
+    document.getElementById('discount_amount_preview').value = discountAmount.toFixed(2);
+    document.getElementById('due_balance_preview').value = dueBalance.toFixed(2);
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const inputIds = [
+        'id_monthly_fee',
+        'id_admission_fee',
+        'id_registration_fee',
+        'id_art_material',
+        'id_transport_fee',
+        'id_books_fee',
+        'id_uniform_fee',
+        'id_fine',
+        'id_others',
+        'id_previous_balance',
+        'id_discount_percent',
+        'id_deposit_amount'
+    ];
+
+    inputIds.forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', calculateLiveTotals);
+        }
+    });
+
+    calculateLiveTotals();
+});
+</script>
+
+{% endblock %}

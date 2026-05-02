@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 class="mb-4">Reports Dashboard</h2>
+
+<div class="row g-4">
+
+    <div class="col-md-4">
+        <a href="{% url 'today_attendance_report' %}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 p-4 text-center">
+                <h4>Today Attendance</h4>
+                <p>Student daily attendance report</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="{% url 'teacher_attendance_report' %}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 p-4 text-center">
+                <h4>Teacher Attendance</h4>
+                <p>Staff attendance report</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="{% url 'fees_report' %}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 p-4 text-center">
+                <h4>Fees Report</h4>
+                <p>Collection and dues report</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="{% url 'profit_loss_report' %}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 p-4 text-center">
+                <h4>Profit / Loss</h4>
+                <p>Income and expense summary</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="{% url 'low_performance_report' %}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 p-4 text-center">
+                <h4>Low Performance</h4>
+                <p>Student performance tracking</p>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-md-4">
+        <a href="{% url 'complaint_report' %}" class="text-decoration-none">
+            <div class="card shadow-sm border-0 p-4 text-center">
+                <h4>Complaints</h4>
+                <p>Complaint status report</p>
+            </div>
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

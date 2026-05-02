@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bulk Demand Slip Print</title>
+    <style>
+        body { font-family: Arial; margin: 0; padding: 10px; }
+        .page { width: 210mm; margin: auto; }
+        .row { display: flex; gap: 10mm; page-break-inside: avoid; margin-bottom: 10mm; }
+        .slip { width: 50%; border: 2px solid #000; box-sizing: border-box; }
+        .school { background: #ffd400; color: #b00000; text-align: center; font-size: 22px; font-weight: 900; padding: 4px; }
+        .contact { text-align: center; font-size: 11px; padding: 3px; border-bottom: 1px solid #000; }
+        .title { background: #1e3a8a; color: white; text-align: center; font-size: 18px; font-weight: bold; padding: 4px; }
+        .info { padding: 6px; font-size: 13px; display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #000; }
+        .info b { display: inline-block; width: 55px; }
+        .due { text-align: center; font-weight: bold; padding: 6px; border-bottom: 1px solid #000; }
+        .due span { color: red; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { border: 1px solid #000; padding: 5px; text-align: center; }
+        .msg { background: #dbeafe; padding: 7px; font-size: 14px; border-top: 1px solid #000; }
+        .footer { height: 85px; position: relative; }
+        .sign { position: absolute; left: 12px; bottom: 10px; color: #1d4ed8; font-style: italic; }
+        .stamp { position: absolute; right: 12px; bottom: 10px; color: red; font-weight: bold; font-size: 18px; text-align: center; }
+        .no-print { text-align: center; margin: 15px; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body>
+
+<div class="no-print">
+    <button onclick="window.print()">Print All Demand Slips</button>
+</div>
+
+<div class="page">
+{% for slip in slips %}
+    {% if forloop.counter0|divisibleby:2 %}
+    <div class="row">
+    {% endif %}
+
+    <div class="slip">
+        <div class="school">AL RAHMAN MISSION</div>
+        <div class="contact">
+            Bangla + English Medium | 📞 9091215171 | ✉ alrahmanmission@gmail.com
+        </div>
+        <div class="title">Fee Demand Slip</div>
+
+        <div class="info">
+            <div><b>SID:</b> {{ slip.student.student_id }}</div>
+            <div><b>Roll:</b> {{ slip.student.roll_no }}</div>
+            <div><b>Name:</b> {{ slip.student.student_name }}</div>
+            <div><b>Class:</b> {{ slip.student.class_assigned }}</div>
+            <div><b>Father:</b> {{ slip.student.father_name }}</div>
+            <div><b>Date:</b> {% now "d M Y" %}</div>
+            <div><b>Mobile:</b> {{ slip.student.phone }}</div>
+            <div><b>Reg:</b> {{ slip.student.registration_no }}</div>
+        </div>
+
+        <div class="due">Due Months: <span>Current Month</span></div>
+
+        <table>
+            <tr><th>Detail</th><th>Amount</th></tr>
+            <tr><td>Monthly Fee</td><td>{{ slip.monthly_fee }}</td></tr>
+            {% if slip.transport_fee %}
+            <tr><td>Transport Fee</td><td>{{ slip.transport_fee }}</td></tr>
+            {% endif %}
+            {% if slip.previous_due %}
+            <tr><td>Previous Due</td><td>{{ slip.previous_due }}</td></tr>
+            {% endif %}
+            <tr><th>Total Fee Due</th><th>{{ slip.total_due }}</th></tr>
+        </table>
+
+        <div class="msg">Kindly pay the fee before 15th of this month.</div>
+
+        <div class="footer">
+            <div class="sign">Authorized Sign</div>
+            <div class="stamp">School's<br>Sign & Stamp</div>
+        </div>
+    </div>
+
+    {% if forloop.counter|divisibleby:2 or forloop.last %}
+    </div>
+    {% endif %}
+{% endfor %}
+</div>
+
+<script>
+window.onload = function() {
+    setTimeout(function(){ window.print(); }, 500);
+}
+</script>
+
+</body>
+</html>

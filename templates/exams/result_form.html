@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card card-box p-4">
+    <h3 class="fw-bold mb-3">Add Student Marks</h3>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit" class="btn btn-success">Save Marks</button>
+        <a href="/exams/results/" class="btn btn-secondary">Back</a>
+    </form>
+</div>
+
+{% endblock %}

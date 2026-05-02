@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>{{ title }}</h3>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Student</th>
+        <th>Total Days</th>
+        <th>Present</th>
+        <th>Absent</th>
+        <th>Percentage</th>
+    </tr>
+
+    {% for r in data %}
+    <tr>
+        <td>{{ r.student }}</td>
+        <td>{{ r.total }}</td>
+        <td>{{ r.present }}</td>
+        <td>{{ r.absent }}</td>
+        <td>{{ r.percent }}%</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" class="text-center">No low performer found</td></tr>
+    {% endfor %}
+</table>
+
+{% endblock %}

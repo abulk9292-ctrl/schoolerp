@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <h3>🔥 Backup History</h3>
+
+    <table class="table table-bordered table-striped mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>File Name</th>
+                <th>Size (MB)</th>
+                <th>Created</th>
+                <th>Download</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for b in backups %}
+            <tr>
+                <td>{{ b.name }}</td>
+                <td>{{ b.size }}</td>
+                <td>{{ b.created }}</td>
+                <td>
+                    <a href="{% url 'download_backup' b.name %}" class="btn btn-success btn-sm">
+                        ⬇ Download
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center">No backup found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'manual_backup' %}" class="btn btn-danger">
+        🔥 Create New Backup
+    </a>
+</div>
+
+{% endblock %}

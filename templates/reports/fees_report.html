@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>Fees Income & Expense Report</h3>
+
+<div class="mb-3 no-print">
+    <button onclick="window.print()" class="btn btn-primary">🖨 Print Report</button>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-4">
+        <div class="card card-box"><div class="card-body">
+            <h6>Total Income</h6>
+            <h4>₹{{ total_income|default:0 }}</h4>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-box"><div class="card-body">
+            <h6>Total Expense</h6>
+            <h4>₹{{ total_expense|default:0 }}</h4>
+        </div></div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-box"><div class="card-body">
+            <h6>Profit / Loss</h6>
+            <h4>₹{{ profit|default:0 }}</h4>
+        </div></div>
+    </div>
+</div>
+
+<div class="card card-box mb-4">
+    <div class="card-body">
+        <h5>Monthly Income vs Expenses</h5>
+        <canvas id="incomeExpenseChart" height="110"></canvas>
+    </div>
+</div>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Student</th>
+        <th>Session</th>
+        <th>Month</th>
+        <th>Paid Amount</th>
+        <th>Date</th>
+    </tr>
+
+    {% for r in records %}
+    <tr>
+        <td>{{ r.student }}</td>
+        <td>{{ r.session }}</td>
+        <td>{{ r.fees_month }}</td>
+        <td>₹{{ r.deposit_amount }}</td>
+        <td>{{ r.payment_date }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" class="text-center">No record found</td></tr>
+    {% endfor %}
+</table>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('incomeExpenseChart');
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ months|safe }},
+        datasets: [
+            {
+                label: 'Expenses',
+                data: {{ expense_data|safe }},
+                borderColor: '#ff6b7a',
+                backgroundColor: 'rgba(255, 107, 122, 0.35)',
+                fill: true,
+                tension: 0.45,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            },
+            {
+                label: 'Income',
+                data: {{ income_data|safe }},
+                borderColor: '#5b7cfa',
+                backgroundColor: 'rgba(91, 124, 250, 0.55)',
+                fill: true,
+                tension: 0.45,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { position: 'top' }
+        },
+        scales: {
+            y: { beginAtZero: true }
+        }
+    }
+});
+</script>
+
+{% endblock %}

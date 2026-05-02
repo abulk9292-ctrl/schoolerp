@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fee Demand Slip</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: #f1f5f9;
+            padding: 20px;
+        }
+
+        .no-print {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .print-btn {
+            background: #0b5ed7;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .page {
+            width: 210mm;
+            margin: auto;
+            background: white;
+            padding: 10mm;
+        }
+
+        .row {
+            display: flex;
+            gap: 10mm;
+        }
+
+        .slip {
+            width: 50%;
+            border: 2px solid #000;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+        }
+
+        .school-name {
+            background: #ffd400;
+            color: #c00000;
+            font-size: 24px;
+            font-weight: 900;
+            padding: 4px;
+        }
+
+        .contact {
+            font-size: 12px;
+            padding: 3px;
+            background: #f8fafc;
+        }
+
+        .title {
+            background: #1e3a8a;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 4px;
+        }
+
+        .info {
+            padding: 6px;
+            font-size: 13px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-bottom: 1px solid #000;
+        }
+
+        .info b {
+            width: 60px;
+            display: inline-block;
+        }
+
+        .due {
+            text-align: center;
+            padding: 6px;
+            font-weight: bold;
+            border-bottom: 1px solid #000;
+        }
+
+        .due span {
+            color: red;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th, td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: center;
+        }
+
+        .msg {
+            background: #dbeafe;
+            padding: 6px;
+            font-size: 14px;
+            border-top: 1px solid #000;
+        }
+
+        .footer {
+            height: 90px;
+            position: relative;
+        }
+
+        .sign {
+            position: absolute;
+            left: 10px;
+            bottom: 10px;
+            color: #1d4ed8;
+            font-style: italic;
+        }
+
+        .stamp {
+            position: absolute;
+            right: 10px;
+            bottom: 10px;
+            color: red;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="no-print">
+    <button class="print-btn" onclick="window.print()">Print Demand Slip</button>
+</div>
+
+<div class="page">
+<div class="row">
+
+{% for i in "12" %}
+
+<div class="slip">
+
+    <div class="header">
+        <div class="school-name">AL RAHMAN MISSION</div>
+        <div class="contact">
+            Bangla + English Medium | Uttar Dinajpur  
+            📞 9091215171 | ✉ alrahmanmission@gmail.com  
+            🌐 www.alrahmanmission.in
+        </div>
+        <div class="title">Fee Demand Slip</div>
+    </div>
+
+    <div class="info">
+        <div><b>SID:</b> {{ student.student_id }}</div>
+        <div><b>Roll:</b> {{ student.roll_no }}</div>
+
+        <div><b>Name:</b> {{ student.student_name }}</div>
+        <div><b>Class:</b> {{ student.class_assigned }}</div>
+
+        <div><b>Father:</b> {{ student.father_name }}</div>
+        <div><b>Date:</b> {% now "d M Y" %}</div>
+
+        <div><b>Mobile:</b> {{ student.phone }}</div>
+        <div><b>Reg:</b> {{ student.registration_no }}</div>
+    </div>
+
+    <div class="due">
+        Due Months: <span>{{ due_months|default:"Current Month" }}</span>
+    </div>
+
+    <table>
+        <tr>
+            <th>Detail</th>
+            <th>Amount</th>
+        </tr>
+
+        {% if structure %}
+        <tr>
+            <td>Monthly Fee</td>
+            <td>{{ structure.monthly_fee }}</td>
+        </tr>
+
+        {% if structure.transport_fee %}
+        <tr>
+            <td>Transport Fee</td>
+            <td>{{ structure.transport_fee }}</td>
+        </tr>
+        {% endif %}
+
+        {% if previous_due %}
+        <tr>
+            <td>Previous Due</td>
+            <td>{{ previous_due }}</td>
+        </tr>
+        {% endif %}
+
+        <tr>
+            <th>Total</th>
+            <th>{{ total_due|default:previous_due }}</th>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="2">Fee structure not found</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    <div class="msg">
+        Kindly pay the fee before 15th of this month.
+    </div>
+
+    <div class="footer">
+        <div class="sign">Authorized Sign</div>
+        <div class="stamp">School Stamp</div>
+    </div>
+
+</div>
+
+{% endfor %}
+
+</div>
+</div>
+
+</body>
+</html>

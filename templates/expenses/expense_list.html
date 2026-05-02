@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 class="mb-3">Expense & Profit/Loss</h2>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <h6>Total Income</h6>
+                <h3>₹ {{ total_income }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-danger text-white">
+            <div class="card-body">
+                <h6>Total Expense</h6>
+                <h3>₹ {{ total_expense }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card {% if status == 'PROFIT' %}bg-primary{% elif status == 'LOSS' %}bg-warning{% else %}bg-secondary{% endif %} text-white">
+            <div class="card-body">
+                <h6>{{ status }}</h6>
+                <h3>₹ {{ profit_loss }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<a href="{% url 'expense_add' %}" class="btn btn-success mb-3">+ Add Expense</a>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Date</th>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th width="120">Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for e in expenses %}
+        <tr>
+            <td>{{ e.date }}</td>
+            <td>{{ e.title }}</td>
+            <td>{{ e.category }}</td>
+            <td>₹ {{ e.amount }}</td>
+            <td>{{ e.description|default:"-" }}</td>
+            <td>
+                <a href="{% url 'expense_delete' e.id %}"
+                   onclick="return confirm('Delete this expense?')"
+                   class="btn btn-danger btn-sm">
+                    Delete
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center">No expense found</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

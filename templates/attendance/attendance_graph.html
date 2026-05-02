@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 class="mb-3">Attendance Analytics</h2>
+
+<div class="card card-box mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+
+            <div class="col-md-4">
+                <label>Class</label>
+                <select name="class_id" class="form-select">
+                    <option value="">All Classes</option>
+                    {% for c in classes %}
+                        <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>
+                            {{ c.class_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label>Month</label>
+                <select name="month" class="form-select">
+                    <option value="">All</option>
+                    <option value="1">January</option>
+                    <option value="2">February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button class="btn btn-primary w-100">Load Graph</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div class="row">
+
+    <div class="col-md-6">
+        <div class="card card-box p-3">
+            <h5>Status Distribution</h5>
+            <canvas id="statusChart"></canvas>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card card-box p-3">
+            <h5>Top Students Attendance</h5>
+            <canvas id="studentChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+const statusCtx = document.getElementById('statusChart');
+
+new Chart(statusCtx, {
+    type: 'pie',
+    data: {
+        labels: ['Present', 'Absent', 'Late'],
+        datasets: [{
+            data: [{{ present }}, {{ absent }}, {{ late }}],
+            backgroundColor: ['#28a745', '#dc3545', '#ffc107']
+        }]
+    }
+});
+
+
+const studentData = {{ student_data|safe }};
+
+const studentLabels = studentData.map(item => item.name);
+const studentValues = studentData.map(item => item.present);
+
+const studentCtx = document.getElementById('studentChart');
+
+new Chart(studentCtx, {
+    type: 'bar',
+    data: {
+        labels: studentLabels,
+        datasets: [{
+            label: 'Present Days',
+            data: studentValues,
+            backgroundColor: '#4f6df5'
+        }]
+    }
+});
+</script>
+
+{% endblock %}

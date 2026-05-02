@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-warning">
+            <h5>Add Complaint - {{ student.student_name }}</h5>
+        </div>
+        <div class="card-body">
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label>Parent Name</label>
+                    <input type="text" name="parent_name" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Title</label>
+                    <input type="text" name="title" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label>Description</label>
+                    <textarea name="description" class="form-control" rows="4" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">Submit Complaint</button>
+                <a href="{% url 'student_detail' student.id %}" class="btn btn-secondary">Back</a>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

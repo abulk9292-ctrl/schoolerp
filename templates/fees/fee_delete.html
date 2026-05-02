@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card card-box">
+    <div class="card-body">
+        <h3 class="mb-3">Delete Fee Record</h3>
+        <p>
+            Are you sure you want to delete fee record of
+            <strong>{{ fee.student.student_name }}</strong>
+            for <strong>{{ fee.fees_month }}</strong>?
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <a href="/fees/" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

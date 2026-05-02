@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card card-box p-4">
+    <h3 class="fw-bold mb-3">Exam Routine</h3>
+
+    <form method="post" class="mb-4">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn btn-success">Save Routine</button>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped">
+            <thead class="table-success">
+                <tr>
+                    <th>Date</th>
+                    <th>Class</th>
+                    <th>Subject</th>
+                    <th>Exam</th>
+                    <th>Time</th>
+                    <th>Total Marks</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in routines %}
+                <tr>
+                    <td>{{ r.date }}</td>
+                    <td>{{ r.school_class }}</td>
+                    <td>{{ r.subject }}</td>
+                    <td>{{ r.exam }}</td>
+                    <td>{{ r.start_time }} - {{ r.end_time }}</td>
+                    <td>{{ r.total_marks }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">No routine found</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

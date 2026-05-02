@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 class="mb-3">Monthly Attendance Report</h2>
+
+<div class="card card-box mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+
+            <div class="col-md-3">
+                <label>Class</label>
+                <select name="class_id" class="form-select">
+                    <option value="">All</option>
+                    {% for c in classes %}
+                        <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>
+                            {{ c.class_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label>Start Date</label>
+                <input type="date" name="start_date" value="{{ start_date }}" class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label>End Date</label>
+                <input type="date" name="end_date" value="{{ end_date }}" class="form-control">
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-primary w-100">SHOW</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div class="mb-3">
+    <button onclick="window.print()" class="btn btn-success">Print</button>
+</div>
+
+<div class="table-responsive">
+<table class="table table-bordered table-sm text-center align-middle">
+
+    <thead class="table-light">
+        <tr>
+            <th>Roll</th>
+            <th>Name</th>
+
+            {% for d in date_headers %}
+                <th>{{ d|date:"d" }}</th>
+            {% endfor %}
+
+            <th>P</th>
+            <th>A</th>
+            <th>L</th>
+            <th>%</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% for row in report_rows %}
+        <tr>
+            <td>{{ row.student.roll_no }}</td>
+            <td class="text-start">{{ row.student.student_name }}</td>
+
+            {% for s in row.day_statuses %}
+                <td
+                    {% if s == 'P' %}class="bg-success text-white"{% endif %}
+                    {% if s == 'A' %}class="bg-danger text-white"{% endif %}
+                    {% if s == 'L' %}class="bg-warning"{% endif %}
+                >
+                    {{ s }}
+                </td>
+            {% endfor %}
+
+            <td class="fw-bold text-success">{{ row.present }}</td>
+            <td class="fw-bold text-danger">{{ row.absent }}</td>
+            <td class="fw-bold text-warning">{{ row.late }}</td>
+            <td class="fw-bold">
+                {% if row.percentage >= 75 %}
+                    <span class="badge bg-success">{{ row.percentage }}%</span>
+                {% elif row.percentage >= 50 %}
+                    <span class="badge bg-warning text-dark">{{ row.percentage }}%</span>
+                {% else %}
+                    <span class="badge bg-danger">{{ row.percentage }}%</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
+</div>
+
+<div class="mt-3">
+    <span class="badge bg-success">P</span> Present
+    <span class="badge bg-danger">A</span> Absent
+    <span class="badge bg-warning text-dark">L</span> Late
+</div>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h2 class="mb-3">Teacher Daily Attendance Report</h2>
+
+<div class="card card-box mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Date</label>
+                <input type="date" name="date" value="{{ selected_date }}" class="form-control">
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th>Photo</th>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Designation</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in records %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                    {% if item.employee.photo %}
+                        <img src="{{ item.employee.photo.url }}" width="45" height="45" style="object-fit: cover; border-radius: 6px;">
+                    {% else %}
+                        No Photo
+                    {% endif %}
+                </td>
+                <td>{{ item.employee.employee_id }}</td>
+                <td>{{ item.employee.name }}</td>
+                <td>{{ item.employee.designation }}</td>
+                <td>
+                    {% if item.status == 'Present' %}
+                        <span class="badge bg-success">Present</span>
+                    {% else %}
+                        <span class="badge bg-danger">Absent</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center">No attendance records found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

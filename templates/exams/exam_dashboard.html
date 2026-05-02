@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3 class="fw-bold mb-4">Exams Dashboard</h3>
+
+<div class="row g-3">
+    <div class="col-md-3">
+        <div class="card card-box p-3">
+            <h6>Total Exams</h6>
+            <h2>{{ total_exams|default:0 }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-box p-3">
+            <h6>Total Results</h6>
+            <h2>{{ total_results|default:0 }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-box p-3">
+            <h6>Passed</h6>
+            <h2>{{ passed|default:0 }}</h2>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-box p-3">
+            <h6>Failed</h6>
+            <h2>{{ failed|default:0 }}</h2>
+        </div>
+    </div>
+</div>
+
+<div class="card card-box mt-4 p-4">
+    <h5 class="fw-bold">Exam Options</h5>
+
+    <a href="/exams/add/" class="btn btn-success mt-2">Add Exam</a>
+    <a href="/exams/routine/" class="btn btn-primary mt-2">Exam Routine</a>
+    <a href="/exams/results/add/" class="btn btn-warning mt-2">Add Marks</a>
+    <a href="/exams/results/" class="btn btn-info mt-2">Result List</a>
+    <a href="/exams/report-card/" class="btn btn-dark mt-2">Report Card</a>
+</div>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Classes</h2>
+
+<form method="POST" class="mb-3">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-6">
+            <input type="text" name="class_name" class="form-control" placeholder="Enter Class Name">
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-success">Add Class</button>
+        </div>
+    </div>
+</form>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Class Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in classes %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ c.class_name }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

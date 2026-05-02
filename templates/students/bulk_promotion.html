@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Bulk Promotion System</h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="alert alert-info">
+                Only <b>Active Students</b> will be promoted. Discontinued students will be skipped.
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="col-md-5 mb-3">
+                        <label class="form-label">From Class</label>
+                        <select name="from_class" class="form-select" required>
+                            <option value="">Select From Class</option>
+                            {% for c in classes %}
+                                <option value="{{ c.id }}">{{ c.class_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-5 mb-3">
+                        <label class="form-label">To Class</label>
+                        <select name="to_class" class="form-select" required>
+                            <option value="">Select To Class</option>
+                            {% for c in classes %}
+                                <option value="{{ c.id }}">{{ c.class_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 mb-3 d-flex align-items-end">
+                        <button type="submit"
+                                onclick="return confirm('Are you sure you want to promote all active students?')"
+                                class="btn btn-success w-100">
+                            Promote
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <a href="{% url 'student_list' %}" class="btn btn-secondary mt-3">
+                Back to Student List
+            </a>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

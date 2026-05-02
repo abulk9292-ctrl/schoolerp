@@ -1,0 +1,394 @@
+{% load fees_extras %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Pending Report</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #eef3f8;
+            margin: 0;
+            padding: 18px;
+            font-family: Arial, sans-serif;
+        }
+
+        .page-wrapper {
+            max-width: 100%;
+            margin: 0 auto;
+            background: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .main-title {
+            font-size: 42px;
+            font-weight: 900;
+            color: #0b5d95;
+            margin: 0;
+        }
+
+        .school-sub {
+            font-weight: 700;
+            color: #444;
+        }
+
+        .filter-box {
+            background: #dff3fb;
+            border: 1px solid #bde3ef;
+            padding: 12px;
+            margin: 15px 0;
+        }
+
+        .toolbar-box {
+            background: #fff;
+            padding: 8px 0 12px;
+        }
+
+        .toolbar-btn {
+            min-width: 85px;
+            font-size: 13px;
+        }
+
+        .btn-filter {
+            background: #e74c3c;
+            color: white;
+            font-weight: 800;
+            border: none;
+        }
+
+        .pending-table th,
+        .pending-table td {
+            font-size: 12px;
+            white-space: nowrap;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .pending-table th {
+            background: #f1f4f7;
+            font-weight: 800;
+        }
+
+        .pending-table .name-col,
+        .pending-table .father-col {
+            white-space: normal;
+            min-width: 135px;
+            text-align: left;
+        }
+
+        .month-paid {
+            color: #0a8f2f;
+            font-weight: 900;
+        }
+
+        .month-due {
+            color: #e60000;
+            font-weight: 900;
+        }
+
+        .month-none {
+            color: #6c757d;
+            font-weight: 700;
+        }
+
+        .summary-row td {
+            background: #fafafa;
+            font-weight: 900;
+        }
+
+        .print-header {
+            display: none;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        @media print {
+            body {
+                background: #fff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .print-header {
+                display: block;
+            }
+
+            .page-wrapper {
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+
+            .pending-table th,
+            .pending-table td {
+                font-size: 10px;
+                padding: 4px 5px;
+            }
+
+            @page {
+                size: A4 landscape;
+                margin: 8mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wrapper">
+
+    <div class="topbar-box no-print d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="main-title">Fee Pending Report</h1>
+            <div class="school-sub">AL RAHMAN MISSION | Month/Class Wise Fee Pending Report</div>
+        </div>
+        <div>
+            <a href="/fees/" class="btn btn-secondary btn-sm">Back to Fees</a>
+            <button type="button" class="btn btn-success btn-sm" onclick="window.print()">Print</button>
+        </div>
+    </div>
+
+    <div class="print-header">
+        <h2>AL RAHMAN MISSION</h2>
+        <p>Fee Pending Report</p>
+    </div>
+
+    <div class="filter-box no-print">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Select Class</label>
+                <select name="class_id" class="form-select form-select-sm">
+                    <option value="">All Classes</option>
+                    {% for c in classes %}
+                        <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>
+                            {{ c.class_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Search</label>
+                <input type="text" name="q" value="{{ search_query }}" class="form-control form-control-sm" placeholder="Student ID / Name / Father / Phone">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Month Selection</label>
+                <div class="small">
+                    <label><input type="checkbox" checked> Balance</label>
+                    {% for month in months %}
+                        <label class="ms-1"><input type="checkbox" checked> {{ month|slice:":3" }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-filter btn-sm w-100">FILTER</button>
+                <a href="/fees/pending-amount/" class="btn btn-secondary btn-sm w-100 mt-1">RESET</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="toolbar-box no-print">
+        <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+            <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-outline-secondary toolbar-btn" onclick="copyTableData()">Copy</button>
+                <button type="button" class="btn btn-outline-success toolbar-btn" onclick="downloadCSV()">CSV</button>
+                <button type="button" class="btn btn-outline-primary toolbar-btn" onclick="downloadExcel()">Excel</button>
+                <button type="button" class="btn btn-outline-dark toolbar-btn" onclick="window.print()">Print</button>
+                <button type="button" class="btn btn-danger toolbar-btn" onclick="sendWhatsAppMessages()">Message Send</button>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="selectAllSms">
+                <label class="form-check-label fw-bold" for="selectAllSms">Select All SMS / WhatsApp</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle pending-table" id="pendingTable">
+            <thead>
+                <tr>
+                    <th>Sr.</th>
+                    <th>ID</th>
+                    <th class="name-col">Name</th>
+                    <th class="father-col">Father Name</th>
+                    <th>Mobile</th>
+                    <th>Balance</th>
+                    {% for month in months %}
+                        <th>{{ month|slice:":3" }}</th>
+                    {% endfor %}
+                    <th>Total / SMS</th>
+                    <th class="no-print">Send</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in rows %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ row.student.student_id }}</td>
+                    <td class="name-col">{{ row.student.student_name }}</td>
+                    <td class="father-col">{{ row.student.father_name }}</td>
+                    <td>{{ row.student.phone }}</td>
+                    <td>
+                        {% if row.balance > 0 %}
+                            <span class="month-due">{{ row.balance }}</span>
+                        {% else %}
+                            <span class="month-paid">0</span>
+                        {% endif %}
+                    </td>
+
+                    {% for month in months %}
+                        {% with value=row.month_values|get_item:month %}
+                            <td>
+                                {% if value == 'Paid' %}
+                                    <span class="month-paid">Paid</span>
+                                {% elif value == '-' %}
+                                    <span class="month-none">-</span>
+                                {% else %}
+                                    <span class="month-due">{{ value }}</span>
+                                {% endif %}
+                            </td>
+                        {% endwith %}
+                    {% endfor %}
+
+                    <td><span class="month-due">{{ row.total_pending }}</span></td>
+
+                    <td class="no-print">
+                        <input type="checkbox" class="sms-checkbox" value="{{ row.student.phone }}">
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="20" class="text-center">No pending amount found.</td>
+                </tr>
+                {% endfor %}
+
+                <tr class="summary-row">
+                    <td colspan="5">Total</td>
+                    <td></td>
+                    {% for month in months %}
+                        <td></td>
+                    {% endfor %}
+                    <td><span class="month-due">{{ grand_total_due }}</span></td>
+                    <td class="no-print"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-2">
+        <small>Showing {{ total_students }} entries</small>
+        <span class="float-end"><b>Total Pending:</b> <span class="month-due">{{ grand_total_due }}</span></span>
+    </div>
+
+</div>
+
+<script>
+document.getElementById('selectAllSms')?.addEventListener('change', function() {
+    const checkboxes = document.querySelectorAll('.sms-checkbox');
+    checkboxes.forEach(cb => cb.checked = this.checked);
+});
+
+function getTableText() {
+    const table = document.getElementById('pendingTable');
+    let rows = [];
+    for (let r = 0; r < table.rows.length; r++) {
+        let cols = [];
+        for (let c = 0; c < table.rows[r].cells.length; c++) {
+            if (table.rows[r].cells[c].classList.contains('no-print')) continue;
+            cols.push(table.rows[r].cells[c].innerText.trim());
+        }
+        rows.push(cols.join('\t'));
+    }
+    return rows.join('\n');
+}
+
+function copyTableData() {
+    const text = getTableText();
+    navigator.clipboard.writeText(text).then(function() {
+        alert('Table copied successfully');
+    });
+}
+
+function downloadCSV() {
+    const table = document.getElementById('pendingTable');
+    let csv = [];
+    for (let r = 0; r < table.rows.length; r++) {
+        let row = [];
+        for (let c = 0; c < table.rows[r].cells.length; c++) {
+            if (table.rows[r].cells[c].classList.contains('no-print')) continue;
+            let text = table.rows[r].cells[c].innerText.replace(/"/g, '""').trim();
+            row.push('"' + text + '"');
+        }
+        csv.push(row.join(','));
+    }
+
+    const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+    const downloadLink = document.createElement('a');
+    downloadLink.download = 'pending_amount_list.csv';
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = 'none';
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+}
+
+function downloadExcel() {
+    const table = document.getElementById('pendingTable').outerHTML;
+    const html = `
+        <html>
+        <head><meta charset="UTF-8"></head>
+        <body>${table}</body>
+        </html>
+    `;
+    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'pending_amount_list.xls';
+    document.body.appendChild(link);
+    link.click();
+}
+
+function sendWhatsAppMessages() {
+    const checked = document.querySelectorAll('.sms-checkbox:checked');
+
+    if (checked.length === 0) {
+        alert('Please select at least one student');
+        return;
+    }
+
+    checked.forEach(function(cb) {
+        const row = cb.closest('tr');
+
+        const name = row.cells[2].innerText.trim();
+        const phone = row.cells[4].innerText.trim();
+        const totalDue = row.cells[row.cells.length - 2].innerText.trim();
+
+        if (!phone) return;
+
+        const cleanPhone = phone.replace(/\D/g, '');
+
+        const message =
+            `Assalamu Alaikum,\n\n` +
+            `${name}-এর pending school fee = ₹${totalDue}.\n` +
+            `Kindly clear the due at AL RAHMAN MISSION office.\n\nThank You.`;
+
+        const url = `https://wa.me/91${cleanPhone}?text=${encodeURIComponent(message)}`;
+
+        window.open(url, '_blank');
+    });
+}
+</script>
+
+</body>
+</html>

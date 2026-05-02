@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">{{ page_title }}</h2>
+
+<div class="card card-box">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Student Name</label>
+                    {{ form.student_name }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Admission No</label>
+                    {{ form.admission_no }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Admission Date</label>
+                    {{ form.admission_date }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Class</label>
+                    {{ form.class_assigned }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Roll No</label>
+                    {{ form.roll_no }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Father Name</label>
+                    {{ form.father_name }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Mother Name</label>
+                    {{ form.mother_name }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Guardian Name</label>
+                    {{ form.guardian_name }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Phone</label>
+                    {{ form.phone }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Gender</label>
+                    {{ form.gender }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Date of Birth</label>
+                    {{ form.date_of_birth }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Aadhaar Number</label>
+                    {{ form.aadhaar_number }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Previous School</label>
+                    {{ form.previous_school }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Transport Required</label>
+                    <div class="form-check mt-2">
+                        {{ form.transport_required }}
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <label class="form-label">Transport Details</label>
+                    {{ form.transport_details }}
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label">Address</label>
+                    {{ form.address }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Photo</label>
+                    {{ form.photo }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Active Status</label>
+                    <div class="form-check mt-2">
+                        {{ form.is_active }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">Save Student</button>
+                <a href="/students/" class="btn btn-secondary">Back</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
