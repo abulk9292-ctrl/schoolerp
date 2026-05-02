@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card card-box">
+        <div class="card-body">
+
+            <h3 class="mb-3">📥 Import Students (Excel)</h3>
+
+            <!-- 🔥 Demo Download -->
+            <a href="{% url 'download_student_demo' %}" class="btn btn-success mb-3">
+                ⬇ Download Demo Excel
+            </a>
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label">Upload Excel File</label>
+                    {{ form.excel_file }}
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    🚀 Import Students
+                </button>
+
+                <a href="{% url 'student_list' %}" class="btn btn-secondary">
+                    Back
+                </a>
+            </form>
+
+            <hr>
+
+            <h5>📌 Excel Format Guide:</h5>
+            <ul>
+                <li>student_name</li>
+                <li>admission_no</li>
+                <li>admission_date</li>
+                <li>class_id</li>
+                <li>roll_no</li>
+                <li>father_name</li>
+                <li>mother_name</li>
+                <li>guardian_name</li>
+                <li>phone</li>
+                <li>gender</li>
+                <li>date_of_birth</li>
+                <li>aadhaar_number</li>
+                <li>transport_required (True/False)</li>
+                <li>transport_details</li>
+                <li>previous_school</li>
+                <li>address</li>
+            </ul>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

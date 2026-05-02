@@ -11,7 +11,7 @@ class StudentForm(forms.ModelForm):
             'admission_no',
             'admission_date',
 
-            'current_session',  # 🔥 ADD
+            'current_session',
 
             'class_assigned',
             'roll_no',
@@ -39,7 +39,6 @@ class StudentForm(forms.ModelForm):
             'admission_no': forms.TextInput(attrs={'class': 'form-control'}),
             'admission_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
 
-            # 🔥 SESSION SELECT
             'current_session': forms.Select(attrs={'class': 'form-select'}),
 
             'class_assigned': forms.Select(attrs={'class': 'form-select'}),
@@ -71,3 +70,14 @@ class StudentForm(forms.ModelForm):
 
         if active_session:
             self.fields['current_session'].initial = active_session
+
+
+# ✅ STUDENT EXCEL IMPORT FORM
+class StudentImportForm(forms.Form):
+    excel_file = forms.FileField(
+        label="Upload Student Excel File",
+        widget=forms.ClearableFileInput(attrs={
+            'class': 'form-control',
+            'accept': '.xlsx,.xls'
+        })
+    )

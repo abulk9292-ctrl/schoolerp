@@ -5,6 +5,14 @@
     <h2 class="mb-0">All Students</h2>
 
     <div>
+        <a href="{% url 'student_import' %}" class="btn btn-primary me-2">
+            📥 Import Students
+        </a>
+
+        <a href="{% url 'download_student_demo' %}" class="btn btn-success me-2">
+            ⬇ Demo Excel
+        </a>
+
         <a href="{% url 'bulk_promotion' %}" class="btn btn-info me-2">
             Bulk Promotion
         </a>

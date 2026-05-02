@@ -435,3 +435,100 @@ def student_qr_profile(request, pk):
         'student': student,
         'today': today
     })
+# ==============================
+# 🔥 STUDENT EXCEL IMPORT SYSTEM
+# ==============================
+
+from .forms import StudentImportForm
+from academics.models import AcademicSession
+import pandas as pd
+
+
+@login_required
+def student_import(request):
+    if request.method == 'POST':
+        form = StudentImportForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            excel_file = request.FILES['excel_file']
+
+            try:
+                df = pd.read_excel(excel_file)
+
+                active_session = AcademicSession.objects.filter(is_active=True).first()
+
+                for _, row in df.iterrows():
+                    Student.objects.create(
+                        student_name=row.get('student_name'),
+                        admission_no=row.get('admission_no'),
+                        admission_date=row.get('admission_date'),
+
+                        current_session=active_session,
+
+                        class_assigned_id=row.get('class_id'),
+                        roll_no=row.get('roll_no'),
+
+                        father_name=row.get('father_name'),
+                        mother_name=row.get('mother_name'),
+                        guardian_name=row.get('guardian_name'),
+                        phone=row.get('phone'),
+
+                        gender=row.get('gender'),
+                        date_of_birth=row.get('date_of_birth'),
+                        aadhaar_number=row.get('aadhaar_number'),
+
+                        transport_required=row.get('transport_required', False),
+                        transport_details=row.get('transport_details'),
+
+                        previous_school=row.get('previous_school'),
+                        address=row.get('address'),
+
+                        is_active=True,
+                    )
+
+                messages.success(request, "Students imported successfully!")
+                return redirect('student_list')
+
+            except Exception as e:
+                messages.error(request, f"Import Error: {e}")
+    else:
+        form = StudentImportForm()
+
+    return render(request, 'students/student_import.html', {
+        'form': form
+    })
+
+
+# ==============================
+# 🔥 DEMO EXCEL DOWNLOAD
+# ==============================
+
+@login_required
+def download_student_demo(request):
+    data = [{
+        'student_name': 'Rahim',
+        'admission_no': 'ADM001',
+        'admission_date': '2024-01-10',
+        'class_id': 1,
+        'roll_no': 1,
+        'father_name': 'Karim',
+        'mother_name': 'Salma',
+        'guardian_name': 'Karim',
+        'phone': '9999999999',
+        'gender': 'Male',
+        'date_of_birth': '2010-05-01',
+        'aadhaar_number': '123456789012',
+        'transport_required': True,
+        'transport_details': 'Van',
+        'previous_school': 'ABC School',
+        'address': 'Village XYZ'
+    }]
+
+    df = pd.DataFrame(data)
+
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="student_import_demo.xlsx"'
+
+    df.to_excel(response, index=False)
+
+    return response
