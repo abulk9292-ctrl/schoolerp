@@ -7,8 +7,12 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
 
-    # Dashboard
+    # Dashboard (ERP)
     path('', dashboard, name='dashboard'),
+
+    # 🔥 PUBLIC WEBSITE
+    path('site/', include('website.urls')),
+
 
     # Main Modules
     path('academics/', include('academics.urls')),
@@ -19,25 +23,24 @@ urlpatterns = [
     path('payroll/', include('payroll.urls')),
     path('expenses/', include('expenses.urls')),
 
-    # 🔥 Missing Modules FIX
+    # Modules
     path('reports/', include('reports.urls')),
     path('admissions/', include('admissions.urls')),
     path('idcards/', include('idcards.urls')),
     path('communications/', include('communications.urls')),
     path('api/', include('api.urls')),
 
-    # Extra modules
+    # Extra
     path('settings/', include('settings_app.urls')),
     path('complaints/', include('complaints.urls')),
 
     # Mobile API
     path('mobile-api/', include('mobile_api.urls')),
 
-    # Exams
+    # Exams + Backup
     path('exams/', include('exams.urls')),
     path('backup/', include('backup.urls')),
 ]
 
-# Static + Media
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

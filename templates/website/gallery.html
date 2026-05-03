@@ -1,0 +1,122 @@
+{% extends 'website/home.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+.gallery-section {
+    padding: 50px 0;
+    background: #f8fafc;
+}
+
+.gallery-title {
+    text-align: center;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 10px;
+}
+
+.gallery-subtitle {
+    text-align: center;
+    color: #64748b;
+    margin-bottom: 35px;
+}
+
+.gallery-card {
+    background: #fff;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+    transition: 0.3s;
+    height: 100%;
+}
+
+.gallery-card:hover {
+    transform: translateY(-6px);
+}
+
+.gallery-card img,
+.gallery-card video {
+    width: 100%;
+    height: 230px;
+    object-fit: cover;
+    background: #000;
+}
+
+.gallery-body {
+    padding: 15px;
+}
+
+.gallery-body h5 {
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.category-badge {
+    display: inline-block;
+    background: #e0f2fe;
+    color: #0369a1;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.gallery-desc {
+    color: #64748b;
+    font-size: 14px;
+}
+</style>
+
+<section class="gallery-section">
+    <div class="container">
+
+        <h2 class="gallery-title">📸 School Gallery</h2>
+        <p class="gallery-subtitle">Photos and videos of AL RAHMAN MISSION</p>
+
+        <div class="row g-4">
+
+            {% for item in galleries %}
+            <div class="col-lg-4 col-md-6">
+
+                <div class="gallery-card">
+
+                    {% if item.video %}
+                        <video controls>
+                            <source src="{{ item.video.url }}" type="video/mp4">
+                            Your browser does not support video.
+                        </video>
+                    {% elif item.image %}
+                        <img src="{{ item.image.url }}" alt="{{ item.title }}">
+                    {% else %}
+                        <img src="{% static 'images/logo.png' %}" alt="No Image">
+                    {% endif %}
+
+                    <div class="gallery-body">
+                        <span class="category-badge">{{ item.category }}</span>
+                        <h5>{{ item.title }}</h5>
+
+                        {% if item.description %}
+                            <p class="gallery-desc">{{ item.description }}</p>
+                        {% endif %}
+                    </div>
+
+                </div>
+
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <div class="alert alert-warning">
+                    No gallery item available.
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+
+    </div>
+</section>
+
+{% endblock %}

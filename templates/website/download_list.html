@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary">📥 Downloads</h2>
+        <p class="text-muted">Download Results, Routine, Forms & More</p>
+    </div>
+
+    <div class="row">
+
+        {% for d in downloads %}
+        <div class="col-md-4 mb-4">
+
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+
+                    <h5 class="fw-bold text-dark">
+                        {{ d.title }}
+                    </h5>
+
+                    <p class="text-muted small">
+                        Type: {{ d.file_type }}
+                    </p>
+
+                    {% if d.description %}
+                    <p class="small">
+                        {{ d.description }}
+                    </p>
+                    {% endif %}
+
+                </div>
+
+                <div class="card-footer text-center bg-white">
+
+                    <a href="{{ d.pdf_file.url }}" target="_blank" class="btn btn-success w-100">
+                        ⬇ Download PDF
+                    </a>
+
+                </div>
+            </div>
+
+        </div>
+        {% empty %}
+        <div class="text-center">
+            <p>No files available.</p>
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

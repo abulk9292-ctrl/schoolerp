@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Login - AL RAHMAN MISSION</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #001f4d, #0d6efd, #16a085);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .bg-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.18);
+            animation: float 7s infinite ease-in-out;
+        }
+
+        .c1 { width: 180px; height: 180px; top: 8%; left: 8%; }
+        .c2 { width: 120px; height: 120px; bottom: 12%; right: 10%; animation-delay: 1.5s; }
+        .c3 { width: 90px; height: 90px; top: 18%; right: 20%; animation-delay: 2.5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-25px); }
+        }
+
+        .login-card {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 430px;
+            background: rgba(255,255,255,0.18);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,0.35);
+            border-radius: 28px;
+            padding: 38px;
+            box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+            color: white;
+        }
+
+        .logo-box {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.95);
+            color: #0d6efd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 42px;
+            margin: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+        }
+
+        .form-control {
+            border-radius: 15px;
+            padding: 13px;
+            border: none;
+        }
+
+        label {
+            font-weight: 700;
+        }
+
+        .btn-login {
+            border-radius: 15px;
+            padding: 13px;
+            font-weight: 800;
+        }
+
+        .small-link a {
+            color: white;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .small-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="bg-circle c1"></div>
+<div class="bg-circle c2"></div>
+<div class="bg-circle c3"></div>
+
+<div class="login-card">
+
+    <div class="logo-box">🎓</div>
+
+    <h3 class="text-center fw-bold mt-3 mb-1">Student Login</h3>
+    <p class="text-center mb-4">AL RAHMAN MISSION</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-warning text-center fw-bold">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label>Username</label>
+            <input type="text" name="username" class="form-control" placeholder="Enter Student ID" required>
+        </div>
+
+        <div class="mb-3">
+            <label>Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+        </div>
+
+        <button class="btn btn-warning w-100 btn-login">
+            🔐 Login Now
+        </button>
+    </form>
+
+    <div class="text-center small-link mt-3">
+        <a href="/students/forgot/">Forgot Password?</a>
+    </div>
+
+    <div class="text-center mt-3">
+        <a href="/students/portal-login/" class="btn btn-light btn-sm fw-bold">Login Portal</a>
+        <a href="/site/" class="btn btn-outline-light btn-sm fw-bold">Back to Website</a>
+    </div>
+
+</div>
+
+</body>
+</html>

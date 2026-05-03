@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AL RAHMAN MISSION</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body { font-family: Arial, sans-serif; background:#f6f8fb; }
+
+        .top-bar { background:#101820; color:white; font-size:15px; }
+        .navbar { box-shadow:0 4px 18px rgba(0,0,0,0.18); }
+        .brand-text { font-size:24px; font-weight:900; letter-spacing:.4px; }
+
+        .slider-img {
+            height: 88vh;
+            object-fit: cover;
+            filter: brightness(45%);
+        }
+
+        .hero-fallback {
+            height: 88vh;
+            background: linear-gradient(135deg, #003b8f, #0d6efd, #16a085);
+            color:white;
+            display:flex;
+            align-items:center;
+            text-align:center;
+        }
+
+        .carousel-caption { bottom: 30%; }
+        .carousel-caption h1 {
+            font-size: 62px;
+            font-weight: 900;
+            text-shadow: 2px 3px 10px #000;
+        }
+        .carousel-caption p {
+            font-size: 25px;
+            text-shadow: 2px 2px 8px #000;
+        }
+
+        .btn-main {
+            padding: 12px 34px;
+            font-size: 18px;
+            border-radius: 40px;
+            font-weight: bold;
+        }
+
+        .notice {
+            background: linear-gradient(90deg,#003b8f,#0d6efd);
+            color: white;
+            padding: 13px;
+            font-weight: bold;
+        }
+
+        .notice-marquee-wrap {
+            display: flex;
+            align-items: center;
+            background: #fff3cd;
+            border-bottom: 1px solid #ffe08a;
+            color: #111;
+            font-weight: 600;
+            overflow: hidden;
+        }
+        
+        .notice-title {
+            background: #dc3545;
+            color: white;
+            padding: 10px 18px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+        
+        .notice-marquee-wrap marquee {
+            padding: 10px;
+        }
+        
+        .notice-item {
+            margin-right: 50px;
+        }
+
+        .section-title {
+            text-align:center;
+            font-weight:900;
+            margin-bottom:10px;
+            color:#0b2c5f;
+        }
+
+        .section-subtitle {
+            text-align:center;
+            color:#666;
+            margin-bottom:35px;
+        }
+
+        .feature-card, .premium-card {
+            background:white;
+            border-radius:22px;
+            padding:32px 22px;
+            box-shadow:0 12px 35px rgba(0,0,0,0.10);
+            height:100%;
+            transition:.3s;
+            border:1px solid #eef1f5;
+        }
+
+        .feature-card:hover, .premium-card:hover {
+            transform:translateY(-8px);
+            box-shadow:0 18px 45px rgba(0,0,0,0.15);
+        }
+
+        .welcome-box {
+            background:white;
+            border-radius:24px;
+            padding:40px;
+            box-shadow:0 12px 35px rgba(0,0,0,.10);
+        }
+
+        .stat-box {
+            background:#0d6efd;
+            color:white;
+            border-radius:20px;
+            padding:25px;
+            text-align:center;
+            height:100%;
+        }
+
+        .gallery-img, .event-img, .infra-img {
+            width:100%;
+            object-fit:cover;
+            border-radius:18px;
+        }
+
+        .gallery-img { height:220px; box-shadow:0 8px 25px rgba(0,0,0,.18); }
+        .event-img, .infra-img { height:190px; margin-bottom:14px; }
+
+        .cta-section {
+            background:linear-gradient(135deg,#001f4d,#0d6efd);
+            color:white;
+            padding:55px 20px;
+            border-radius:28px;
+        }
+
+        .footer {
+            background:#101820;
+            color:white;
+            padding:45px 0 15px;
+            margin-top:70px;
+        }
+
+        .floating-whatsapp {
+            position:fixed;
+            right:22px;
+            bottom:22px;
+            background:#25D366;
+            color:white;
+            padding:14px 18px;
+            border-radius:50px;
+            text-decoration:none;
+            font-weight:bold;
+            box-shadow:0 10px 25px rgba(0,0,0,.25);
+            z-index:9999;
+        }
+
+        @media(max-width:768px){
+            .carousel-caption h1 { font-size:34px; }
+            .carousel-caption p { font-size:18px; }
+            .slider-img, .hero-fallback { height:70vh; }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="top-bar py-2">
+    <div class="container d-flex justify-content-between flex-wrap">
+        <div>📞 9091215171 | ✉️ alrahmamission@gmail.com</div>
+        <div>
+            <a href="/site/admission/" class="btn btn-warning btn-sm fw-bold">Apply Now</a>
+            <a href="https://wa.me/919091215171" target="_blank" class="btn btn-success btn-sm fw-bold">WhatsApp</a>
+        </div>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <div class="container">
+        <a class="navbar-brand brand-text" href="/site/">AL RAHMAN MISSION</a>
+
+        <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#mainNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" href="/site/">Home</a></li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">About</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/site/about/">About School</a></li>
+                        <li><a class="dropdown-item" href="#missionSection">Mission & Vision</a></li>
+                        <li><a class="dropdown-item" href="/site/about/">Principal Message</a></li>
+                        <li><a class="dropdown-item" href="{% url 'gallery_page' %}">Gallery</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Academics</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#featuresSection">Nursery to Class X</a></li>
+                        <li><a class="dropdown-item" href="#featuresSection">Bangla + English Medium</a></li>
+                        <li><a class="dropdown-item" href="#eventsSection">Exam & Result</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#">Facilities</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#infraSection">Hostel</a></li>
+                        <li><a class="dropdown-item" href="#infraSection">Transport</a></li>
+                        <li><a class="dropdown-item" href="#infraSection">Smart Class</a></li>
+                    </ul>
+                </li>
+
+                <li class="nav-item"><a class="nav-link" href="/site/admission/">Admission</a></li>
+                <li class="nav-item"><a class="nav-link" href="#gallerySection">Gallery</a></li>
+                <li class="nav-item"><a class="nav-link" href="/site/contact/">Contact</a></li>
+
+
+                <li class="nav-item ms-2">
+                    <a class="btn btn-light btn-sm fw-bold text-primary px-3"
+                       href="/students/result-check/">
+                        📄 Result Check
+                    </a>
+                </li>
+
+                <li class="nav-item dropdown ms-2">
+                    <a class="btn btn-warning btn-sm fw-bold dropdown-toggle text-dark px-3"
+                       data-bs-toggle="dropdown">
+                        🎓 Login
+                    </a>
+                
+                    <ul class="dropdown-menu dropdown-menu-end">
+                
+                        <!-- 🔥 Student Login -->
+                        <li>
+                            <a class="dropdown-item" href="/students/login/">
+                                🎓 Student Login
+                            </a>
+                        </li>
+                
+                        <!-- 🔥 ADD THIS -->
+                        <li>
+                            <a class="dropdown-item" href="/students/parent/login/">
+                                👨‍👩‍👦 Parent Login
+                            </a>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <a class="dropdown-item fw-bold text-primary" href="/students/portal-login/">
+                                🔐 Login Portal (All)
+                            </a>
+                        </li>
+                
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 🔥 NOTICE MARQUEE (TOP BAR) -->
+{% if notices %}
+<div class="notice-marquee-wrap">
+    <div class="notice-title">📢 Notice</div>
+
+    <marquee behavior="scroll" direction="left" scrollamount="5"
+        onmouseover="this.stop();" onmouseout="this.start();">
+
+        {% for notice in notices %}
+            <span class="notice-item">
+                {% if notice.is_important %}🔥{% endif %}
+                {{ notice.title }}
+                {% if notice.notice_date %} - {{ notice.notice_date }}{% endif %}
+            </span>
+        {% endfor %}
+
+    </marquee>
+</div>
+{% endif %}
+
+
+{% if sliders %}
+<div id="homeSlider" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-indicators">
+        {% for slider in sliders %}
+        <button type="button" data-bs-target="#homeSlider" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}"></button>
+        {% endfor %}
+    </div>
+
+    <div class="carousel-inner">
+        {% for slider in sliders %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+            <img src="{{ slider.image.url }}" class="d-block w-100 slider-img">
+            <div class="carousel-caption">
+                <h1>{{ slider.title }}</h1>
+                {% if slider.subtitle %}<p>{{ slider.subtitle }}</p>{% endif %}
+                <a href="{{ slider.button_link|default:'/site/admission/' }}" class="btn btn-warning btn-main mt-3">
+                    {{ slider.button_text|default:"Apply Now" }}
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <button class="carousel-control-prev" type="button" data-bs-target="#homeSlider" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#homeSlider" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+{% else %}
+<div class="hero-fallback">
+    <div class="container">
+        <h1 class="display-3 fw-bold">Welcome to AL RAHMAN MISSION</h1>
+        <p class="fs-4">Bangla + English Medium School | Nursery to Class X</p>
+        <a href="/site/admission/" class="btn btn-warning btn-main mt-3">Apply Now</a>
+    </div>
+</div>
+{% endif %}
+
+<div class="notice text-center">
+    {% if notices %}
+    <marquee>
+        {% for n in notices %}
+            {% if n.is_important %}🔴 <strong>{{ n.title }}</strong>{% else %}🟢 {{ n.title }}{% endif %}
+            &nbsp;&nbsp;&nbsp; | &nbsp;&nbsp;&nbsp;
+        {% endfor %}
+    </marquee>
+    {% else %}
+        📢 Admission Open for 2026 Session
+    {% endif %}
+</div>
+
+{% if important_notices %}
+<div class="container mt-4">
+    <div class="alert alert-danger shadow">
+        <h5>🔥 Important Notices</h5>
+        <ul class="mb-0">
+            {% for n in important_notices %}
+            <li><strong>{{ n.title }}</strong>{% if n.notice_date %} ({{ n.notice_date }}){% endif %}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+<div class="container mt-5">
+    <div class="welcome-box">
+        <div class="row align-items-center g-4">
+            <div class="col-md-7">
+                <h2 class="fw-bold text-primary">Welcome to AL RAHMAN MISSION</h2>
+                <p class="fs-5">
+                    We provide quality education from Nursery to Class X with discipline, moral values,
+                    academic care, hostel and transport facilities.
+                </p>
+                <a href="/site/about/" class="btn btn-primary rounded-pill px-4">Read More</a>
+                <a href="/site/admission/" class="btn btn-warning rounded-pill px-4">Online Admission</a>
+            </div>
+            <div class="col-md-5">
+                <div class="row g-3">
+                    <div class="col-6"><div class="stat-box"><h3>Nur-X</h3><p>Classes</p></div></div>
+                    <div class="col-6"><div class="stat-box"><h3>Hostel</h3><p>Facility</p></div></div>
+                    <div class="col-6"><div class="stat-box"><h3>Smart</h3><p>Classes</p></div></div>
+                    <div class="col-6"><div class="stat-box"><h3>ARM</h3><p>ERP System</p></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5" id="featuresSection">
+    <h2 class="section-title">Our Core Facilities</h2>
+    <p class="section-subtitle">A complete learning environment for students.</p>
+    <div class="row g-4">
+        <div class="col-md-4 text-center"><div class="feature-card"><h3>📘 Academics</h3><p>Nursery to Class X education system.</p></div></div>
+        <div class="col-md-4 text-center"><div class="feature-card"><h3>🏫 Facilities</h3><p>Hostel, Transport, Smart Classes.</p></div></div>
+        <div class="col-md-4 text-center"><div class="feature-card"><h3>🎯 Results</h3><p>Strong academic performance.</p></div></div>
+    </div>
+</div>
+
+<div class="container mt-5" id="missionSection">
+    <div class="row g-4">
+        <div class="col-md-6"><div class="premium-card"><h3>🎯 Our Mission</h3><p>To build disciplined, confident and educated students with moral values and modern knowledge.</p></div></div>
+        <div class="col-md-6"><div class="premium-card"><h3>🌟 Our Vision</h3><p>To become a trusted school for quality education, care, character building and future success.</p></div></div>
+    </div>
+</div>
+
+{% if why_choose_items %}
+<div class="container mt-5">
+    <h2 class="section-title">Why Choose AL RAHMAN MISSION</h2>
+    <p class="section-subtitle">Parents trust us for care, education and discipline.</p>
+    <div class="row g-4">
+        {% for w in why_choose_items %}
+        <div class="col-md-4 text-center">
+            <div class="premium-card">
+                <h2>{{ w.icon|default:"⭐" }}</h2>
+                <h4>{{ w.title }}</h4>
+                <p>{{ w.description|default:"-" }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if galleries %}
+<div class="container mt-5" id="gallerySection">
+    <h2 class="section-title">School Gallery</h2>
+    <p class="section-subtitle">A glimpse of our campus, classroom and activities.</p>
+    <div class="row g-4">
+        {% for g in galleries %}
+        <div class="col-md-3">
+            <img src="{{ g.image.url }}" class="gallery-img" alt="{{ g.title }}">
+            <h6 class="text-center mt-2">{{ g.title }}</h6>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if events %}
+<div class="container mt-5" id="eventsSection">
+    <h2 class="section-title">Latest Events</h2>
+    <div class="row g-4">
+        {% for e in events %}
+        <div class="col-md-4">
+            <div class="premium-card">
+                {% if e.image %}<img src="{{ e.image.url }}" class="event-img" alt="{{ e.title }}">{% endif %}
+                <h4>{{ e.title }}</h4>
+                {% if e.event_date %}<p><strong>Date:</strong> {{ e.event_date }}</p>{% endif %}
+                <p>{{ e.description|default:"-" }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if infrastructures %}
+<div class="container mt-5" id="infraSection">
+    <h2 class="section-title">Infrastructure</h2>
+    <div class="row g-4">
+        {% for i in infrastructures %}
+        <div class="col-md-4">
+            <div class="premium-card text-center">
+                {% if i.image %}<img src="{{ i.image.url }}" class="infra-img" alt="{{ i.title }}">{% endif %}
+                <h4>{{ i.title }}</h4>
+                <p>{{ i.description|default:"-" }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="container mt-5">
+    <div class="cta-section text-center">
+        <h2 class="fw-bold">Admission Open for 2026 Session</h2>
+        <p class="fs-5">Apply online now and secure your child’s future with AL RAHMAN MISSION.</p>
+        <a href="/site/admission/" class="btn btn-warning btn-main">Apply Now</a>
+        <a href="https://wa.me/919091215171" target="_blank" class="btn btn-success btn-main">WhatsApp</a>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <h4>AL RAHMAN MISSION</h4>
+                <p>Bangla + English Medium School</p>
+                <p>Nursery to Class X</p>
+            </div>
+            <div class="col-md-4">
+                <h5>Quick Links</h5>
+                <p><a class="text-white" href="/site/">Home</a></p>
+                <p><a class="text-white" href="/site/admission/">Admission</a></p>
+                <p><a class="text-white" href="/site/contact/">Contact</a></p>
+            </div>
+            <div class="col-md-4">
+                <h5>Contact</h5>
+                <p>📞 9091215171</p>
+                <p>✉️ alrahmamission@gmail.com</p>
+                <p>🌐 www.alrahmanmission.in</p>
+            </div>
+        </div>
+        <hr>
+        <div class="text-center">© 2026 AL RAHMAN MISSION. All Rights Reserved.</div>
+    </div>
+</footer>
+
+<a href="https://wa.me/919091215171" target="_blank" class="floating-whatsapp">💬 WhatsApp</a>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

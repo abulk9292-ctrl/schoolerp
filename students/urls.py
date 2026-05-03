@@ -53,4 +53,18 @@ urlpatterns = [
 
     # 🔥 DEMO DOWNLOAD
     path('download-demo/', views.download_student_demo, name='download_student_demo'),
+    # 🔥 Student Panel URLs
+    path('login/', views.student_login, name='student_login'),
+    path('dashboard/', views.student_dashboard, name='student_dashboard'),
+    path('logout/', views.student_logout, name='student_logout'),
+    # 🔥 Parent Panel
+    path('parent/login/', views.parent_login, name='parent_login'),
+    path('parent/dashboard/', views.parent_dashboard, name='parent_dashboard'),
+    path('parent/logout/', views.parent_logout, name='parent_logout'),
+    path('forgot/', views.student_forgot_password, name='student_forgot'),
+    path('verify/', views.student_verify_otp, name='student_verify_otp'),
+    path('reset/', views.student_reset_password, name='student_reset_password'),
+    path('portal-login/', views.combined_login, name='combined_login'),
+    path('result-check/', views.public_result_check, name='public_result_check'),
+    path('student/change-password/', views.student_change_password, name='student_change_password'),
 ]

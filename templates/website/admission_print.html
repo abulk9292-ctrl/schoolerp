@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admission Print</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #eee; }
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 10px auto;
+            background: white;
+            padding: 18mm;
+            border: 2px solid #111;
+        }
+        .header { text-align: center; border-bottom: 2px solid #111; padding-bottom: 10px; }
+        .header h1 { margin: 0; font-size: 30px; }
+        .row { display: flex; margin-bottom: 8px; }
+        .label { width: 180px; font-weight: bold; }
+        .photo {
+            width: 120px; height: 140px; border: 1px solid #111;
+            object-fit: cover; float: right; margin-left: 15px;
+        }
+        .section-title {
+            margin-top: 18px; background: #eee; padding: 6px;
+            font-weight: bold; border: 1px solid #111;
+        }
+        .print-btn { text-align: center; margin: 15px; }
+        @media print {
+            .print-btn { display: none; }
+            body { background: white; }
+            .page { margin: 0; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="print-btn">
+    <button onclick="window.print()">🖨 Print / Save PDF</button>
+</div>
+
+<div class="page">
+    <div class="header">
+        <h1>AL RAHMAN MISSION</h1>
+        <p>Bangla + English Medium</p>
+        <h3>Online Admission Application Form</h3>
+    </div>
+
+    {% if admission.student_photo %}
+        <img src="{{ admission.student_photo.url }}" class="photo">
+    {% endif %}
+
+    <div class="section-title">Application Details</div>
+    <div class="row"><div class="label">Admission No:</div><div>{{ admission.admission_no }}</div></div>
+    <div class="row"><div class="label">Status:</div><div>{{ admission.status }}</div></div>
+    <div class="row"><div class="label">Student ID:</div><div>{% if admission.student_id %}{{ admission.student_id }}{% else %}Not Generated Yet{% endif %}</div></div>
+    <div class="row"><div class="label">Date:</div><div>{{ admission.created_at|date:"d M Y h:i A" }}</div></div>
+
+    <div class="section-title">Student Information</div>
+    <div class="row"><div class="label">Student Name:</div><div>{{ admission.student_name }}</div></div>
+    <div class="row"><div class="label">Class:</div><div>{{ admission.student_class }}</div></div>
+    <div class="row"><div class="label">Date of Birth:</div><div>{{ admission.date_of_birth|default:"-" }}</div></div>
+    <div class="row"><div class="label">Gender:</div><div>{{ admission.gender|default:"-" }}</div></div>
+    <div class="row"><div class="label">Aadhaar No:</div><div>{{ admission.aadhaar_no|default:"-" }}</div></div>
+
+    <div class="section-title">Parent / Guardian</div>
+    <div class="row"><div class="label">Father Name:</div><div>{{ admission.father_name }}</div></div>
+    <div class="row"><div class="label">Mother Name:</div><div>{{ admission.mother_name|default:"-" }}</div></div>
+    <div class="row"><div class="label">Mobile:</div><div>{{ admission.mobile }}</div></div>
+    <div class="row"><div class="label">Guardian Mobile:</div><div>{{ admission.guardian_mobile|default:"-" }}</div></div>
+
+    <div class="section-title">Other Details</div>
+    <div class="row"><div class="label">Address:</div><div>{{ admission.address }}</div></div>
+    <div class="row"><div class="label">Previous School:</div><div>{{ admission.previous_school|default:"-" }}</div></div>
+    <div class="row"><div class="label">Transport:</div><div>{% if admission.transport_required %}Yes{% else %}No{% endif %}</div></div>
+    <div class="row"><div class="label">Hostel:</div><div>{% if admission.hostel_required %}Yes{% else %}No{% endif %}</div></div>
+
+    <br><br>
+    <div style="display:flex; justify-content:space-between;">
+        <div>Guardian Signature</div>
+        <div>Principal Signature</div>
+    </div>
+</div>
+
+</body>
+</html>

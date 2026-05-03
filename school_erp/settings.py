@@ -8,9 +8,11 @@ SECRET_KEY = 'django-insecure-test-key'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "alrahmanmission.in",
-    "www.alrahmanmission.in",
-    "alrahman-erp.onrender.com"
+    '127.0.0.1',
+    'localhost',
+    'alrahman-erp.onrender.com',
+    'alrahmanmission.in',
+    'www.alrahmanmission.in',
 ]
 
 INSTALLED_APPS = [
@@ -41,6 +43,7 @@ INSTALLED_APPS = [
     'complaints',
     'expenses',
     'backup',
+    'website',
 ]
 
 MIDDLEWARE = [

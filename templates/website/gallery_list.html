@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-primary">📸 Gallery</h2>
+        <p class="text-muted">Our Campus, Events & Activities</p>
+    </div>
+
+    <div class="row">
+
+        {% for g in galleries %}
+        <div class="col-md-4 mb-4">
+
+            <div class="card shadow-sm h-100">
+
+                <!-- IMAGE -->
+                {% if g.image %}
+                <img src="{{ g.image.url }}" class="card-img-top" style="height:220px; object-fit:cover;">
+                {% endif %}
+
+                <!-- VIDEO -->
+                {% if g.video %}
+                <video controls style="width:100%; height:220px; object-fit:cover;">
+                    <source src="{{ g.video.url }}">
+                </video>
+                {% endif %}
+
+                <div class="card-body">
+
+                    <h5 class="fw-bold">{{ g.title }}</h5>
+
+                    <p class="text-muted small">
+                        Category: {{ g.category }}
+                    </p>
+
+                    {% if g.description %}
+                    <p class="small">{{ g.description }}</p>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </div>
+        {% empty %}
+        <div class="text-center">
+            <p>No gallery items available.</p>
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -3,8 +3,9 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum, Q
 from django.core.paginator import Paginator
+from django.contrib.auth.hashers import check_password, make_password
 
-from .models import Student
+from .models import Student, StudentOTP
 from .forms import StudentForm
 from academics.models import Class
 
@@ -836,4 +837,456 @@ def student_import_confirm(request):
         'success_count': success_count,
         'failed_count': failed_count,
         'form': StudentImportForm()
+    })
+
+# ==============================
+# 🔥 STUDENT LOGIN PANEL (NEW)
+# ==============================
+
+from django.contrib.auth import logout
+
+
+def student_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        try:
+            student = Student.objects.get(
+                login_username=username,
+                login_enabled=True
+            )
+
+            # ✅ SECURE PASSWORD CHECK
+            if check_password(password, student.login_password):
+
+                # 🔥 OLD PASSWORD AUTO-CONVERT TO HASH
+                if not student.login_password.startswith('pbkdf2_'):
+                    student.login_password = make_password(password)
+                    student.save(update_fields=['login_password'])
+
+                request.session['student_id'] = student.id
+
+                messages.success(request, f"Welcome {student.student_name}")
+                return redirect('student_dashboard')
+            else:
+                messages.error(request, "Invalid login credentials")
+
+        except Student.DoesNotExist:
+            messages.error(request, "Invalid login credentials")
+
+    return render(request, 'students/student_login.html')
+
+
+def student_logout(request):
+    request.session.flush()
+    return redirect('student_login')
+
+
+def student_dashboard(request):
+    student_id = request.session.get('student_id')
+
+    if not student_id:
+        return redirect('student_login')
+
+    student = get_object_or_404(Student, pk=student_id)
+
+    attendance_total = 0
+    attendance_present = 0
+    attendance_absent = 0
+    attendance_percentage = 0
+    recent_attendance = []
+
+    try:
+        from attendance.models import StudentAttendance
+
+        attendance_qs = StudentAttendance.objects.filter(student=student).order_by('-date')
+        attendance_total = attendance_qs.count()
+        attendance_present = attendance_qs.filter(status='Present').count()
+        attendance_absent = attendance_qs.filter(status='Absent').count()
+        recent_attendance = attendance_qs[:10]
+
+        if attendance_total > 0:
+            attendance_percentage = round((attendance_present / attendance_total) * 100, 2)
+    except Exception:
+        pass
+
+    total_paid = 0
+    total_due = 0
+    fee_records = []
+
+    try:
+        from fees.models import Fee
+        fee_records = Fee.objects.filter(student=student).order_by('-id')[:10]
+        total_paid = Fee.objects.filter(student=student).aggregate(total=Sum('amount_paid'))['total'] or 0
+    except Exception:
+        pass
+
+    exam_records = []
+
+    try:
+        from exams.models import Result
+        exam_records = Result.objects.filter(student=student).order_by('-id')[:10]
+    except Exception:
+        try:
+            from exams.models import ExamResult
+            exam_records = ExamResult.objects.filter(student=student).order_by('-id')[:10]
+        except Exception:
+            pass
+
+    return render(request, 'students/student_dashboard.html', {
+        'student': student,
+
+        'attendance_total': attendance_total,
+        'attendance_present': attendance_present,
+        'attendance_absent': attendance_absent,
+        'attendance_percentage': attendance_percentage,
+        'recent_attendance': recent_attendance,
+
+        'total_paid': total_paid,
+        'total_due': total_due,
+        'fee_records': fee_records,
+
+        'exam_records': exam_records,
+    })
+
+# =========================
+# 🔥 PARENT LOGIN SYSTEM
+# =========================
+
+from .models import Parent
+
+def parent_login(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        try:
+            parent = Parent.objects.get(
+                username=username,
+                is_active=True
+            )
+
+            if check_password(password, parent.password):
+
+                # 🔥 AUTO HASH UPGRADE
+                if not parent.password.startswith('pbkdf2_'):
+                    parent.password = make_password(password)
+                    parent.save(update_fields=['password'])
+
+                request.session['parent_id'] = parent.id
+                return redirect('parent_dashboard')
+            else:
+                messages.error(request, "Invalid login")
+
+        except Parent.DoesNotExist:
+            messages.error(request, "Invalid login")
+
+    return render(request, 'students/parent_login.html')
+
+
+def parent_dashboard(request):
+    parent_id = request.session.get('parent_id')
+
+    if not parent_id:
+        return redirect('parent_login')
+
+    parent = get_object_or_404(Parent, id=parent_id)
+    student = parent.student
+
+    attendance_total = 0
+    attendance_present = 0
+    attendance_absent = 0
+    attendance_percentage = 0
+    recent_attendance = []
+
+    try:
+        from attendance.models import StudentAttendance
+
+        attendance_qs = StudentAttendance.objects.filter(student=student).order_by('-date')
+        attendance_total = attendance_qs.count()
+        attendance_present = attendance_qs.filter(status='Present').count()
+        attendance_absent = attendance_qs.filter(status='Absent').count()
+        recent_attendance = attendance_qs[:10]
+
+        if attendance_total > 0:
+            attendance_percentage = round((attendance_present / attendance_total) * 100, 2)
+    except Exception:
+        pass
+
+    total_paid = 0
+    total_due = 0
+    fee_records = []
+
+    try:
+        from fees.models import Fee
+
+        fee_records = Fee.objects.filter(student=student).order_by('-id')[:10]
+        total_paid = Fee.objects.filter(student=student).aggregate(total=Sum('amount_paid'))['total'] or 0
+    except Exception:
+        pass
+
+    exam_records = []
+
+    try:
+        from exams.models import Result
+        exam_records = Result.objects.filter(student=student).order_by('-id')[:10]
+    except Exception:
+        try:
+            from exams.models import ExamResult
+            exam_records = ExamResult.objects.filter(student=student).order_by('-id')[:10]
+        except Exception:
+            pass
+
+    return render(request, 'students/parent_dashboard.html', {
+        'parent': parent,
+        'student': student,
+
+        'attendance_total': attendance_total,
+        'attendance_present': attendance_present,
+        'attendance_absent': attendance_absent,
+        'attendance_percentage': attendance_percentage,
+        'recent_attendance': recent_attendance,
+
+        'total_paid': total_paid,
+        'total_due': total_due,
+        'fee_records': fee_records,
+
+        'exam_records': exam_records,
+    })
+
+def parent_logout(request):
+    request.session.flush()
+    return redirect('parent_login')
+
+import random
+from django.utils import timezone
+from datetime import timedelta
+from .models import StudentOTP
+
+
+def student_forgot_password(request):
+    if request.method == 'POST':
+        student_id = request.POST.get('student_id')
+
+        try:
+            student = Student.objects.get(student_id=student_id)
+
+            otp = str(random.randint(100000, 999999))
+
+            StudentOTP.objects.create(
+                student=student,
+                otp=otp
+            )
+
+            # 🔥 Demo OTP (console)
+            print("OTP:", otp)
+
+            request.session['reset_student'] = student.id
+
+            messages.success(request, f"OTP sent (demo: check terminal)")
+            return redirect('student_verify_otp')
+
+        except Student.DoesNotExist:
+            messages.error(request, "Student not found")
+
+    return render(request, 'students/forgot_password.html')
+
+
+def student_verify_otp(request):
+    student_id = request.session.get('reset_student')
+
+    if not student_id:
+        return redirect('student_login')
+
+    if request.method == 'POST':
+        otp_input = request.POST.get('otp')
+
+        try:
+            otp_obj = StudentOTP.objects.filter(student_id=student_id).last()
+
+            if otp_obj and otp_obj.otp == otp_input:
+                return redirect('student_reset_password')
+            else:
+                messages.error(request, "Invalid OTP")
+
+        except:
+            messages.error(request, "Error")
+
+    return render(request, 'students/verify_otp.html')
+
+def student_reset_password(request):
+    student_id = request.session.get('reset_student')
+
+    if not student_id:
+        return redirect('student_login')
+
+    student = get_object_or_404(Student, id=student_id)
+
+    if request.method == 'POST':
+        new_password = request.POST.get('password')
+
+        if not new_password:
+            messages.error(request, "Please enter new password.")
+            return redirect('student_reset_password')
+
+        # ✅ HASH PASSWORD
+        student.login_password = make_password(new_password)
+        student.save(update_fields=['login_password'])
+
+        request.session.pop('reset_student', None)
+
+        messages.success(request, "Password updated successfully. Please login.")
+        return redirect('student_login')
+
+    return render(request, 'students/reset_password.html')
+
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.hashers import check_password, make_password
+from .models import Parent
+
+
+def combined_login(request):
+    if request.method == 'POST':
+        login_type = request.POST.get('login_type')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # 🎓 STUDENT LOGIN
+        if login_type == 'student':
+            try:
+                student = Student.objects.get(login_username=username, login_enabled=True)
+
+                if check_password(password, student.login_password):
+
+                    if not student.login_password.startswith('pbkdf2_'):
+                        student.login_password = make_password(password)
+                        student.save(update_fields=['login_password'])
+
+                    request.session['student_id'] = student.id
+                    messages.success(request, f"Welcome {student.student_name}")
+                    return redirect('student_dashboard')
+
+                messages.error(request, "Invalid student login")
+            except Student.DoesNotExist:
+                messages.error(request, "Invalid student login")
+
+        # 👨‍👩‍👦 PARENT LOGIN
+        elif login_type == 'parent':
+            try:
+                parent = Parent.objects.get(username=username, is_active=True)
+
+                if check_password(password, parent.password) or password == parent.password:
+                    if not parent.password.startswith('pbkdf2_'):
+                        parent.password = make_password(password)
+                        parent.save(update_fields=['password'])
+
+                    request.session['parent_id'] = parent.id
+                    messages.success(request, "Welcome Parent")
+                    return redirect('parent_dashboard')
+
+                messages.error(request, "Invalid parent login")
+            except Parent.DoesNotExist:
+                messages.error(request, "Invalid parent login")
+
+        # 👨‍🏫 STAFF LOGIN
+        elif login_type == 'staff':
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None and user.is_staff and not user.is_superuser:
+                login(request, user)
+                messages.success(request, "Welcome Staff")
+                return redirect('dashboard')
+
+            messages.error(request, "Invalid staff login")
+
+        # 🔐 ADMIN LOGIN
+        elif login_type == 'admin':
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None and user.is_superuser:
+                login(request, user)
+                messages.success(request, "Welcome Admin")
+                return redirect('/admin/')
+
+            messages.error(request, "Invalid admin login")
+
+        else:
+            messages.error(request, "Please select login type")
+
+    return render(request, 'students/combined_login.html')
+
+# ==============================
+# 🔥 PUBLIC RESULT CHECK
+# ==============================
+
+def public_result_check(request):
+    student = None
+    exam_records = []
+    searched = False
+
+    if request.method == 'POST':
+        searched = True
+        student_id = request.POST.get('student_id')
+        dob = request.POST.get('date_of_birth')
+
+        try:
+            student = Student.objects.get(
+                student_id=student_id,
+                date_of_birth=dob,
+                is_active=True
+            )
+
+            try:
+                from exams.models import Result
+                exam_records = Result.objects.filter(student=student).order_by('-id')
+            except Exception:
+                try:
+                    from exams.models import ExamResult
+                    exam_records = ExamResult.objects.filter(student=student).order_by('-id')
+                except Exception:
+                    exam_records = []
+
+        except Student.DoesNotExist:
+            messages.error(request, "Invalid Student ID or Date of Birth.")
+
+    return render(request, 'students/public_result_check.html', {
+        'student': student,
+        'exam_records': exam_records,
+        'searched': searched,
+    })
+
+def student_change_password(request):
+    student_id = request.session.get('student_id')
+
+    if not student_id:
+        return redirect('student_login')
+
+    student = get_object_or_404(Student, id=student_id)
+
+    if request.method == 'POST':
+        old_password = request.POST.get('old_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        if not check_password(old_password, student.login_password):
+            messages.error(request, "Old password is incorrect.")
+            return redirect('student_change_password')
+
+        if new_password != confirm_password:
+            messages.error(request, "New password and confirm password do not match.")
+            return redirect('student_change_password')
+
+        if len(new_password) < 6:
+            messages.error(request, "Password must be at least 6 characters.")
+            return redirect('student_change_password')
+
+        student.login_password = make_password(new_password)
+        student.save(update_fields=['login_password'])
+
+        messages.success(request, "Password changed successfully.")
+        return redirect('student_dashboard')
+
+    return render(request, 'students/student_change_password.html', {
+        'student': student
     })
