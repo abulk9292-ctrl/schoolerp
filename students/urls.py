@@ -67,4 +67,5 @@ urlpatterns = [
     path('portal-login/', views.combined_login, name='combined_login'),
     path('result-check/', views.public_result_check, name='public_result_check'),
     path('student/change-password/', views.student_change_password, name='student_change_password'),
+    path('bulk-password-print/', views.bulk_student_password_print, name='bulk_student_password_print'),
 ]

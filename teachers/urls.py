@@ -11,4 +11,5 @@ urlpatterns = [
     path('<int:pk>/', views.employee_detail, name='employee_detail'),
     path('discontinue/<int:pk>/', views.employee_discontinue, name='employee_discontinue'),
     path('rejoin/<int:pk>/', views.employee_rejoin, name='employee_rejoin'),
+    path('teacher-password-print/', views.teacher_password_print, name='teacher_password_print'),
 ]

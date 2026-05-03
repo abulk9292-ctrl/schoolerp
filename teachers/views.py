@@ -129,3 +129,27 @@ def employee_rejoin(request, pk):
 
     messages.success(request, f'{employee.name} has re-joined.')
     return redirect('employee_detail', pk=employee.pk)
+
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Employee
+
+
+@login_required
+def teacher_password_print(request):
+    selected_designation = request.GET.get('designation')
+
+    employees = Employee.objects.filter(is_active=True).order_by('designation', 'id')
+
+    if selected_designation:
+        employees = employees.filter(designation=selected_designation)
+
+    designations = Employee.objects.filter(
+        is_active=True
+    ).values_list('designation', flat=True).distinct().order_by('designation')
+
+    return render(request, 'teachers/teacher_password_print.html', {
+        'employees': employees,
+        'designations': designations,
+        'selected_designation': selected_designation,
+    })

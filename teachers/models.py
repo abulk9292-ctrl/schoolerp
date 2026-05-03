@@ -20,6 +20,11 @@ class Employee(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def get_default_raw_password(self):
+        if self.phone:
+            return self.phone
+        return self.employee_id
+
     def save(self, *args, **kwargs):
         is_new = self.pk is None
         super().save(*args, **kwargs)

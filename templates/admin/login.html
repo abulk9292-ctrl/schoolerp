@@ -1,151 +1,315 @@
 {% extends "admin/base_site.html" %}
-{% load i18n static %}
+{% load static %}
+
+{% block content_title %}{% endblock %}
 
 {% block extrastyle %}
 {{ block.super }}
+
 <style>
-    body.login {
-        background: linear-gradient(135deg, #064e3b, #16a34a);
-        font-family: Arial, sans-serif;
+html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: 100% !important;
+}
+
+body,
+body.login {
+    min-height: 100vh !important;
+    overflow: hidden !important;
+    background:
+        radial-gradient(circle at 15% 22%, rgba(255,255,255,.22) 0 100px, transparent 102px),
+        radial-gradient(circle at 80% 40%, rgba(255,255,255,.18) 0 70px, transparent 72px),
+        radial-gradient(circle at 86% 82%, rgba(255,255,255,.22) 0 75px, transparent 77px),
+        linear-gradient(135deg,#052b83 0%,#0b7cff 48%,#10a982 100%) !important;
+    font-family: Arial, sans-serif !important;
+}
+
+/* 🦋 Flying butterflies */
+body::before {
+    content: "🦋   🦋   🦋" !important;
+    position: fixed !important;
+    top: 80px !important;
+    left: -220px !important;
+    font-size: 42px !important;
+    letter-spacing: 55px !important;
+    z-index: 1 !important;
+    animation: butterflyFly 12s linear infinite !important;
+    filter: drop-shadow(0 10px 12px rgba(0,0,0,.25)) !important;
+}
+
+body::after {
+    content: "🦋      🦋" !important;
+    position: fixed !important;
+    bottom: 120px !important;
+    right: -180px !important;
+    font-size: 34px !important;
+    letter-spacing: 70px !important;
+    z-index: 1 !important;
+    animation: butterflyFly2 15s linear infinite !important;
+    filter: drop-shadow(0 10px 12px rgba(0,0,0,.25)) !important;
+}
+
+@keyframes butterflyFly {
+    0% { transform: translateX(0) translateY(0) rotate(0deg); opacity: .3; }
+    30% { transform: translateX(550px) translateY(80px) rotate(12deg); opacity: 1; }
+    60% { transform: translateX(1050px) translateY(-35px) rotate(-10deg); opacity: 1; }
+    100% { transform: translateX(1850px) translateY(70px) rotate(8deg); opacity: .3; }
+}
+
+@keyframes butterflyFly2 {
+    0% { transform: translateX(0) translateY(0) rotate(0deg); opacity: .25; }
+    35% { transform: translateX(-550px) translateY(-60px) rotate(-14deg); opacity: 1; }
+    70% { transform: translateX(-1050px) translateY(40px) rotate(12deg); opacity: 1; }
+    100% { transform: translateX(-1800px) translateY(-70px) rotate(-8deg); opacity: .25; }
+}
+
+#header,
+.breadcrumbs,
+#nav-sidebar,
+.toggle-nav-sidebar,
+#content-related,
+h1 {
+    display: none !important;
+}
+
+#container {
+    width: 100% !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+#content {
+    width: 100% !important;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#content-main {
+    width: 455px !important;
+    max-width: 455px !important;
+    margin: auto !important;
+}
+
+/* 🔥 Premium 3D Glass Card */
+.login-card {
+    position: relative !important;
+    z-index: 5 !important;
+    padding: 42px 42px 36px !important;
+    border-radius: 34px !important;
+    background: linear-gradient(145deg, rgba(255,255,255,.28), rgba(255,255,255,.12)) !important;
+    border: 1px solid rgba(255,255,255,.50) !important;
+    backdrop-filter: blur(20px) saturate(170%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(170%) !important;
+    box-shadow:
+        0 35px 90px rgba(0,0,0,.42),
+        inset 0 2px 0 rgba(255,255,255,.55),
+        inset 0 -25px 60px rgba(255,255,255,.08) !important;
+    text-align: center !important;
+    color: white !important;
+    transform: perspective(900px) rotateX(3deg) !important;
+    overflow: hidden !important;
+}
+
+.login-card::before {
+    content: "" !important;
+    position: absolute !important;
+    top: -70px !important;
+    left: -90px !important;
+    width: 260px !important;
+    height: 260px !important;
+    background: radial-gradient(circle, rgba(255,255,255,.35), transparent 65%) !important;
+}
+
+.logo-box {
+    width: 95px !important;
+    height: 95px !important;
+    margin: auto !important;
+    border-radius: 50% !important;
+    background: white !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 16px 35px rgba(0,0,0,.32) !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+.logo-img {
+    width: 72px !important;
+    height: 72px !important;
+    object-fit: contain !important;
+}
+
+.school-title {
+    position: relative !important;
+    z-index: 2 !important;
+    font-size: 31px !important;
+    font-weight: 900 !important;
+    margin: 18px 0 8px !important;
+    color: white !important;
+    text-shadow: 0 6px 16px rgba(0,0,0,.32) !important;
+}
+
+.school-subtitle {
+    position: relative !important;
+    z-index: 2 !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    margin-bottom: 28px !important;
+    color: #f1f7ff !important;
+}
+
+.form-row {
+    position: relative !important;
+    z-index: 2 !important;
+    text-align: left !important;
+    margin-bottom: 18px !important;
+}
+
+.form-row label {
+    color: white !important;
+    font-weight: 900 !important;
+    margin-bottom: 8px !important;
+    display: block !important;
+}
+
+.form-row input {
+    width: 100% !important;
+    height: 56px !important;
+    border-radius: 16px !important;
+    border: 1px solid rgba(255,255,255,.45) !important;
+    padding: 13px 15px !important;
+    background: rgba(255,255,255,.20) !important;
+    color: white !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    outline: none !important;
+    box-shadow: inset 0 3px 8px rgba(0,0,0,.18) !important;
+}
+
+.form-row input:focus {
+    border: 2px solid #ffd43b !important;
+    box-shadow: 0 0 0 4px rgba(255,212,59,.28) !important;
+}
+
+.submit-row {
+    position: relative !important;
+    z-index: 2 !important;
+    padding: 0 !important;
+    margin-top: 22px !important;
+    background: transparent !important;
+    border: none !important;
+}
+
+.submit-row input {
+    width: 100% !important;
+    height: 58px !important;
+    border-radius: 18px !important;
+    border: none !important;
+    background: linear-gradient(135deg,#ffe36e,#ffb300) !important;
+    color: #111 !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    cursor: pointer !important;
+    box-shadow: 0 16px 35px rgba(0,0,0,.32) !important;
+}
+
+.login-links {
+    position: relative !important;
+    z-index: 2 !important;
+    margin-top: 18px !important;
+}
+
+.login-links a {
+    text-decoration: none !important;
+    padding: 8px 14px !important;
+    border-radius: 8px !important;
+    font-weight: 900 !important;
+    font-size: 14px !important;
+}
+
+.portal-btn {
+    background: white !important;
+    color: #111 !important;
+}
+
+.back-btn {
+    border: 1px solid white !important;
+    color: white !important;
+    background: rgba(255,255,255,.12) !important;
+}
+
+.errornote {
+    background: #fecaca !important;
+    color: #991b1b !important;
+    border-radius: 12px !important;
+    padding: 10px !important;
+    font-weight: 800 !important;
+}
+
+@media(max-width: 520px) {
+    #content-main {
+        width: 92vw !important;
     }
 
-    #container {
-        background: transparent;
-        border: none;
-        width: 430px;
-        margin-top: 90px;
+    .login-card {
+        padding: 32px 24px !important;
     }
 
-    #header {
-        display: none;
+    .school-title {
+        font-size: 25px !important;
     }
-
-    .login #content {
-        background: #ffffff;
-        border-radius: 24px;
-        padding: 35px;
-        box-shadow: 0 20px 45px rgba(0,0,0,0.25);
-    }
-
-    .login-title {
-        text-align: center;
-        margin-bottom: 25px;
-    }
-
-    .login-title h1 {
-        font-size: 28px;
-        font-weight: 800;
-        color: #065f46;
-        margin-bottom: 6px;
-    }
-
-    .login-title p {
-        margin: 0;
-        color: #555;
-        font-size: 14px;
-        font-weight: 600;
-    }
-
-    .form-row {
-        padding: 0 !important;
-        margin-bottom: 18px;
-    }
-
-    .form-row label {
-        color: #111;
-        font-weight: 700;
-        margin-bottom: 6px;
-        display: block;
-    }
-
-    .form-row input {
-        width: 100%;
-        padding: 13px 14px;
-        border-radius: 12px;
-        border: 1px solid #d1d5db;
-        font-size: 15px;
-        box-sizing: border-box;
-    }
-
-    .submit-row {
-        padding: 0 !important;
-        margin-top: 18px;
-        text-align: center;
-        background: transparent !important;
-        border: none !important;
-    }
-
-    .submit-row input {
-        width: 100%;
-        padding: 13px;
-        border-radius: 14px;
-        background: #16a34a;
-        color: white;
-        border: none;
-        font-weight: 800;
-        font-size: 16px;
-        cursor: pointer;
-    }
-
-    .submit-row input:hover {
-        background: #15803d;
-    }
-
-    .back-site {
-        display: block;
-        text-align: center;
-        margin-top: 18px;
-        text-decoration: none;
-        color: #065f46;
-        font-weight: 700;
-    }
-
-    .errornote {
-        border-radius: 12px;
-        padding: 12px;
-        background: #fee2e2;
-        color: #991b1b;
-        border: none;
-    }
+}
 </style>
 {% endblock %}
 
 {% block content %}
 
-<div class="login-title">
-    <h1>AL RAHMAN MISSION</h1>
-    <p>ERP Admin Login</p>
+<div class="login-card">
+
+    <div class="logo-box">
+        <img src="{% static 'images/logo.png' %}" class="logo-img">
+    </div>
+
+    <h2 class="school-title">AL RAHMAN MISSION</h2>
+    <p class="school-subtitle">ERP Admin Login</p>
+
+    {% if form.errors %}
+        <p class="errornote">Invalid username or password</p>
+    {% endif %}
+
+    <form method="post" action="{{ app_path }}">
+        {% csrf_token %}
+
+        <div class="form-row">
+            <label>Username</label>
+            {{ form.username }}
+        </div>
+
+        <div class="form-row">
+            <label>Password</label>
+            {{ form.password }}
+            <input type="hidden" name="next" value="{{ next }}">
+        </div>
+
+        <div class="submit-row">
+            <input type="submit" value="🔐 Login Now">
+        </div>
+    </form>
+
+    <div class="login-links">
+        <a href="{% url 'combined_login' %}" class="portal-btn">Login Portal</a>
+        <a href="/" class="back-btn">Back to Website</a>
+    </div>
+
 </div>
-
-{% if form.errors and not form.non_field_errors %}
-<p class="errornote">Please enter the correct username and password.</p>
-{% endif %}
-
-{% if form.non_field_errors %}
-{% for error in form.non_field_errors %}
-<p class="errornote">{{ error }}</p>
-{% endfor %}
-{% endif %}
-
-<form action="{{ app_path }}" method="post" id="login-form">
-    {% csrf_token %}
-
-    <div class="form-row">
-        {{ form.username.label_tag }}
-        {{ form.username }}
-    </div>
-
-    <div class="form-row">
-        {{ form.password.label_tag }}
-        {{ form.password }}
-        <input type="hidden" name="next" value="{{ next }}">
-    </div>
-
-    <div class="submit-row">
-        <input type="submit" value="Login to ERP">
-    </div>
-</form>
-
-<a href="/" class="back-site">← Back to Website</a>
 
 {% endblock %}

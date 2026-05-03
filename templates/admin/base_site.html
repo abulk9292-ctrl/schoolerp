@@ -1,0 +1,200 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}AL RAHMAN MISSION ERP Admin{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+
+<style>
+:root {
+    --arm-blue: #0b7cff;
+    --arm-green: #10a982;
+    --arm-dark: #07111f;
+    --arm-card: #111827;
+    --arm-gold: #ffd54a;
+}
+
+html, body {
+    background:
+        radial-gradient(circle at 10% 10%, rgba(11,124,255,.25), transparent 28%),
+        radial-gradient(circle at 90% 30%, rgba(16,169,130,.22), transparent 25%),
+        linear-gradient(135deg, #050814, #07111f) !important;
+    color: #fff !important;
+    font-family: Arial, sans-serif !important;
+}
+
+/* HEADER */
+#header {
+    height: 72px !important;
+    background: linear-gradient(135deg, var(--arm-blue), var(--arm-green)) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,.35) !important;
+}
+
+#branding h1 {
+    margin: 0 !important;
+}
+
+#site-name a {
+    color: var(--arm-gold) !important;
+    font-size: 25px !important;
+    font-weight: 900 !important;
+    text-decoration: none !important;
+    text-shadow: 0 3px 8px rgba(0,0,0,.35) !important;
+}
+
+#user-tools,
+#user-tools a {
+    color: white !important;
+    font-weight: 700 !important;
+}
+
+/* CONTENT */
+#content {
+    padding: 30px 40px !important;
+}
+
+#content h1 {
+    color: white !important;
+    font-size: 26px !important;
+    font-weight: 900 !important;
+    margin-bottom: 25px !important;
+}
+
+/* MODULE CARD */
+.module {
+    background: rgba(255,255,255,.06) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    margin-bottom: 22px !important;
+    box-shadow: 0 18px 45px rgba(0,0,0,.35) !important;
+    backdrop-filter: blur(12px) !important;
+}
+
+.module h2,
+.module caption {
+    background: linear-gradient(135deg, var(--arm-blue), var(--arm-green)) !important;
+    color: white !important;
+    font-size: 15px !important;
+    font-weight: 900 !important;
+    padding: 13px 16px !important;
+    letter-spacing: .5px !important;
+}
+
+.module table {
+    width: 100% !important;
+}
+
+.module table th,
+.module table td {
+    background: transparent !important;
+    border-bottom: 1px solid rgba(255,255,255,.08) !important;
+    padding: 12px 14px !important;
+}
+
+.module table tr:hover {
+    background: rgba(255,255,255,.08) !important;
+}
+
+.module a {
+    color: #7dd3fc !important;
+    font-weight: 800 !important;
+    text-decoration: none !important;
+}
+
+.module a:hover {
+    color: white !important;
+}
+
+/* ADD / CHANGE */
+.addlink {
+    color: #22c55e !important;
+    font-weight: 900 !important;
+}
+
+.changelink {
+    color: #facc15 !important;
+    font-weight: 900 !important;
+}
+
+/* RECENT ACTIONS */
+#content-related {
+    background: rgba(255,255,255,.07) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    border-radius: 20px !important;
+    padding: 18px !important;
+    box-shadow: 0 18px 45px rgba(0,0,0,.35) !important;
+}
+
+#content-related h2,
+#content-related h3 {
+    color: white !important;
+    font-weight: 900 !important;
+}
+
+#recent-actions-module {
+    background: transparent !important;
+}
+
+.actionlist li {
+    background: rgba(255,255,255,.06) !important;
+    margin-bottom: 10px !important;
+    padding: 10px !important;
+    border-radius: 12px !important;
+}
+
+/* BREADCRUMBS */
+.breadcrumbs {
+    background: rgba(255,255,255,.08) !important;
+    color: white !important;
+    padding: 12px 40px !important;
+}
+
+.breadcrumbs a {
+    color: #7dd3fc !important;
+}
+
+/* FORMS */
+input, select, textarea {
+    background: #111827 !important;
+    color: white !important;
+    border: 1px solid rgba(255,255,255,.18) !important;
+    border-radius: 8px !important;
+}
+
+.button,
+input[type=submit],
+.submit-row input {
+    background: linear-gradient(135deg, var(--arm-blue), var(--arm-green)) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-weight: 900 !important;
+    padding: 10px 16px !important;
+}
+
+/* MOBILE */
+@media(max-width: 900px) {
+    #content {
+        padding: 20px !important;
+    }
+
+    #content-main,
+    #content-related {
+        width: 100% !important;
+        float: none !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        🚀 AL RAHMAN MISSION ERP
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

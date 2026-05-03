@@ -9,72 +9,179 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        body {
-            background-color: #f5f7fb;
-            margin: 0;
-            padding: 0;
+        :root {
+            --green: #0c9b57;
+            --deep: #052e2b;
+            --blue: #0b7cff;
+            --gold: #ffd54a;
+            --dark: #07111f;
         }
 
-        .sidebar {
-            width: 260px;
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at 85% 15%, rgba(12,155,87,.18), transparent 30%),
+                radial-gradient(circle at 25% 80%, rgba(11,124,255,.12), transparent 32%),
+                #eef5f0;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .app-layout {
+            display: flex;
             min-height: 100vh;
-            background: #ffffff;
-            border-right: 1px solid #e5e7eb;
+        }
+
+        /* 🔥 PREMIUM SIDEBAR */
+        .sidebar {
+            width: 285px;
+            min-height: 100vh;
+            background:
+                linear-gradient(180deg, rgba(5,46,43,.98), rgba(7,89,133,.96), rgba(17,24,39,.98));
+            border-right: 1px solid rgba(255,255,255,.12);
+            overflow-y: auto;
+            box-shadow: 12px 0 35px rgba(0,0,0,.25);
+            padding: 18px 14px;
+            position: sticky;
+            top: 0;
+        }
+
+        .brand-box {
+            padding: 16px 12px 18px;
+            margin-bottom: 14px;
+            border-radius: 20px;
+            background: rgba(255,255,255,.10);
+            border: 1px solid rgba(255,255,255,.14);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+            text-align: center;
+        }
+
+        .brand-title {
+            color: #fff;
+            font-size: 23px;
+            font-weight: 900;
+            letter-spacing: .7px;
+            margin: 0;
+        }
+
+        .brand-sub {
+            color: #d1fae5;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 5px;
         }
 
         .sidebar .nav-link {
-            color: #444;
-            padding: 10px 16px;
-            border-left: 3px solid transparent;
+            color: rgba(255,255,255,.88);
+            padding: 11px 14px;
+            border-left: 4px solid transparent;
             text-decoration: none;
             display: block;
-            border-radius: 6px;
+            border-radius: 14px;
+            margin-bottom: 7px;
+            font-weight: 800;
+            transition: all .22s ease;
+        }
+
+        .sidebar .nav-link i {
+            color: #fde68a;
+            margin-right: 8px;
+            font-size: 17px;
         }
 
         .sidebar .nav-link:hover,
         .sidebar .nav-link.active {
-            color: #4f6df5;
-            background: #f8f9ff;
-            border-left: 3px solid #4f6df5;
+            color: #ffffff;
+            background: rgba(255,255,255,.15);
+            border-left: 4px solid var(--gold);
+            transform: translateX(4px);
+            box-shadow: 0 12px 24px rgba(0,0,0,.18);
+        }
+
+        .submenu {
+            margin: 4px 0 12px 11px;
+            padding: 8px;
+            border-left: 1px dashed rgba(255,255,255,.28);
+            background: rgba(255,255,255,.08);
+            border-radius: 16px;
         }
 
         .submenu .nav-link {
-            padding: 8px 16px 8px 32px;
+            padding: 9px 12px 9px 22px;
             font-size: 14px;
-            background: #fafafa;
+            background: rgba(255,255,255,.07);
+            color: rgba(255,255,255,.87);
+            border-radius: 11px;
+            margin-bottom: 5px;
+        }
+
+        .submenu .nav-link:hover {
+            background: rgba(255,213,74,.22);
+            color: white;
+        }
+
+        /* 🔥 MAIN AREA */
+        .main-area {
+            flex: 1;
+            min-width: 0;
         }
 
         .topbar {
-            background: #0c9b57;
+            background: linear-gradient(135deg, #0c9b57, #0b7cff);
             color: white;
-            padding: 8px 20px;
+            padding: 11px 22px;
+            box-shadow: 0 8px 22px rgba(0,0,0,.15);
+            position: sticky;
+            top: 0;
+            z-index: 10;
         }
 
         .topbar-line {
-            font-size: 11px;
-            font-weight: 700;
+            font-size: 12px;
+            font-weight: 900;
             line-height: 1.2;
             white-space: nowrap;
         }
 
         .content-area {
-            padding: 24px;
+            padding: 26px;
             width: 100%;
         }
 
         .card-box {
             border: none;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            border-radius: 18px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
             background: #fff;
         }
 
         .table-responsive {
             background: white;
-            border-radius: 12px;
-            padding: 12px;
+            border-radius: 16px;
+            padding: 14px;
+            box-shadow: 0 10px 25px rgba(0,0,0,.06);
         }
 
+        .alert {
+            border-radius: 14px;
+            font-weight: 700;
+        }
+
+        /* 🔥 SCROLLBAR */
+        .sidebar::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,.28);
+            border-radius: 10px;
+        }
+
+        /* 🔥 PRINT */
         @media print {
             .sidebar,
             .no-print {
@@ -88,6 +195,7 @@
                 padding: 4px 0 8px 0 !important;
                 border-bottom: 1px solid #111111 !important;
                 margin-bottom: 8px !important;
+                box-shadow: none !important;
             }
 
             .topbar-line {
@@ -102,13 +210,13 @@
                 width: 100% !important;
             }
 
-            .flex-grow-1 {
+            .main-area {
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
 
-            .d-flex {
+            .app-layout {
                 display: block !important;
             }
 
@@ -120,21 +228,62 @@
                 margin: 0 !important;
             }
         }
+
+        @media(max-width: 900px) {
+            .app-layout {
+                display: block;
+            }
+
+            .sidebar {
+                width: 100%;
+                min-height: auto;
+                position: relative;
+            }
+
+            .content-area {
+                padding: 16px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-<div class="d-flex">
-    <div class="sidebar p-3">
-        <h5 class="fw-bold mb-4">AL RAHMAN</h5>
+<div class="app-layout">
+
+    <div class="sidebar no-print">
+        <div class="brand-box">
+            <h5 class="brand-title">AL RAHMAN</h5>
+            <div class="brand-sub">MISSION ERP</div>
+        </div>
 
         <ul class="nav flex-column">
+
             <li><a href="/" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
             <li><a href="{% url 'general_settings' %}" class="nav-link"><i class="bi bi-gear"></i> General Settings</a></li>
             <li><a href="/academics/classes/" class="nav-link"><i class="bi bi-building"></i> Classes</a></li>
             <li><a href="/academics/subjects/" class="nav-link"><i class="bi bi-book"></i> Subjects</a></li>
-            <li><a href="/students/" class="nav-link"><i class="bi bi-people"></i> Students</a></li>
-            <li><a href="/teachers/" class="nav-link"><i class="bi bi-person-badge"></i> Employees</a></li>
+
+            <li>
+                <a class="nav-link" data-bs-toggle="collapse" href="#studentsMenu" role="button" aria-expanded="true">
+                    <i class="bi bi-people"></i> Students ▾
+                </a>
+                <ul class="collapse show nav flex-column submenu" id="studentsMenu">
+                    <li><a href="/students/" class="nav-link">Student List</a></li>
+                    <li><a href="{% url 'bulk_student_password_print' %}" class="nav-link">🔐 Student Password</a></li>
+                </ul>
+            </li>
+
+            <li>
+                <a class="nav-link" data-bs-toggle="collapse" href="#employeesMenu" role="button" aria-expanded="true">
+                    <i class="bi bi-person-badge"></i> Employees ▾
+                </a>
+                <ul class="collapse show nav flex-column submenu" id="employeesMenu">
+                    <li><a href="/teachers/" class="nav-link">Employee List</a></li>
+                    <li><a href="{% url 'teacher_password_print' %}" class="nav-link">👨‍🏫 Teacher Password</a></li>
+                </ul>
+            </li>
+
             <li><a href="#" class="nav-link"><i class="bi bi-bank"></i> Accounts</a></li>
 
             <li>
@@ -170,45 +319,19 @@
             <li><a href="#" class="nav-link"><i class="bi bi-journal-text"></i> Homework</a></li>
             <li><a href="#" class="nav-link"><i class="bi bi-stars"></i> Behaviour & Skills</a></li>
             <li><a href="#" class="nav-link"><i class="bi bi-shop"></i> Online Store & POS</a></li>
+
             <li>
-    <a class="nav-link" data-bs-toggle="collapse" href="#smsMenu" role="button" aria-expanded="true">
-        <i class="bi bi-whatsapp"></i> SMS / WhatsApp ▾
-    </a>
+                <a class="nav-link" data-bs-toggle="collapse" href="#smsMenu" role="button" aria-expanded="true">
+                    <i class="bi bi-whatsapp"></i> SMS / WhatsApp ▾
+                </a>
+                <ul class="collapse show nav flex-column submenu" id="smsMenu">
+                    <li><a href="{% url 'attendance_alert_list' %}" class="nav-link">🔔 Attendance Alerts</a></li>
+                    <li><a href="{% url 'attendance_alert_list' %}" class="nav-link">📲 WhatsApp Send</a></li>
+                    <li><a href="{% url 'attendance_alert_list' %}" class="nav-link">📩 SMS Send</a></li>
+                    <li><a href="#" class="nav-link">🚀 Bulk Send Coming Soon</a></li>
+                </ul>
+            </li>
 
-    <ul class="collapse show nav flex-column submenu" id="smsMenu">
-
-        <!-- 🔔 Attendance Alert -->
-        <li>
-            <a href="{% url 'attendance_alert_list' %}" class="nav-link">
-                🔔 Attendance Alerts
-            </a>
-        </li>
-
-        <!-- 📲 WhatsApp Manual Send -->
-        <li>
-            <a href="{% url 'attendance_alert_list' %}" class="nav-link">
-                📲 WhatsApp Send
-            </a>
-        </li>
-
-        <!-- 📩 SMS -->
-        <li>
-            <a href="{% url 'attendance_alert_list' %}" class="nav-link">
-                📩 SMS Send
-            </a>
-        </li>
-
-        <!-- 🔥 FUTURE -->
-        <li>
-            <a href="#" class="nav-link">
-                🚀 Bulk Send (Coming Soon)
-            </a>
-        </li>
-
-    </ul>
-</li>
-            
-            
             <li><a href="#" class="nav-link"><i class="bi bi-camera-video"></i> Live Class</a></li>
             <li><a href="#" class="nav-link"><i class="bi bi-question-circle"></i> Question Paper</a></li>
 
@@ -227,18 +350,17 @@
                     <li><a href="/exams/popup-entry/" class="nav-link">Popup Marks Entry</a></li>
                     <li><a href="/exams/topper/" class="nav-link">Topper List</a></li>
                     <li><a href="/exams/print-bulk/" class="nav-link">Print Bulk Result</a></li>
-                    
                 </ul>
             </li>
 
             <li><a href="#" class="nav-link"><i class="bi bi-clipboard-check"></i> Class Tests</a></li>
             <li><a href="/reports/" class="nav-link"><i class="bi bi-file-bar-graph"></i> Reports</a></li>
             <li><a href="#" class="nav-link"><i class="bi bi-award"></i> Certificates</a></li>
+
         </ul>
-        
     </div>
 
-    <div class="flex-grow-1">
+    <div class="main-area">
         <div class="topbar">
             <div class="topbar-line">
                 AL RAHMAN MISSION ERP | Bangla + English Medium |
@@ -260,6 +382,7 @@
             {% block content %}{% endblock %}
         </div>
     </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

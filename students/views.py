@@ -1290,3 +1290,41 @@ def student_change_password(request):
     return render(request, 'students/student_change_password.html', {
         'student': student
     })
+
+
+from django.contrib.auth.hashers import make_password
+
+@login_required
+def bulk_student_password_print(request):
+    selected_class = request.GET.get('class_id')
+
+    students = Student.objects.filter(is_active=True).order_by(
+        'class_assigned',
+        'roll_no',
+        'id'
+    )
+
+    if selected_class:
+        students = students.filter(class_assigned_id=selected_class)
+
+    if request.method == "POST":
+        reset_count = 0
+
+        for student in students:
+            raw_password = student.get_default_raw_password()
+            student.login_username = student.student_id
+            student.login_password = make_password(raw_password)
+            student.login_enabled = True
+            student.save(update_fields=['login_username', 'login_password', 'login_enabled'])
+            reset_count += 1
+
+        messages.success(request, f"✅ {reset_count} students password reset done.")
+        return redirect(f"{request.path}?class_id={selected_class}" if selected_class else request.path)
+
+    classes = Class.objects.all().order_by('id')
+
+    return render(request, 'students/bulk_password_print.html', {
+        'students': students,
+        'classes': classes,
+        'selected_class': selected_class,
+    })
