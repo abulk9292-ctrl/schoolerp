@@ -1,0 +1,151 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    body.login {
+        background: linear-gradient(135deg, #064e3b, #16a34a);
+        font-family: Arial, sans-serif;
+    }
+
+    #container {
+        background: transparent;
+        border: none;
+        width: 430px;
+        margin-top: 90px;
+    }
+
+    #header {
+        display: none;
+    }
+
+    .login #content {
+        background: #ffffff;
+        border-radius: 24px;
+        padding: 35px;
+        box-shadow: 0 20px 45px rgba(0,0,0,0.25);
+    }
+
+    .login-title {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .login-title h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: #065f46;
+        margin-bottom: 6px;
+    }
+
+    .login-title p {
+        margin: 0;
+        color: #555;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .form-row {
+        padding: 0 !important;
+        margin-bottom: 18px;
+    }
+
+    .form-row label {
+        color: #111;
+        font-weight: 700;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+    .form-row input {
+        width: 100%;
+        padding: 13px 14px;
+        border-radius: 12px;
+        border: 1px solid #d1d5db;
+        font-size: 15px;
+        box-sizing: border-box;
+    }
+
+    .submit-row {
+        padding: 0 !important;
+        margin-top: 18px;
+        text-align: center;
+        background: transparent !important;
+        border: none !important;
+    }
+
+    .submit-row input {
+        width: 100%;
+        padding: 13px;
+        border-radius: 14px;
+        background: #16a34a;
+        color: white;
+        border: none;
+        font-weight: 800;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .submit-row input:hover {
+        background: #15803d;
+    }
+
+    .back-site {
+        display: block;
+        text-align: center;
+        margin-top: 18px;
+        text-decoration: none;
+        color: #065f46;
+        font-weight: 700;
+    }
+
+    .errornote {
+        border-radius: 12px;
+        padding: 12px;
+        background: #fee2e2;
+        color: #991b1b;
+        border: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="login-title">
+    <h1>AL RAHMAN MISSION</h1>
+    <p>ERP Admin Login</p>
+</div>
+
+{% if form.errors and not form.non_field_errors %}
+<p class="errornote">Please enter the correct username and password.</p>
+{% endif %}
+
+{% if form.non_field_errors %}
+{% for error in form.non_field_errors %}
+<p class="errornote">{{ error }}</p>
+{% endfor %}
+{% endif %}
+
+<form action="{{ app_path }}" method="post" id="login-form">
+    {% csrf_token %}
+
+    <div class="form-row">
+        {{ form.username.label_tag }}
+        {{ form.username }}
+    </div>
+
+    <div class="form-row">
+        {{ form.password.label_tag }}
+        {{ form.password }}
+        <input type="hidden" name="next" value="{{ next }}">
+    </div>
+
+    <div class="submit-row">
+        <input type="submit" value="Login to ERP">
+    </div>
+</form>
+
+<a href="/" class="back-site">← Back to Website</a>
+
+{% endblock %}
