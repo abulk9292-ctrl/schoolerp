@@ -1,7 +1,16 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Employee(models.Model):
+    user = models.OneToOneField(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='employee'
+    )
+
     employee_id = models.CharField(max_length=20, unique=True, blank=True)
 
     name = models.CharField(max_length=150)
@@ -18,20 +27,78 @@ class Employee(models.Model):
     photo = models.ImageField(upload_to='employees/', blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
+    # ✅ ERP ACCESS CONTROL
+    is_erp_admin = models.BooleanField(default=False)
+
+    can_access_students = models.BooleanField(default=False)
+    can_access_teachers = models.BooleanField(default=False)
+    can_access_academics = models.BooleanField(default=False)
+    can_access_attendance = models.BooleanField(default=True)
+    can_access_fees = models.BooleanField(default=False)
+    can_access_payroll = models.BooleanField(default=False)
+    can_access_exams = models.BooleanField(default=False)
+    can_access_reports = models.BooleanField(default=False)
+    can_access_admissions = models.BooleanField(default=False)
+    can_access_idcards = models.BooleanField(default=False)
+    can_access_communications = models.BooleanField(default=False)
+    can_access_expenses = models.BooleanField(default=False)
+    can_access_backup = models.BooleanField(default=False)
+    can_access_settings = models.BooleanField(default=False)
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def get_default_raw_password(self):
         if self.phone:
-            return self.phone
-        return self.employee_id
+            return str(self.phone)
+        if self.employee_id:
+            return str(self.employee_id)
+        return "12345678"
 
     def save(self, *args, **kwargs):
         is_new = self.pk is None
+
+        # ✅ First save to get ID
         super().save(*args, **kwargs)
 
-        if is_new and not self.employee_id:
+        # ✅ Auto Employee ID
+        if not self.employee_id:
             self.employee_id = f"EMP{self.id}"
             super().save(update_fields=['employee_id'])
+
+        password = self.get_default_raw_password()
+
+        # ✅ Create / Link Django User
+        existing_user = User.objects.filter(username=self.employee_id).first()
+
+        if existing_user and self.user != existing_user:
+            self.user = existing_user
+            super().save(update_fields=['user'])
+
+        elif not self.user:
+            user = User.objects.create_user(
+                username=self.employee_id,
+                password=password,
+                first_name=self.name
+            )
+            user.is_staff = False
+            user.is_superuser = False
+            user.is_active = self.is_active
+            user.save()
+
+            self.user = user
+            super().save(update_fields=['user'])
+
+        else:
+            self.user.username = self.employee_id
+            self.user.first_name = self.name
+            self.user.is_active = self.is_active
+
+            # ✅ New employee হলে password set হবে
+            # পুরোনো employee edit করলে password reset হবে না
+            if is_new:
+                self.user.set_password(password)
+
+            self.user.save()
 
     def __str__(self):
         return f"{self.name} ({self.employee_id})"

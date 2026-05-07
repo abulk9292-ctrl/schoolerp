@@ -1,64 +1,186 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h3>Salary Records</h3>
+<style>
+.payroll-title{font-weight:900;color:#0f172a;margin-bottom:14px}
+.summary-card{border:0;border-radius:16px;box-shadow:0 8px 22px rgba(15,23,42,.08)}
+.summary-label{font-size:13px;color:#64748b;font-weight:700}
+.summary-value{font-size:22px;font-weight:900}
+.filter-box{border:1px solid #e2e8f0;border-radius:16px;padding:14px;background:#fff;box-shadow:0 6px 16px rgba(15,23,42,.05)}
+.table-card{border:0;border-radius:16px;box-shadow:0 8px 24px rgba(15,23,42,.08);overflow:hidden}
+.table th{background:#0b2f5b!important;color:#fff!important;font-size:13px;white-space:nowrap}
+.table td{font-size:13px;vertical-align:middle;white-space:nowrap}
+.action-btns .btn{margin:2px}
+</style>
 
-<a href="{% url 'salary_add' %}" class="btn btn-success mb-3">Add Salary</a>
-<a href="{% url 'auto_generate_salary' %}" class="btn btn-warning mb-3">Auto Generate Payroll</a>
+<h3 class="payroll-title">💰 Salary Records</h3>
 
-<table class="table table-bordered table-striped">
-    <tr>
-        <th>Employee</th>
-        <th>Month</th>
-        <th>Year</th>
-        <th>Absent</th>
-        <th>Bonus</th>
-        <th>Deduction</th>
-        <th>Net Salary</th>
-        <th>Paid</th>
-        <th>Due</th>
-        <th>Advance</th>
-        <th>Status</th>
-        <th>Action</th>
-    </tr>
+<div class="row g-3 mb-3">
+    <div class="col-md-3">
+        <div class="card summary-card p-3">
+            <div class="summary-label">Total Paid</div>
+            <div class="summary-value text-success">
+                ₹
+                {% with total=0 %}
+                    {{ total_paid|default:"0.00" }}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
 
-    {% for r in records %}
-    <tr>
-        <td>{{ r.employee.name }}</td>
-        <td>{{ r.month }}</td>
-        <td>{{ r.year }}</td>
-        <td>{{ r.absent_days }}</td>
-        <td>₹{{ r.bonus }}</td>
-        <td>₹{{ r.attendance_deduction|add:r.extra_deduction }}</td>
-        <td><b>₹{{ r.net_salary }}</b></td>
-        <td class="text-success"><b>₹{{ r.paid_amount }}</b></td>
-        <td class="text-danger"><b>₹{{ r.due_amount }}</b></td>
-        <td class="text-primary"><b>₹{{ r.advance_amount }}</b></td>
+    <div class="col-md-3">
+        <div class="card summary-card p-3">
+            <div class="summary-label">Total Due</div>
+            <div class="summary-value text-danger">
+                ₹{{ total_due|default:"0.00" }}
+            </div>
+        </div>
+    </div>
 
-        <td>
-            {% if r.status == 'Paid' %}
-                <span class="badge bg-success">Paid</span>
-            {% elif r.status == 'Partial' %}
-                <span class="badge bg-warning text-dark">Partial</span>
-            {% elif r.status == 'Advance' %}
-                <span class="badge bg-info text-dark">Advance</span>
-            {% else %}
-                <span class="badge bg-danger">Unpaid</span>
-            {% endif %}
-        </td>
+    <div class="col-md-3">
+        <div class="card summary-card p-3">
+            <div class="summary-label">Total Advance</div>
+            <div class="summary-value text-primary">
+                ₹{{ total_advance|default:"0.00" }}
+            </div>
+        </div>
+    </div>
 
-        <td>
-            <a href="{% url 'salary_detail' r.id %}" class="btn btn-sm btn-primary">View</a>
-            <a href="{% url 'salary_print' r.id %}" class="btn btn-sm btn-dark">Print</a>
-            <a href="{% url 'salary_edit' r.id %}" class="btn btn-sm btn-info">Edit</a>
-            <a href="{% url 'salary_delete' r.id %}" class="btn btn-sm btn-danger">Delete</a>
-        </td>
-    </tr>
-    {% empty %}
-    <tr>
-        <td colspan="12" class="text-center">No salary record found.</td>
-    </tr>
-    {% endfor %}
-</table>
+    <div class="col-md-3">
+        <div class="card summary-card p-3">
+            <div class="summary-label">Records</div>
+            <div class="summary-value text-dark">
+                {{ records|length }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex gap-2 flex-wrap mb-3">
+    <a href="{% url 'salary_add' %}" class="btn btn-success">➕ Add Salary</a>
+    <a href="{% url 'auto_generate_salary' %}" class="btn btn-warning">⚙ Auto Generate Payroll</a>
+    <button onclick="window.print()" class="btn btn-dark">🖨 Print List</button>
+</div>
+
+<div class="filter-box mb-3 no-print">
+    <form method="GET" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label fw-bold">Month</label>
+            <select name="month" class="form-select">
+                <option value="">All Month</option>
+                {% for m_value, m_label in months %}
+                    <option value="{{ m_value }}" {% if selected_month == m_value %}selected{% endif %}>
+                        {{ m_label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label fw-bold">Year</label>
+            <input type="number" name="year" class="form-control"
+                   value="{{ selected_year|default:'' }}" placeholder="2026">
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label fw-bold">Status</label>
+            <select name="status" class="form-select">
+                <option value="">All Status</option>
+                <option value="Paid" {% if selected_status == 'Paid' %}selected{% endif %}>Paid</option>
+                <option value="Partial" {% if selected_status == 'Partial' %}selected{% endif %}>Partial</option>
+                <option value="Unpaid" {% if selected_status == 'Unpaid' %}selected{% endif %}>Unpaid</option>
+                <option value="Advance" {% if selected_status == 'Advance' %}selected{% endif %}>Advance</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <button class="btn btn-primary">🔍 Filter</button>
+            <a href="{% url 'salary_list' %}" class="btn btn-secondary">Reset</a>
+        </div>
+    </form>
+</div>
+
+<div class="card table-card">
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Month</th>
+                    <th>Year</th>
+                    <th>Absent</th>
+                    <th>Payable Absent</th>
+                    <th>Bonus</th>
+                    <th>Deduction</th>
+                    <th>Previous Due</th>
+                    <th>Net Salary</th>
+                    <th>Payable</th>
+                    <th>Paid</th>
+                    <th>Due</th>
+                    <th>Advance</th>
+                    <th>Status</th>
+                    <th class="no-print">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for r in records %}
+                <tr>
+                    <td>
+                        <b>{{ r.employee.name }}</b><br>
+                        <small class="text-muted">{{ r.employee.employee_id|default:"-" }}</small>
+                    </td>
+                    <td>{{ r.month }}</td>
+                    <td>{{ r.year }}</td>
+                    <td>{{ r.absent_days }}</td>
+                    <td>{{ r.payable_absent_days }}</td>
+                    <td class="text-success"><b>₹{{ r.bonus }}</b></td>
+                    <td class="text-danger"><b>₹{{ r.attendance_deduction|add:r.extra_deduction }}</b></td>
+                    <td><b>₹{{ r.previous_due|default:"0.00" }}</b></td>
+                    <td><b>₹{{ r.net_salary }}</b></td>
+                    <td><b>₹{{ r.payable_amount|default:r.net_salary }}</b></td>
+                    <td class="text-success"><b>₹{{ r.paid_amount }}</b></td>
+                    <td class="text-danger"><b>₹{{ r.due_amount }}</b></td>
+                    <td class="text-primary"><b>₹{{ r.advance_amount }}</b></td>
+
+                    <td>
+                        {% if r.status == 'Paid' %}
+                            <span class="badge bg-success">Paid</span>
+                        {% elif r.status == 'Partial' %}
+                            <span class="badge bg-warning text-dark">Partial</span>
+                        {% elif r.status == 'Advance' %}
+                            <span class="badge bg-info text-dark">Advance</span>
+                        {% else %}
+                            <span class="badge bg-danger">Unpaid</span>
+                        {% endif %}
+                    </td>
+
+                    <td class="action-btns no-print">
+                        <a href="{% url 'salary_detail' r.id %}" class="btn btn-sm btn-primary">View</a>
+                        <a href="{% url 'salary_print' r.id %}" class="btn btn-sm btn-dark">Print</a>
+                        <a href="{% url 'salary_edit' r.id %}" class="btn btn-sm btn-info">Edit</a>
+                        <a href="{% url 'salary_delete' r.id %}" class="btn btn-sm btn-danger">Delete</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="15" class="text-center py-4">
+                        No salary record found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+@media print{
+    .sidebar,.topbar,.no-print,.print-actions{display:none!important}
+    .content-area{padding:0!important;margin:0!important}
+    .summary-card,.filter-box,.table-card{box-shadow:none!important}
+    .table th,.table td{font-size:10px!important;padding:4px!important}
+}
+</style>
 
 {% endblock %}

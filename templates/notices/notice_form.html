@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card card-box">
+        <div class="card-body">
+
+            <h3 class="mb-3">{{ page_title }}</h3>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Title</label>
+                        {{ form.title }}
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Notice Type</label>
+                        {{ form.notice_type }}
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Target</label>
+                        {{ form.target }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Class</label>
+                        {{ form.school_class }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Published By</label>
+                        {{ form.published_by }}
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Expiry Date</label>
+                        {{ form.expiry_date }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Attachment</label>
+                        {{ form.attachment }}
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Status</label>
+                        {{ form.status }}
+                    </div>
+
+                    <div class="col-md-3 d-flex align-items-end">
+                        <div class="form-check">
+                            {{ form.is_pinned }}
+                            <label class="form-check-label">Pinned Notice</label>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">Description</label>
+                        {{ form.description }}
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">
+                        Save Notice
+                    </button>
+
+                    <a href="{% url 'notice_list' %}" class="btn btn-secondary">
+                        Back
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -41,4 +41,7 @@ urlpatterns = [
     # =========================
     path('bulk-demand-slip/', views.bulk_demand_slip_page, name='bulk_demand_slip_page'),
     path('bulk-demand-slip/print/', views.bulk_demand_slip_print, name='bulk_demand_slip_print'),
+    path('check-paid-month/', views.check_paid_month),
+    path('check-paid-month/', views.check_paid_month, name='check_paid_month'),
+    
 ]

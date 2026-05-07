@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card card-box">
+        <div class="card-body">
+
+            <h3 class="mb-3">{{ page_title }}</h3>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label">Title</label>
+                        {{ form.title }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Class</label>
+                        {{ form.school_class }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Subject</label>
+                        {{ form.subject }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Given By</label>
+                        {{ form.given_by }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Due Date</label>
+                        {{ form.due_date }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Status</label>
+                        {{ form.status }}
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">Attachment</label>
+                        {{ form.attachment }}
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label">Description</label>
+                        {{ form.description }}
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success">
+                        Save Homework
+                    </button>
+
+                    <a href="{% url 'homework_list' %}" class="btn btn-secondary">
+                        Back
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

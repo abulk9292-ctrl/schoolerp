@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+@page{
+    size:A4;
+    margin:5mm;
+}
+
+*{
+    box-sizing:border-box;
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+}
+
+body{
+    background:#e5e7eb;
+    font-family:Arial, sans-serif;
+}
+
+.no-print{
+    text-align:center;
+    margin-bottom:15px;
+}
+
+.sheet{
+    width:200mm;
+    min-height:287mm;
+    margin:auto;
+    background:white;
+    padding:2mm;
+}
+
+.slip-grid{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:2.5mm;
+}
+
+.desk-slip{
+    width:100%;
+    height:45mm;
+    border:1px solid #111;
+    padding:1.5mm;
+    position:relative;
+    overflow:hidden;
+    background:white;
+    page-break-inside:avoid;
+}
+
+.watermark{
+    position:absolute;
+    width:38px;
+    opacity:0.07;
+    top:54%;
+    left:50%;
+    transform:translate(-50%,-50%);
+}
+
+.slip-content{
+    position:relative;
+    z-index:2;
+}
+
+.school-name{
+    text-align:center;
+    font-size:8.5px;
+    font-weight:900;
+    line-height:1;
+}
+
+.exam-name{
+    text-align:center;
+    font-size:7px;
+    font-weight:800;
+    color:#dc2626;
+    line-height:1.1;
+    margin-top:1px;
+}
+
+.title{
+    text-align:center;
+    font-size:9px;
+    font-weight:900;
+    border:1px solid #111;
+    background:#f3f4f6;
+    margin:2px 0;
+    padding:1px;
+}
+
+.info-wrap{
+    display:grid;
+    grid-template-columns:1fr 18mm;
+    gap:1mm;
+}
+
+.photo{
+    width:18mm;
+    height:21mm;
+    border:1px solid #111;
+    object-fit:cover;
+}
+
+.info-table{
+    width:100%;
+    font-size:6.6px;
+    font-weight:700;
+    line-height:1.15;
+}
+
+.info-table td{
+    padding:0.5px 1px;
+    vertical-align:top;
+}
+
+.info-table td:first-child{
+    width:28px;
+}
+
+.seat-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1mm;
+    margin-top:2px;
+}
+
+.seat-box{
+    border:1px solid #111;
+    text-align:center;
+    font-size:6.5px;
+    font-weight:800;
+    padding:2px 1px;
+}
+
+.footer{
+    text-align:center;
+    font-size:5.5px;
+    margin-top:1px;
+    color:#444;
+}
+
+@media print{
+    body{
+        background:white !important;
+    }
+
+    .no-print,
+    .sidebar,
+    .topbar,
+    .navbar,
+    header,
+    aside,
+    footer{
+        display:none !important;
+    }
+
+    .sheet{
+        width:200mm !important;
+        margin:0 auto !important;
+        padding:0 !important;
+    }
+
+    .desk-slip{
+        page-break-inside:avoid !important;
+    }
+}
+</style>
+
+<div class="no-print">
+    <button onclick="window.print()" class="btn btn-success">
+        🖨 Print / Save PDF
+    </button>
+
+    <a href="{% url 'desk_slip_select' %}" class="btn btn-secondary">
+        ⬅ Back
+    </a>
+</div>
+
+<div class="sheet">
+    <div class="slip-grid">
+
+        {% for student in students %}
+
+        <div class="desk-slip">
+
+            <img src="{{ logo_url|default:'/static/images/logo.png' }}" class="watermark">
+
+            <div class="slip-content">
+
+                <div class="school-name">
+                    AL RAHMAN MISSION
+                </div>
+
+                <div class="exam-name">
+                    {{ exam.name|default:"Examination" }}
+                </div>
+
+                <div class="title">
+                    DESK SLIP
+                </div>
+
+                <div class="info-wrap">
+
+                    <table class="info-table">
+                        <tr>
+                            <td>Name</td>
+                            <td>
+                                :
+                                {% if student.student_name %}
+                                    {{ student.student_name }}
+                                {% elif student.name %}
+                                    {{ student.name }}
+                                {% elif student.full_name %}
+                                    {{ student.full_name }}
+                                {% else %}
+                                    {{ student }}
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Class</td>
+                            <td>
+                                :
+                                {% if student.class_assigned %}
+                                    {{ student.class_assigned.class_name }}
+                                {% else %}
+                                    {{ selected_class|default:"-" }}
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Roll</td>
+                            <td>: {{ student.roll_no|default:"-" }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>ID</td>
+                            <td>: {{ student.student_id|default:student.id }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Reg</td>
+                            <td>: {{ student.registration_no|default:"-" }}</td>
+                        </tr>
+                    </table>
+
+                    <div>
+                        {% if student.photo %}
+                            <img src="{{ student.photo.url }}" class="photo">
+                        {% else %}
+                            <img src="{% static 'images/logo.png' %}" class="photo">
+                        {% endif %}
+                    </div>
+
+                </div>
+
+                <div class="seat-row">
+                    <div class="seat-box">
+                        Room: ____
+                    </div>
+
+                    <div class="seat-box">
+                        Desk: ____
+                    </div>
+                </div>
+
+                <div class="footer">
+                    Sit according to assigned desk only
+                </div>
+
+            </div>
+
+        </div>
+
+        {% empty %}
+
+        <div class="alert alert-warning">
+            No students found.
+        </div>
+
+        {% endfor %}
+
+    </div>
+</div>
+
+{% endblock %}

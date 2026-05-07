@@ -1,8 +1,150 @@
 {% extends 'base.html' %}
 
 {% block content %}
+
+<style>
+
+.card-box{
+    border:none;
+    border-radius:20px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+}
+
+.settings-title{
+    font-weight:900;
+    color:#111827;
+}
+
+.form-control{
+    border-radius:12px;
+    padding:10px;
+}
+
+label{
+    font-weight:700;
+    margin-bottom:6px;
+}
+
+.preview-img{
+    width:120px;
+    height:120px;
+    object-fit:contain;
+    border:2px solid #ddd;
+    border-radius:12px;
+    padding:5px;
+    background:white;
+}
+
+.save-btn{
+    border-radius:12px;
+    padding:10px 25px;
+    font-weight:700;
+}
+
+</style>
+
 <div class="container mt-4">
-    <h2>General Settings</h2>
-    <p>General Settings page is working successfully.</p>
+
+    <div class="card card-box p-4">
+
+        <h2 class="settings-title mb-4">
+            ⚙ General Settings
+        </h2>
+
+        <form method="POST"
+              enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+
+                    <label>
+                        School Name
+                    </label>
+
+                    {{ form.school_name }}
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label>
+                        Principal Name
+                    </label>
+
+                    {{ form.principal_name }}
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <label>
+                        Principal Signature
+                    </label>
+
+                    {{ form.principal_signature }}
+
+                    {% if form.instance.principal_signature %}
+                        <div class="mt-2">
+                            <img src="{{ form.instance.principal_signature.url }}"
+                                 class="preview-img">
+                        </div>
+                    {% endif %}
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <label>
+                        School Logo
+                    </label>
+
+                    {{ form.school_logo }}
+
+                    {% if form.instance.school_logo %}
+                        <div class="mt-2">
+                            <img src="{{ form.instance.school_logo.url }}"
+                                 class="preview-img">
+                        </div>
+                    {% endif %}
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <label>
+                        School Header
+                    </label>
+
+                    {{ form.school_header }}
+
+                    {% if form.instance.school_header %}
+                        <div class="mt-2">
+                            <img src="{{ form.instance.school_header.url }}"
+                                 class="preview-img">
+                        </div>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            <div class="mt-4">
+
+                <button class="btn btn-success save-btn">
+
+                    💾 Save Settings
+
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
 </div>
+
 {% endblock %}

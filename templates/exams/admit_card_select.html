@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    .card-box{
+        border:none;
+        border-radius:22px;
+        box-shadow:0 10px 28px rgba(0,0,0,0.08);
+    }
+
+    .title-box{
+        font-weight:900;
+        color:#111827;
+    }
+
+    .student-table th{
+        background:#111827;
+        color:white;
+        font-size:14px;
+        white-space:nowrap;
+    }
+
+    .student-table td{
+        vertical-align:middle;
+        font-size:14px;
+    }
+
+    .student-photo{
+        width:42px;
+        height:42px;
+        border-radius:50%;
+        object-fit:cover;
+        border:2px solid #ddd;
+    }
+
+    .filter-box{
+        background:#f8fafc;
+        border-radius:16px;
+        padding:18px;
+    }
+
+    .top-btn{
+        border-radius:12px;
+        font-weight:700;
+    }
+
+    .no-data-box{
+        border:2px dashed #cbd5e1;
+        border-radius:18px;
+        padding:30px;
+        background:#f8fafc;
+        text-align:center;
+        color:#475569;
+        font-weight:700;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <div class="card card-box p-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="title-box">🎫 Admit Card Generate</h3>
+
+            <a href="{% url 'exam_dashboard' %}" class="btn btn-dark top-btn">
+                ⬅ Back
+            </a>
+        </div>
+
+        <form method="GET">
+            <div class="filter-box">
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Select Exam</label>
+
+                        <select name="exam" class="form-select" required>
+                            <option value="">Select Exam</option>
+
+                            {% for e in exams %}
+                                <option value="{{ e.id }}"
+                                    {% if selected_exam_id|stringformat:"s" == e.id|stringformat:"s" %}selected{% endif %}>
+                                    {{ e.name }} ({{ e.academic_session }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Class</label>
+
+                        <select name="class" class="form-select">
+                            <option value="">All Classes</option>
+
+                            {% for c in classes %}
+                                <option value="{{ c }}"
+                                    {% if selected_class == c %}selected{% endif %}>
+                                    {{ c }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Search Student</label>
+
+                        <input type="text"
+                               name="search"
+                               value="{{ search|default:'' }}"
+                               class="form-control"
+                               placeholder="Search name / SID / roll / registration">
+                    </div>
+
+                </div>
+
+                <div class="mt-4 d-flex gap-2 flex-wrap">
+
+                    <button type="submit" class="btn btn-primary top-btn">
+                        🔍 Load Students
+                    </button>
+
+                    <a href="{% url 'admit_card_select' %}" class="btn btn-secondary top-btn">
+                        🔄 Reset
+                    </a>
+
+                    {% if selected_exam %}
+                        <a href="{% url 'admit_card_bulk_print' %}?exam={{ selected_exam.id }}{% if selected_class %}&class={{ selected_class|urlencode }}{% endif %}{% if search %}&search={{ search|urlencode }}{% endif %}"
+                           class="btn btn-dark top-btn">
+                            🖨 Print All
+                        </a>
+                    {% endif %}
+
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+    {% if selected_exam %}
+
+        <div class="card card-box mt-4 p-4">
+
+            <form method="POST" action="{% url 'admit_card_bulk_print' %}">
+                {% csrf_token %}
+
+                <input type="hidden" name="exam" value="{{ selected_exam.id }}">
+                <input type="hidden" name="class" value="{{ selected_class|default:'' }}">
+                <input type="hidden" name="search" value="{{ search|default:'' }}">
+
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">👨‍🎓 Student List</h5>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" onclick="selectAllStudents()" class="btn btn-warning top-btn">
+                            ✅ Select All
+                        </button>
+
+                        <button type="button" onclick="clearAllStudents()" class="btn btn-outline-danger top-btn">
+                            ❌ Clear
+                        </button>
+
+                        <button type="submit" class="btn btn-success top-btn">
+                            🖨 Print Selected
+                        </button>
+                    </div>
+                </div>
+
+                {% if students %}
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered student-table" id="studentTable">
+                            <thead>
+                                <tr>
+                                    <th width="50">✔</th>
+                                    <th width="70">Photo</th>
+                                    <th>Student Name</th>
+                                    <th>SID</th>
+                                    <th>Roll</th>
+                                    <th>Class</th>
+                                    <th width="150">Action</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for s in students %}
+                                <tr>
+                                    <td class="text-center">
+                                        <input type="checkbox"
+                                               name="students"
+                                               value="{{ s.id }}"
+                                               class="student-check">
+                                    </td>
+
+                                    <td class="text-center">
+                                        {% if s.photo %}
+                                            <img src="{{ s.photo.url }}" class="student-photo">
+                                        {% else %}
+                                            <div class="student-photo d-flex align-items-center justify-content-center bg-light">
+                                                👤
+                                            </div>
+                                        {% endif %}
+                                    </td>
+
+                                    <td>
+                                        {{ s.student_name|default:"Student" }}
+                                    </td>
+
+                                    <td>
+                                        {{ s.student_id|default:"-" }}
+                                    </td>
+
+                                    <td>
+                                        {{ s.roll_no|default:"-" }}
+                                    </td>
+
+                                    <td>
+                                        {{ s.class_assigned.class_name|default:"-" }}
+                                    </td>
+
+                                    <td>
+                                        <a href="{% url 'admit_card_select' %}?exam={{ selected_exam.id }}{% if selected_class %}&class={{ selected_class|urlencode }}{% endif %}{% if search %}&search={{ search|urlencode }}{% endif %}&student={{ s.id }}"
+                                           class="btn btn-sm btn-primary">
+                                            🎫 Single Print
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                {% else %}
+
+                    <div class="no-data-box">
+                        ⚠️ No students found. Please check class/search filter.
+                    </div>
+
+                {% endif %}
+
+            </form>
+
+        </div>
+
+    {% else %}
+
+        <div class="card card-box mt-4 p-4">
+            <div class="no-data-box">
+                👆 First select exam, then class/search and click Load Students.
+            </div>
+        </div>
+
+    {% endif %}
+
+</div>
+
+<script>
+function selectAllStudents() {
+    document.querySelectorAll('.student-check').forEach(function(check) {
+        check.checked = true;
+    });
+}
+
+function clearAllStudents() {
+    document.querySelectorAll('.student-check').forEach(function(check) {
+        check.checked = false;
+    });
+}
+</script>
+
+{% endblock %}

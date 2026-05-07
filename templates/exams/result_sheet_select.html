@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-5">
+            <h3 class="fw-bold text-center mb-4">📊 Result Sheet Select</h3>
+
+            <form method="GET" action="{% url 'result_list' %}">
+                <div class="mb-3">
+                    <label class="fw-bold">Select Exam</label>
+                    <select name="exam" class="form-select" required>
+                        <option value="">Choose Exam</option>
+                        {% for e in exams %}
+                            <option value="{{ e.id }}">{{ e.name }} ({{ e.academic_session }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="fw-bold">Select Class</label>
+                    <select name="class" class="form-select" required>
+                        <option value="">Choose Class</option>
+                        {% for c in classes %}
+                            <option value="{{ c }}">{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button class="btn btn-success w-100 fw-bold">
+                    📄 Generate Result Sheet
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

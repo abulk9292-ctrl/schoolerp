@@ -1,0 +1,580 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    @page { size: A4; margin: 0; }
+
+    * {
+        box-sizing: border-box;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    body { background: #e5e7eb; }
+
+    .print-btn-area {
+        margin-bottom: 12px;
+        text-align: center;
+    }
+
+    .bulk-wrapper {
+        width: 210mm;
+        margin: auto;
+    }
+
+    .report-card {
+        width: 200mm;
+        min-height: 287mm;
+        background: white;
+        margin: 0 auto 14px auto;
+        padding: 6mm;
+        border: 3px solid #111;
+        position: relative;
+        font-family: Arial, sans-serif;
+        color: #111;
+        box-shadow: 0 0 15px rgba(0,0,0,0.18);
+        overflow: hidden;
+        page-break-after: always;
+        page-break-inside: avoid;
+    }
+
+    .watermark-logo {
+        position: absolute;
+        top: 49%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 430px;
+        height: 430px;
+        object-fit: contain;
+        opacity: 0.10;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    .report-content {
+        position: relative;
+        z-index: 2;
+    }
+
+    .header-img-box {
+        width: 100%;
+        text-align: center;
+        border-bottom: 2px solid #111;
+        padding-bottom: 2px;
+        margin-bottom: 5px;
+    }
+
+    .header-img {
+        width: 100%;
+        max-height: 112px;
+        object-fit: contain;
+        display: block;
+    }
+
+    .report-title {
+        font-size: 21px;
+        font-weight: 900;
+        text-align: center;
+        background: #f2f7ff;
+        border: 1px solid #999;
+        padding: 3px;
+        color: #111;
+        margin-top: 3px;
+    }
+
+    .student-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 198px 100px;
+        gap: 8px;
+        align-items: start;
+        margin-top: 6px;
+    }
+
+    .info-table { width: 100%; }
+
+    .info-table td {
+        padding: 1px 4px;
+        font-size: 14px;
+        font-weight: 600;
+        vertical-align: top;
+        line-height: 1.20;
+    }
+
+    .info-table td:first-child {
+        width: 95px;
+        white-space: nowrap;
+    }
+
+    .number-panel { width: 198px; }
+
+    .roll-reg-table,
+    .result-no-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+    }
+
+    .result-no-table { margin-top: 6px; }
+
+    .roll-reg-table td,
+    .result-no-table td {
+        border: 2px solid #222;
+        font-weight: 900;
+        text-align: center;
+        padding: 3px 4px;
+        vertical-align: middle;
+    }
+
+    .clean-label {
+        background: #28f060;
+        color: red;
+        font-size: 12px;
+        width: 72px;
+        white-space: nowrap;
+    }
+
+    .clean-value {
+        background: #fff;
+        color: #111;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .sid-value,
+    .reg-value,
+    .result-value { font-size: 11px; }
+
+    .photo-panel {
+        width: 100px;
+        text-align: right;
+    }
+
+    .student-photo {
+        width: 92px;
+        height: 112px;
+        border: 2px solid #222;
+        object-fit: cover;
+        background: #fff;
+    }
+
+    .photo-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: bold;
+    }
+
+    .marks-table,
+    .small-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        background: rgba(255,255,255,0.90);
+    }
+
+    .marks-table { margin-top: 7px; }
+
+    .marks-table th,
+    .marks-table td,
+    .small-table th,
+    .small-table td {
+        border: 1px solid #777;
+        padding: 2px 3px;
+        text-align: center;
+        font-weight: 600;
+        line-height: 1.20;
+    }
+
+    .marks-title {
+        background: #31f05b !important;
+        font-size: 15px;
+        color: #111;
+    }
+
+    .marks-table th { background: #03c5eb9f !important; }
+
+    .subject-name {
+        text-align: left !important;
+        padding-left: 8px !important;
+    }
+
+    .pink-head {
+        background: #f2a3e8 !important;
+        font-weight: 900;
+    }
+
+    .green-cell {
+        background: #c8ffd4 !important;
+        color: #006400;
+        font-weight: 900;
+    }
+
+    .bottom-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        margin-top: 10px;
+    }
+
+    .signature-area {
+        display: grid;
+        grid-template-columns: 115px 1fr 1fr;
+        align-items: end;
+        margin-top: 48px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 13px;
+    }
+
+    .qr-box {
+        width: 96px;
+        height: 96px;
+        border: 2px solid #111;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+    }
+
+    .qr-box img {
+        width: 90px;
+        height: 90px;
+        object-fit: contain;
+    }
+
+    .signature-line {
+        min-height: 48px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+    }
+
+    .principal-sign-img {
+        width: 135px;
+        height: 55px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+    }
+
+    @media print {
+        html, body {
+            width: 210mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+        }
+
+        body * { visibility: hidden !important; }
+
+        .bulk-wrapper,
+        .bulk-wrapper * {
+            visibility: visible !important;
+        }
+
+        .bulk-wrapper {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 210mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .report-card {
+            position: relative !important;
+            left: 5mm !important;
+            top: 5mm !important;
+            width: 200mm !important;
+            min-height: 287mm !important;
+            margin: 0 0 10mm 0 !important;
+            padding: 6mm !important;
+            border: 3px solid #111 !important;
+            box-shadow: none !important;
+            overflow: hidden !important;
+            page-break-after: always !important;
+            page-break-inside: avoid !important;
+        }
+
+        .report-card:last-child {
+            page-break-after: auto !important;
+        }
+
+        .no-print,
+        .btn,
+        .sidebar,
+        .topbar,
+        .navbar,
+        .footer,
+        header,
+        aside,
+        footer {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        .content-area,
+        .main-content,
+        .container,
+        .container-fluid {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+        }
+
+        .header-img {
+            width: 100% !important;
+            max-height: 112px !important;
+            object-fit: contain !important;
+        }
+
+        .watermark-logo {
+            opacity: 0.10 !important;
+        }
+    }
+</style>
+
+<div class="no-print print-btn-area">
+    <button onclick="window.print()" class="btn btn-success">
+        🖨 Print All / Save PDF
+    </button>
+    <a href="{% url 'report_card_select' %}" class="btn btn-secondary">
+        ⬅ Back
+    </a>
+</div>
+
+<div class="bulk-wrapper">
+
+{% for card in cards %}
+
+<div class="report-card">
+
+    {% if logo_url %}
+        <img src="{{ logo_url }}" class="watermark-logo">
+    {% else %}
+        <img src="{% static 'images/logo.png' %}" class="watermark-logo">
+    {% endif %}
+
+    <div class="report-content">
+
+        <div class="header-img-box">
+            {% if header_url %}
+                <img src="{{ header_url }}" class="header-img">
+            {% else %}
+                <img src="{% static 'images/header.jpg' %}" class="header-img">
+            {% endif %}
+
+            <div class="report-title">
+                Report Card - Academic Session :
+                {% if card.academic_session %}
+                    {{ card.academic_session }}
+                {% else %}
+                    2025-26
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="student-info-grid">
+            <div>
+                <table class="info-table">
+                    <tr>
+                        <td>Name</td>
+                        <td>: {{ card.student.student_name|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Father's</td>
+                        <td>: {{ card.student.father_name|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Mother's</td>
+                        <td>: {{ card.student.mother_name|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Address</td>
+                        <td>: {{ card.student.address|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Class</td>
+                        <td>: {{ card.student.class_assigned|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Birth Date</td>
+                        <td>: {{ card.student.date_of_birth|default:"-" }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="number-panel">
+                <table class="roll-reg-table">
+                    <tr>
+                        <td class="clean-label">Roll No</td>
+                        <td class="clean-value">{{ card.student.roll_no|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td class="clean-label">SID</td>
+                        <td class="clean-value sid-value">{{ card.student.student_id|default:card.student.id }}</td>
+                    </tr>
+                    <tr>
+                        <td class="clean-label">Reg. No</td>
+                        <td class="clean-value reg-value">{{ card.student.registration_no|default:"-" }}</td>
+                    </tr>
+                </table>
+
+                <table class="result-no-table">
+                    <tr>
+                        <td class="clean-label">Result No</td>
+                        <td class="clean-value result-value">
+                            {% if card.result_no %}
+                                {{ card.result_no }}
+                            {% else %}
+                                R{{ card.student.id }}E{{ card.exam.id }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="photo-panel">
+                {% if card.student.photo %}
+                    <img src="{{ card.student.photo.url }}" class="student-photo">
+                {% else %}
+                    <div class="student-photo photo-placeholder">Photo</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <table class="marks-table">
+            <thead>
+                <tr>
+                    <th colspan="7" class="marks-title">
+                        Scholastic Areas &nbsp;&nbsp;&nbsp; {{ card.exam.name }} ({{ card.max_total|default:100 }} Marks)
+                    </th>
+                </tr>
+                <tr>
+                    <th style="width:38px;">SL</th>
+                    <th>Subject</th>
+                    <th>Written</th>
+                    <th>Oral</th>
+                    <th>Total</th>
+                    <th>Max</th>
+                    <th>Grade</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for r in card.results %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="subject-name">{{ r.subject }}</td>
+                    <td>{{ r.written_marks }}</td>
+                    <td>{{ r.oral_marks }}</td>
+                    <td>{{ r.total_marks }}</td>
+                    <td>{{ r.max_marks|default:100 }}</td>
+                    <td>{{ r.grade }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">No marks found</td>
+                </tr>
+                {% endfor %}
+
+                <tr>
+                    <td colspan="2"><b>Total</b></td>
+                    <td><b>{{ card.written_total|default:0 }}</b></td>
+                    <td><b>{{ card.oral_total|default:0 }}</b></td>
+                    <td><b>{{ card.grand_total|default:0 }}</b></td>
+                    <td><b>{{ card.max_total|default:0 }}</b></td>
+                    <td><b>{{ card.final_grade|default:"-" }}</b></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="bottom-section">
+            <div>
+                <table class="small-table">
+                    <tr>
+                        <th colspan="2" class="pink-head">Co-Scholastic Areas</th>
+                    </tr>
+                    <tr><td>Self Answering</td><td class="green-cell">A</td></tr>
+                    <tr><td>Problem Solving</td><td class="green-cell">A</td></tr>
+                    <tr><td>Decision Making</td><td class="green-cell">A</td></tr>
+                    <tr><td>Effective Communication</td><td class="green-cell">A</td></tr>
+                </table>
+
+                <table class="small-table" style="margin-top:7px;">
+                    <tr>
+                        <th colspan="2" class="pink-head">Exam Result</th>
+                    </tr>
+                    <tr><td>Percentage</td><td class="green-cell">{{ card.percentage|default:0 }}%</td></tr>
+                    <tr><td>Attendance</td><td class="green-cell">{{ card.attendance_percentage|default:0 }}%</td></tr>
+                    <tr><td>Grade</td><td class="green-cell">{{ card.final_grade|default:"-" }}</td></tr>
+                    <tr><td>Result</td><td class="green-cell">{{ card.result_status|default:"-" }}</td></tr>
+                    <tr><td>Class Rank</td><td>{{ card.class_rank|default:"-" }}</td></tr>
+                </table>
+            </div>
+
+            <div>
+                <table class="small-table">
+                    <tr>
+                        <th class="pink-head">Mark Range (%)</th>
+                        <th class="pink-head">Grade</th>
+                    </tr>
+                    <tr><td>90% - 100%</td><td>AA</td></tr>
+                    <tr><td>80% - 89%</td><td>A+</td></tr>
+                    <tr><td>60% - 79%</td><td>A</td></tr>
+                    <tr><td>45% - 59%</td><td>B+</td></tr>
+                    <tr><td>40% - 44%</td><td>B</td></tr>
+                    <tr><td>35% - 39%</td><td>C+</td></tr>
+                    <tr><td>24% - 34%</td><td>C</td></tr>
+                    <tr><td>Below 24%</td><td>D</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="signature-area">
+            <div>
+                <div class="qr-box">
+                    {% if card.qr_code %}
+                        <img src="{{ card.qr_code }}">
+                    {% elif qr_code %}
+                        <img src="{{ qr_code }}">
+                    {% else %}
+                        <img src="{% static 'images/qr.png' %}"
+                             onerror="this.style.display='none'; this.parentElement.innerHTML='QR CODE';">
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                <div class="signature-line">___________________</div>
+                (Class Teacher)
+            </div>
+
+            <div>
+                <div class="signature-line">
+                    <img src="{% if principal_sign %}{{ principal_sign }}{% else %}{% static 'images/principal_sign.png' %}{% endif %}"
+                         class="principal-sign-img"
+                         onerror="this.style.display='none'; this.parentElement.innerHTML='___________________';">
+                </div>
+                (Principal)
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% empty %}
+
+<div class="alert alert-warning text-center no-print">
+    No report card found for bulk print.
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

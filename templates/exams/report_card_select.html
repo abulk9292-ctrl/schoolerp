@@ -1,34 +1,90 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="card card-box p-4">
-    <h3 class="fw-bold mb-3">Print Report Card</h3>
+<div class="container mt-4">
 
-    <form method="get">
-        <div class="row">
-            <div class="col-md-6">
-                <label>Student</label>
-                <select name="student_id" class="form-control" required>
-                    <option value="">Select Student</option>
-                    {% for s in students %}
-                    <option value="{{ s.id }}">{{ s }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
 
-            <div class="col-md-6">
-                <label>Exam</label>
-                <select name="exam_id" class="form-control" required>
-                    <option value="">Select Exam</option>
-                    {% for e in exams %}
-                    <option value="{{ e.id }}">{{ e }}</option>
-                    {% endfor %}
-                </select>
-            </div>
+            <h3 class="fw-bold text-primary mb-3">
+                🧾 Generate Report Card
+            </h3>
+
+            <p class="text-muted">
+                Select student and exam to generate report card
+            </p>
+
+            <form method="get">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Student</label>
+
+                        <select name="student_id" class="form-select" required>
+                            <option value="">-- Select Student --</option>
+
+                            {% for s in students %}
+                                <option value="{{ s.id }}">
+
+                                    {% if s.student_name %}
+                                        {{ s.student_name }}
+                                    {% elif s.name %}
+                                        {{ s.name }}
+                                    {% elif s.full_name %}
+                                        {{ s.full_name }}
+                                    {% else %}
+                                        {{ s }}
+                                    {% endif %}
+
+                                    —
+
+                                    {% if s.class_assigned %}
+                                        Class: {{ s.class_assigned.class_name }}
+                                    {% else %}
+                                        Class: {{ selected_class|default:"-" }}
+                                    {% endif %}
+
+                                    | ID: {{ s.student_id|default:s.id }}
+
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Exam</label>
+
+                        <select name="exam_id" class="form-select" required>
+                            <option value="">-- Select Exam --</option>
+
+                            {% for e in exams %}
+                                <option value="{{ e.id }}">
+                                    {{ e.name }} ({{ e.academic_session }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+
+                    <button class="btn btn-success px-4">
+                        📄 Generate Report Card
+                    </button>
+
+                    <a href="{% url 'result_list' %}" class="btn btn-secondary px-4">
+                        ⬅ Back
+                    </a>
+
+                </div>
+
+            </form>
+
         </div>
+    </div>
 
-        <button class="btn btn-success mt-3">Generate Report Card</button>
-    </form>
 </div>
 
 {% endblock %}

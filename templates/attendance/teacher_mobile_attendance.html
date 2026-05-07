@@ -1,0 +1,339 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+
+.mobile-card{
+    max-width:500px;
+    margin:auto;
+    border-radius:25px;
+    overflow:hidden;
+    background:#fff;
+    box-shadow:0 10px 30px rgba(0,0,0,0.15);
+}
+
+.top-header{
+    background:linear-gradient(135deg,#0d6efd,#062b63);
+    color:white;
+    padding:30px 20px;
+    text-align:center;
+}
+
+.top-header h2{
+    font-weight:900;
+    margin-bottom:5px;
+}
+
+.top-header p{
+    margin:0;
+    opacity:.9;
+}
+
+.body-area{
+    padding:25px;
+}
+
+.info-box{
+    background:#f8f9fa;
+    border-radius:15px;
+    padding:15px;
+    margin-bottom:20px;
+}
+
+.selfie-preview{
+    width:140px;
+    height:140px;
+    border-radius:20px;
+    object-fit:cover;
+    border:4px solid #0d6efd;
+    margin-top:10px;
+    display:none;
+}
+
+.status-box{
+    padding:15px;
+    border-radius:15px;
+    text-align:center;
+    font-weight:700;
+    margin-bottom:20px;
+}
+
+.success-box{
+    background:#d1e7dd;
+    color:#0f5132;
+}
+
+.warning-box{
+    background:#fff3cd;
+    color:#856404;
+}
+
+button{
+    border-radius:14px !important;
+    font-weight:700 !important;
+    padding:12px !important;
+}
+
+.location-box{
+    background:#eef4ff;
+    border-radius:15px;
+    padding:12px;
+    margin-bottom:15px;
+    font-size:14px;
+}
+
+</style>
+
+<div class="container mt-4 mb-5">
+
+    <div class="mobile-card">
+
+        <div class="top-header">
+
+            <h2>📱 Teacher Attendance</h2>
+
+            <p>
+                AL RAHMAN MISSION
+            </p>
+
+        </div>
+
+        <div class="body-area">
+
+            {% if messages %}
+                {% for message in messages %}
+
+                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">
+                        {{ message }}
+                    </div>
+
+                {% endfor %}
+            {% endif %}
+
+            <div class="info-box">
+
+                <h5 class="fw-bold">
+                    👨‍🏫 Teacher Information
+                </h5>
+
+                <hr>
+
+                <p>
+                    <b>Name:</b>
+                    {{ employee.name }}
+                </p>
+
+                <p>
+                    <b>Employee ID:</b>
+                    {{ employee.employee_id }}
+                </p>
+
+                <p>
+                    <b>Date:</b>
+                    {{ today }}
+                </p>
+
+            </div>
+
+            {% if today_attendance %}
+
+                <div class="status-box success-box">
+
+                    ✅ Attendance Already Marked Today
+
+                    <hr>
+
+                    <div class="mt-2">
+
+                        Status:
+                        <b>{{ today_attendance.status }}</b>
+
+                    </div>
+
+                    <div>
+
+                        Time:
+                        {{ today_attendance.marked_at }}
+
+                    </div>
+
+                    <div>
+
+                        Distance:
+                        {{ today_attendance.distance_meters }} meters
+
+                    </div>
+
+                </div>
+
+            {% else %}
+
+            <form method="POST" enctype="multipart/form-data">
+
+                {% csrf_token %}
+
+                <div class="location-box">
+
+                    <div>
+                        📍 School Radius:
+                        <b>{{ school_radius_meters }} meters</b>
+                    </div>
+
+                    <div class="mt-2">
+                        📡 GPS Location Required
+                    </div>
+
+                    <div class="mt-2">
+                        🤳 Selfie Required
+                    </div>
+
+                </div>
+
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
+                <input type="hidden" name="address" id="address">
+
+                <div class="mb-3">
+
+                    <label class="form-label fw-bold">
+                        🤳 Upload Selfie
+                    </label>
+
+                    <input
+                        type="file"
+                        name="selfie"
+                        id="selfieInput"
+                        accept="image/*"
+                        capture="user"
+                        class="form-control"
+                        required
+                    >
+
+                    <center>
+
+                        <img
+                            id="previewImage"
+                            class="selfie-preview"
+                        >
+
+                    </center>
+
+                </div>
+
+                <div class="mb-3">
+
+                    <button
+                        type="button"
+                        class="btn btn-primary w-100"
+                        onclick="getLocation()"
+                    >
+                        📍 Get GPS Location
+                    </button>
+
+                </div>
+
+                <div id="locationStatus" class="alert alert-info text-center">
+
+                    Waiting for GPS location...
+
+                </div>
+
+                <button
+                    type="submit"
+                    class="btn btn-success w-100"
+                >
+                    ✅ Mark Attendance
+                </button>
+
+            </form>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const selfieInput = document.getElementById('selfieInput');
+const previewImage = document.getElementById('previewImage');
+
+if(selfieInput){
+
+    selfieInput.addEventListener('change', function(e){
+
+        const file = e.target.files[0];
+
+        if(file){
+
+            previewImage.src = URL.createObjectURL(file);
+            previewImage.style.display = 'block';
+
+        }
+
+    });
+
+}
+
+
+function getLocation(){
+
+    const statusBox = document.getElementById('locationStatus');
+
+    if(navigator.geolocation){
+
+        statusBox.innerHTML = "📡 Getting GPS location...";
+
+        navigator.geolocation.getCurrentPosition(
+
+            function(position){
+
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+
+                document.getElementById('latitude').value = lat;
+                document.getElementById('longitude').value = lon;
+
+                statusBox.className = 'alert alert-success text-center';
+
+                statusBox.innerHTML =
+                    "✅ GPS Found<br>" +
+                    "Latitude: " + lat +
+                    "<br>Longitude: " + lon;
+
+                // optional address text
+                document.getElementById('address').value =
+                    "Lat: " + lat + ", Lon: " + lon;
+
+            },
+
+            function(error){
+
+                statusBox.className = 'alert alert-danger text-center';
+
+                statusBox.innerHTML =
+                    "❌ GPS permission denied or failed.";
+
+            }
+
+        );
+
+    }else{
+
+        statusBox.className = 'alert alert-danger text-center';
+
+        statusBox.innerHTML =
+            "❌ Geolocation not supported.";
+
+    }
+
+}
+
+</script>
+
+{% endblock %}

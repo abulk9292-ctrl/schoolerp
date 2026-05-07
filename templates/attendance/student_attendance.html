@@ -1,20 +1,48 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2 class="mb-3">Student Attendance</h2>
+<style>
+    .att-head {
+        background: linear-gradient(135deg, #0c9b57, #0b7cff);
+        color: white;
+        padding: 18px 22px;
+        border-radius: 22px;
+        margin-bottom: 18px;
+        box-shadow: 0 14px 30px rgba(11,124,255,.18);
+    }
+
+    .student-photo {
+        width: 45px;
+        height: 45px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 2px solid #e5e7eb;
+    }
+</style>
+
+<div class="att-head">
+    <h3 class="mb-1">📋 Student Attendance</h3>
+    <div>Class-wise attendance marking and report view</div>
+</div>
+
+{% if not can_mark_attendance %}
+<div class="alert alert-warning">
+    ⚠️ আপনি এই class-এর attendance mark করতে পারবেন না। শুধু report/view করতে পারবেন।
+</div>
+{% endif %}
 
 <div class="card card-box mb-4">
     <div class="card-body">
         <form method="get" class="row g-3">
             <div class="col-md-4">
-                <label class="form-label">Date</label>
+                <label class="form-label fw-bold">Date</label>
                 <input type="date" name="date" value="{{ attendance_date }}" class="form-control">
             </div>
 
             <div class="col-md-4">
-                <label class="form-label">Class</label>
+                <label class="form-label fw-bold">Class</label>
                 <select name="class_id" class="form-select">
-                    <option value="">All Classes</option>
+                    <option value="">Select Class</option>
                     {% for c in classes %}
                         <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>
                             {{ c.class_name }}
@@ -24,7 +52,9 @@
             </div>
 
             <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary">Load Attendance</button>
+                <button type="submit" class="btn btn-primary px-4">
+                    🔍 Load Attendance
+                </button>
             </div>
         </form>
     </div>
@@ -38,8 +68,8 @@
             <input type="hidden" name="class_id" value="{{ selected_class|default:'' }}">
 
             <div class="table-responsive">
-                <table class="table table-bordered align-middle">
-                    <thead class="table-light">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-dark">
                         <tr>
                             <th>#</th>
                             <th>Photo</th>
@@ -50,41 +80,66 @@
                             <th>Status</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         {% for s in students %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
+
                             <td>
                                 {% if s.photo %}
-                                    <img src="{{ s.photo.url }}" width="45" height="45" style="object-fit: cover; border-radius: 6px;">
+                                    <img src="{{ s.photo.url }}" class="student-photo">
                                 {% else %}
-                                    No Photo
+                                    <span class="badge bg-secondary">No Photo</span>
                                 {% endif %}
                             </td>
+
                             <td>{{ s.roll_no }}</td>
-                            <td>{{ s.student_id }}</td>
-                            <td>{{ s.student_name }}</td>
+                            <td><strong>{{ s.student_id }}</strong></td>
+                            <td><strong>{{ s.student_name }}</strong></td>
                             <td>{{ s.class_assigned }}</td>
+
                             <td>
-                                <select name="status_{{ s.id }}" class="form-select">
-                                    <option value="Present" {% if s.current_status == 'Present' %}selected{% endif %}>Present</option>
-                                    <option value="Absent" {% if s.current_status == 'Absent' %}selected{% endif %}>Absent</option>
-                                    <option value="Late" {% if s.current_status == 'Late' %}selected{% endif %}>Late</option>
-                                </select>
+                                {% if can_mark_attendance %}
+                                    <select name="status_{{ s.id }}" class="form-select">
+                                        <option value="Present" {% if s.current_status == 'Present' %}selected{% endif %}>Present</option>
+                                        <option value="Absent" {% if s.current_status == 'Absent' %}selected{% endif %}>Absent</option>
+                                        <option value="Late" {% if s.current_status == 'Late' %}selected{% endif %}>Late</option>
+                                    </select>
+                                {% else %}
+                                    {% if s.current_status == 'Present' %}
+                                        <span class="badge bg-success">Present</span>
+                                    {% elif s.current_status == 'Absent' %}
+                                        <span class="badge bg-danger">Absent</span>
+                                    {% elif s.current_status == 'Late' %}
+                                        <span class="badge bg-warning text-dark">Late</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Not Marked</span>
+                                    {% endif %}
+                                {% endif %}
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="7" class="text-center">No students found for this filter.</td>
+                            <td colspan="7" class="text-center fw-bold text-muted py-4">
+                                No students found for this filter.
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
 
-            <button type="submit" class="btn btn-success">
-                {% if is_update %}Update Attendance{% else %}Save Attendance{% endif %}
-            </button>
+            {% if can_mark_attendance %}
+                <button type="submit" class="btn btn-success px-4">
+                    {% if is_update %}✅ Update Attendance{% else %}✅ Save Attendance{% endif %}
+                </button>
+            {% else %}
+                <a href="/attendance/students/daily-report/?date={{ attendance_date }}{% if selected_class %}&class_id={{ selected_class }}{% endif %}"
+                   class="btn btn-info px-4">
+                    📄 View Report
+                </a>
+            {% endif %}
         </form>
     </div>
 </div>

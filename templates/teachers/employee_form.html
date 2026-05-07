@@ -1,72 +1,235 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2 class="mb-4">{{ page_title }}</h2>
+
+<style>
+    .page-head {
+        background: linear-gradient(135deg, #0c9b57, #0b7cff);
+        color: white;
+        padding: 18px 22px;
+        border-radius: 22px;
+        box-shadow: 0 14px 30px rgba(11,124,255,.18);
+        margin-bottom: 20px;
+    }
+
+    .permission-box {
+        border-radius: 18px;
+        background: #f8fafc;
+        border: 1px solid #e5e7eb;
+        padding: 16px;
+        height: 100%;
+    }
+
+    .permission-title {
+        font-weight: 900;
+        color: #0f172a;
+        margin-bottom: 12px;
+        border-bottom: 1px dashed #cbd5e1;
+        padding-bottom: 8px;
+    }
+
+    .form-check {
+        background: white;
+        border-radius: 12px;
+        padding: 10px 12px 10px 38px;
+        margin-bottom: 8px;
+        box-shadow: 0 6px 16px rgba(0,0,0,.04);
+        font-weight: 700;
+    }
+
+    .admin-access {
+        background: linear-gradient(135deg, #fff7ed, #fef3c7);
+        border: 1px solid #f59e0b;
+        border-radius: 18px;
+        padding: 15px;
+        margin-bottom: 18px;
+        font-weight: 800;
+    }
+</style>
+
+<div class="page-head">
+    <h3 class="mb-1">👨‍🏫 {{ page_title }}</h3>
+    <div>Employee details + ERP role permission control</div>
+</div>
 
 <div class="card card-box">
-    <div class="card-body">
+    <div class="card-body p-4">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
 
+            <h5 class="fw-bold mb-3">👤 Basic Information</h5>
+
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label class="form-label">Name</label>
+                    <label class="form-label fw-bold">Name</label>
                     {{ form.name }}
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Designation</label>
+                    <label class="form-label fw-bold">Designation</label>
                     {{ form.designation }}
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Qualification</label>
+                    <label class="form-label fw-bold">Qualification</label>
                     {{ form.qualification }}
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Subject Specialization</label>
+                    <label class="form-label fw-bold">Subject Specialization</label>
                     {{ form.subject_specialization }}
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Phone</label>
+                    <label class="form-label fw-bold">Phone</label>
                     {{ form.phone }}
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Aadhaar Number</label>
+                    <label class="form-label fw-bold">Aadhaar Number</label>
                     {{ form.aadhaar_number }}
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Joining Date</label>
+                    <label class="form-label fw-bold">Joining Date</label>
                     {{ form.joining_date }}
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Salary</label>
+                    <label class="form-label fw-bold">Salary</label>
                     {{ form.salary }}
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Photo</label>
+                    <label class="form-label fw-bold">Photo</label>
                     {{ form.photo }}
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Active Status</label>
+                    <label class="form-label fw-bold">Active Status</label>
                     <div class="form-check mt-2">
                         {{ form.is_active }}
+                        <label class="form-check-label ms-2">Active Employee</label>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-4">
-                <button type="submit" class="btn btn-success">Save Employee</button>
-                <a href="/teachers/" class="btn btn-secondary">Back</a>
+            <hr class="my-4">
+
+            <h5 class="fw-bold mb-3">🔐 ERP Access Permission</h5>
+
+            <div class="admin-access">
+                <div class="form-check mb-0">
+                    {{ form.is_erp_admin }}
+                    <label class="form-check-label ms-2">
+                        Full ERP Admin Access — সব module access পাবে
+                    </label>
+                </div>
+            </div>
+
+            <div class="row g-3">
+
+                <div class="col-md-4">
+                    <div class="permission-box">
+                        <div class="permission-title">🏫 Core Modules</div>
+
+                        <div class="form-check">
+                            {{ form.can_access_students }}
+                            <label class="form-check-label ms-2">Students Access</label>
+                        </div>
+
+                        <div class="form-check">
+                            {{ form.can_access_teachers }}
+                            <label class="form-check-label ms-2">Teachers / Employees Access</label>
+                        </div>
+
+                        <div class="form-check">
+                            {{ form.can_access_academics }}
+                            <label class="form-check-label ms-2">Academics Access</label>
+                        </div>
+
+                        <div class="form-check">
+                            {{ form.can_access_attendance }}
+                            <label class="form-check-label ms-2">Attendance Access</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="permission-box">
+                        <div class="permission-title">💰 Finance Modules</div>
+
+                        <div class="form-check">
+                            {{ form.can_access_fees }}
+                            <label class="form-check-label ms-2">Fees Access</label>
+                        </div>
+
+                        <div class="form-check">
+                            {{ form.can_access_payroll }}
+                            <label class="form-check-label ms-2">Payroll / Salary Access</label>
+                        </div>
+
+                        <div class="form-check">
+                            {{ form.can_access_expenses }}
+                            <label class="form-check-label ms-2">Expenses Access</label>
+                        </div>
+
+                        <div class="form-check">
+                            {{ form.can_access_reports }}
+                            <label class="form-check-label ms-2">Reports Access</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="permission-box">
+                        <div class="permission-title">📚 Academic & System</div>
+
+                        <div class="form-check">
+                            {{ form.can_access_exams }}
+                            <label class="form-check-label ms-2">Exams Access</label>
+                        </div>
+
+                        <div class="form-check">
+                            {{ form.can_access_admissions }}
+                            <label class="form-check-label ms-2">Admissions Access</label>
+                        </div>
+
+                        <div class="form-check">
+                            {{ form.can_access_idcards }}
+                            <label class="form-check-label ms-2">ID Cards Access</label>
+                        </div>
+
+                        <div class="form-check">
+                            {{ form.can_access_communications }}
+                            <label class="form-check-label ms-2">SMS / WhatsApp Access</label>
+                        </div>
+
+                        <div class="form-check">
+                            {{ form.can_access_backup }}
+                            <label class="form-check-label ms-2">Backup Access</label>
+                        </div>
+
+                        <div class="form-check">
+                            {{ form.can_access_settings }}
+                            <label class="form-check-label ms-2">Settings Access</label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-4 d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn btn-success px-4">
+                    ✅ Save Employee
+                </button>
+
+                <a href="/teachers/" class="btn btn-secondary px-4">
+                    ⬅ Back
+                </a>
             </div>
         </form>
     </div>
 </div>
+
 {% endblock %}

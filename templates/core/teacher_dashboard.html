@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+    .td-head {
+        background: linear-gradient(135deg, #0c9b57, #0b7cff);
+        color: white;
+        padding: 22px;
+        border-radius: 24px;
+        box-shadow: 0 16px 35px rgba(11,124,255,.22);
+        margin-bottom: 22px;
+    }
+
+    .td-card {
+        border: none;
+        border-radius: 22px;
+        padding: 20px;
+        background: #ffffff;
+        box-shadow: 0 14px 32px rgba(0,0,0,.08);
+        height: 100%;
+    }
+
+    .td-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-bottom: 12px;
+        background: #e0f2fe;
+        color: #075985;
+    }
+
+    .td-value {
+        font-size: 28px;
+        font-weight: 900;
+        color: #0f172a;
+    }
+
+    .td-label {
+        color: #64748b;
+        font-weight: 800;
+    }
+
+    .profile-box {
+        background: linear-gradient(135deg, #ecfdf5, #eff6ff);
+        border-radius: 24px;
+        padding: 22px;
+        border: 1px solid #dbeafe;
+        box-shadow: 0 12px 28px rgba(0,0,0,.06);
+    }
+
+    .teacher-photo {
+        width: 92px;
+        height: 92px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid white;
+        box-shadow: 0 12px 28px rgba(0,0,0,.18);
+    }
+
+    .quick-link {
+        display: block;
+        padding: 14px 16px;
+        border-radius: 16px;
+        background: #f8fafc;
+        text-decoration: none;
+        color: #0f172a;
+        font-weight: 900;
+        margin-bottom: 10px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .quick-link:hover {
+        background: #e0f2fe;
+        color: #075985;
+    }
+</style>
+
+<div class="td-head">
+    <h3 class="mb-1">👨‍🏫 Teacher Dashboard</h3>
+    <div>Welcome to AL RAHMAN MISSION ERP</div>
+</div>
+
+{% if employee %}
+<div class="profile-box mb-4">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        {% if employee.photo %}
+            <img src="{{ employee.photo.url }}" class="teacher-photo">
+        {% else %}
+            <div class="teacher-photo bg-white d-flex align-items-center justify-content-center fw-bold fs-1">
+                {{ employee.name|slice:":1" }}
+            </div>
+        {% endif %}
+
+        <div>
+            <h3 class="fw-bold mb-1">{{ employee.name }}</h3>
+            <div class="fw-bold text-muted">{{ employee.designation }}</div>
+            <div class="mt-2">
+                <span class="badge bg-primary">{{ employee.employee_id }}</span>
+                {% if employee.is_active %}
+                    <span class="badge bg-success">Active</span>
+                {% else %}
+                    <span class="badge bg-danger">Inactive</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-3">
+        <div class="td-card">
+            <div class="td-icon">📍</div>
+            <div class="td-value">{{ teacher_status }}</div>
+            <div class="td-label">Today Attendance</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="td-card">
+            <div class="td-icon">👥</div>
+            <div class="td-value">{{ total_students }}</div>
+            <div class="td-label">Total Students</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="td-card">
+            <div class="td-icon">✅</div>
+            <div class="td-value">{{ total_present }}</div>
+            <div class="td-label">Present Today</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="td-card">
+            <div class="td-icon">❌</div>
+            <div class="td-value">{{ total_absent }}</div>
+            <div class="td-label">Absent Today</div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-3">
+
+    <div class="col-md-6">
+        <div class="td-card">
+            <h5 class="fw-bold mb-3">💰 Salary Summary</h5>
+
+            <div class="d-flex justify-content-between border-bottom py-2">
+                <strong>Total Paid</strong>
+                <span class="fw-bold text-success">₹ {{ total_paid }}</span>
+            </div>
+
+            <div class="d-flex justify-content-between py-2">
+                <strong>Total Due</strong>
+                <span class="fw-bold text-danger">₹ {{ total_due }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="td-card">
+            <h5 class="fw-bold mb-3">⚡ Quick Actions</h5>
+
+            <a href="{% url 'teacher_mobile_attendance' %}" class="quick-link">
+                📍 Mark Teacher Attendance
+            </a>
+
+            <a href="/attendance/teachers/daily-report/" class="quick-link">
+                📄 Teacher Attendance Report
+            </a>
+
+            {% if employee.can_access_students or employee.is_erp_admin %}
+                <a href="/students/" class="quick-link">
+                    👥 Student List
+                </a>
+            {% endif %}
+
+            {% if employee.can_access_fees or employee.is_erp_admin %}
+                <a href="/fees/" class="quick-link">
+                    💰 Fee Collection
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

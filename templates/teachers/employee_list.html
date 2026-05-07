@@ -1,14 +1,73 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="d-flex justify-content-between mb-3">
-    <h2>All Employees</h2>
-    <a href="/teachers/add/" class="btn btn-success">Add New</a>
+
+<style>
+    .emp-head {
+        background: linear-gradient(135deg, #0c9b57, #0b7cff);
+        color: white;
+        padding: 18px 22px;
+        border-radius: 22px;
+        box-shadow: 0 14px 30px rgba(11,124,255,.18);
+        margin-bottom: 20px;
+    }
+
+    .emp-photo {
+        width: 46px;
+        height: 46px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 3px solid #e5e7eb;
+    }
+
+    .no-photo {
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        color: #475569;
+    }
+
+    .perm-badge {
+        display: inline-block;
+        font-size: 11px;
+        padding: 5px 8px;
+        border-radius: 999px;
+        margin: 2px;
+        font-weight: 800;
+        background: #e0f2fe;
+        color: #075985;
+    }
+
+    .admin-badge {
+        background: #fef3c7;
+        color: #92400e;
+        border: 1px solid #f59e0b;
+    }
+
+    .action-btns .btn {
+        margin: 2px;
+    }
+</style>
+
+<div class="emp-head d-flex justify-content-between align-items-center flex-wrap gap-2">
+    <div>
+        <h3 class="mb-1">👨‍🏫 All Employees</h3>
+        <div>Employee list + role permission overview</div>
+    </div>
+
+    <a href="/teachers/add/" class="btn btn-light fw-bold">
+        ➕ Add New
+    </a>
 </div>
 
 <div class="table-responsive">
-    <table class="table table-bordered">
-        <thead>
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-dark">
             <tr>
                 <th>#</th>
                 <th>Photo</th>
@@ -18,25 +77,38 @@
                 <th>Phone</th>
                 <th>Salary</th>
                 <th>Status</th>
-                <th>Action</th>
+                <th>Permission</th>
+                <th width="170">Action</th>
             </tr>
         </thead>
+
         <tbody>
             {% for e in employees %}
             <tr>
                 <td>{{ forloop.counter }}</td>
+
                 <td>
                     {% if e.photo %}
-                        <img src="{{ e.photo.url }}" width="40" height="40" style="object-fit: cover;">
+                        <img src="{{ e.photo.url }}" class="emp-photo">
                     {% else %}
-                        No Photo
+                        <div class="no-photo">
+                            {{ e.name|slice:":1" }}
+                        </div>
                     {% endif %}
                 </td>
-                <td>{{ e.employee_id }}</td>
-                <td>{{ e.name }}</td>
+
+                <td>
+                    <strong>{{ e.employee_id }}</strong>
+                </td>
+
+                <td>
+                    <strong>{{ e.name }}</strong>
+                </td>
+
                 <td>{{ e.designation }}</td>
-                <td>{{ e.phone }}</td>
-                <td>{{ e.salary }}</td>
+                <td>{{ e.phone|default:"-" }}</td>
+                <td>₹ {{ e.salary }}</td>
+
                 <td>
                     {% if e.is_active %}
                         <span class="badge bg-success">Active</span>
@@ -44,17 +116,94 @@
                         <span class="badge bg-danger">Inactive</span>
                     {% endif %}
                 </td>
+
                 <td>
-                    <a href="/teachers/edit/{{ e.id }}/" class="btn btn-warning btn-sm">Edit</a>
-                    <a href="/teachers/delete/{{ e.id }}/" class="btn btn-danger btn-sm">Delete</a>
+                    {% if e.is_erp_admin %}
+                        <span class="perm-badge admin-badge">Full ERP Admin</span>
+                    {% endif %}
+
+                    {% if e.can_access_students %}
+                        <span class="perm-badge">Students</span>
+                    {% endif %}
+
+                    {% if e.can_access_teachers %}
+                        <span class="perm-badge">Employees</span>
+                    {% endif %}
+
+                    {% if e.can_access_academics %}
+                        <span class="perm-badge">Academics</span>
+                    {% endif %}
+
+                    {% if e.can_access_attendance %}
+                        <span class="perm-badge">Attendance</span>
+                    {% endif %}
+
+                    {% if e.can_access_fees %}
+                        <span class="perm-badge">Fees</span>
+                    {% endif %}
+
+                    {% if e.can_access_payroll %}
+                        <span class="perm-badge">Payroll</span>
+                    {% endif %}
+
+                    {% if e.can_access_expenses %}
+                        <span class="perm-badge">Expenses</span>
+                    {% endif %}
+
+                    {% if e.can_access_exams %}
+                        <span class="perm-badge">Exams</span>
+                    {% endif %}
+
+                    {% if e.can_access_reports %}
+                        <span class="perm-badge">Reports</span>
+                    {% endif %}
+
+                    {% if e.can_access_admissions %}
+                        <span class="perm-badge">Admissions</span>
+                    {% endif %}
+
+                    {% if e.can_access_idcards %}
+                        <span class="perm-badge">ID Cards</span>
+                    {% endif %}
+
+                    {% if e.can_access_communications %}
+                        <span class="perm-badge">SMS/WhatsApp</span>
+                    {% endif %}
+
+                    {% if e.can_access_backup %}
+                        <span class="perm-badge">Backup</span>
+                    {% endif %}
+
+                    {% if e.can_access_settings %}
+                        <span class="perm-badge">Settings</span>
+                    {% endif %}
+                </td>
+
+                <td class="action-btns">
+                    <a href="/teachers/{{ e.id }}/" class="btn btn-info btn-sm">
+                        View
+                    </a>
+
+                    <a href="/teachers/edit/{{ e.id }}/" class="btn btn-warning btn-sm">
+                        Edit
+                    </a>
+
+                    <a href="/teachers/delete/{{ e.id }}/"
+                       onclick="return confirm('Delete this employee?')"
+                       class="btn btn-danger btn-sm">
+                        Delete
+                    </a>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="9" class="text-center">No employees found.</td>
+                <td colspan="10" class="text-center fw-bold text-muted py-4">
+                    No employees found.
+                </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
 {% endblock %}

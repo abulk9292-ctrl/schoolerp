@@ -1,46 +1,181 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h3 class="fw-bold mb-4">Exams Dashboard</h3>
+<style>
+    .exam-card {
+        border: none;
+        border-radius: 18px;
+        box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+        transition: 0.25s;
+        background: #ffffff;
+    }
+
+    .exam-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    }
+
+    .stat-box {
+        border-radius: 18px;
+        color: white;
+        padding: 22px;
+        min-height: 120px;
+    }
+
+    .bg-1 { background: linear-gradient(135deg, #2563eb, #1e40af); }
+    .bg-2 { background: linear-gradient(135deg, #16a34a, #166534); }
+    .bg-3 { background: linear-gradient(135deg, #f59e0b, #b45309); }
+    .bg-4 { background: linear-gradient(135deg, #dc2626, #991b1b); }
+
+    .option-btn {
+        width: 100%;
+        text-align: left;
+        border-radius: 14px;
+        padding: 14px 16px;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+</style>
+
+<h3 class="fw-bold mb-4">🎓 Exams Dashboard</h3>
 
 <div class="row g-3">
     <div class="col-md-3">
-        <div class="card card-box p-3">
+        <div class="stat-box bg-1">
             <h6>Total Exams</h6>
             <h2>{{ total_exams|default:0 }}</h2>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card card-box p-3">
+        <div class="stat-box bg-2">
             <h6>Total Results</h6>
             <h2>{{ total_results|default:0 }}</h2>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card card-box p-3">
+        <div class="stat-box bg-3">
             <h6>Passed</h6>
             <h2>{{ passed|default:0 }}</h2>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card card-box p-3">
+        <div class="stat-box bg-4">
             <h6>Failed</h6>
             <h2>{{ failed|default:0 }}</h2>
         </div>
     </div>
 </div>
 
-<div class="card card-box mt-4 p-4">
-    <h5 class="fw-bold">Exam Options</h5>
+<div class="card exam-card mt-4 p-4">
+    <h5 class="fw-bold mb-3">🔥 Exam Options</h5>
 
-    <a href="/exams/add/" class="btn btn-success mt-2">Add Exam</a>
-    <a href="/exams/routine/" class="btn btn-primary mt-2">Exam Routine</a>
-    <a href="/exams/results/add/" class="btn btn-warning mt-2">Add Marks</a>
-    <a href="/exams/results/" class="btn btn-info mt-2">Result List</a>
-    <a href="/exams/report-card/" class="btn btn-dark mt-2">Report Card</a>
+    <div class="row">
+
+        <!-- LEFT -->
+        <div class="col-md-4">
+
+            <a href="{% url 'exam_add' %}"
+               class="btn btn-success option-btn">
+
+                ➕ Exam Setup
+
+            </a>
+
+            <a href="{% url 'exam_routine' %}"
+               class="btn btn-primary option-btn">
+
+                📅 Exam Routine
+
+            </a>
+
+            <a href="{% url 'result_add' %}"
+               class="btn btn-warning option-btn">
+
+                ✍️ Add Marks
+
+            </a>
+
+            <a href="{% url 'bulk_result_entry' %}"
+               class="btn btn-info option-btn">
+
+                🧾 Bulk Marks Entry
+
+            </a>
+
+        </div>
+
+        <!-- MIDDLE -->
+        <div class="col-md-4">
+
+            <a href="{% url 'result_list' %}"
+               class="btn btn-secondary option-btn">
+
+                📋 Result List
+
+            </a>
+
+            <a href="{% url 'report_card_bulk_select' %}"
+                class="btn btn-outline-primary option-btn">
+
+                🖨 Report Card Bulk Print
+
+            </a>
+
+            <a href="{% url 'report_card_select' %}"
+               class="btn btn-dark option-btn">
+
+                📄 Single Report Card
+
+            </a>
+
+
+            <a href="{% url 'topper_result' %}"
+               class="btn btn-outline-success option-btn">
+
+                🏆 Top 10 / Topper
+
+            </a>
+
+        </div>
+
+        <!-- RIGHT -->
+        <div class="col-md-4">
+
+            <a href="{% url 'admit_card_select' %}"
+               class="btn btn-outline-primary option-btn">
+
+                🎫 Admit Card
+
+            </a>
+
+            <a href="{% url 'desk_slip_select' %}"
+               class="btn btn-outline-danger option-btn">
+
+                🪑 Desk Slip
+
+            </a>
+
+            <a href="{% url 'blank_marks_sheet_select' %}"
+               class="btn btn-outline-warning option-btn">
+
+                📝 Blank Marks Sheet
+
+            </a>
+
+            <button type="button"
+                    class="btn btn-outline-info option-btn"
+                    disabled>
+
+                📊 Exam Reports — Coming Next
+
+            </button>
+
+        </div>
+
+    </div>
 </div>
 
 {% endblock %}

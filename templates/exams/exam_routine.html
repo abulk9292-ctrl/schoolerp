@@ -1,45 +1,168 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="card card-box p-4">
-    <h3 class="fw-bold mb-3">Exam Routine</h3>
+<div class="container mt-4">
 
-    <form method="post" class="mb-4">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button class="btn btn-success">Save Routine</button>
-    </form>
+    <div class="card card-box p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="fw-bold mb-0">📅 Exam Routine</h3>
+            <a href="{% url 'exam_dashboard' %}" class="btn btn-dark">⬅ Back</a>
+        </div>
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped">
-            <thead class="table-success">
-                <tr>
-                    <th>Date</th>
-                    <th>Class</th>
-                    <th>Subject</th>
-                    <th>Exam</th>
-                    <th>Time</th>
-                    <th>Total Marks</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for r in routines %}
-                <tr>
-                    <td>{{ r.date }}</td>
-                    <td>{{ r.school_class }}</td>
-                    <td>{{ r.subject }}</td>
-                    <td>{{ r.exam }}</td>
-                    <td>{{ r.start_time }} - {{ r.end_time }}</td>
-                    <td>{{ r.total_marks }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center">No routine found</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <form method="get" class="row g-3 mb-4">
+            <div class="col-md-5">
+                <label class="form-label fw-bold">Filter Class</label>
+                <select name="class" class="form-select" onchange="this.form.submit()">
+                    <option value="">All Classes</option>
+                    {% for c in classes %}
+                        <option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>
+                            {{ c }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+
+        <hr>
+
+        <h5 class="fw-bold mb-3">➕ Add Routine</h5>
+
+        <form method="post" class="row g-3 mb-4" id="routineForm">
+            {% csrf_token %}
+
+            <input type="hidden" name="class" value="{{ selected_class }}">
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Exam</label>
+                {{ form.exam }}
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Class</label>
+                {{ form.school_class }}
+
+                <small class="text-muted">
+                    Class select করলে subject auto load হবে
+                </small>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Subject</label>
+                {{ form.subject }}
+
+                {% if selected_class and form.subject.field.choices|length <= 1 %}
+                    <small class="text-danger">
+                        এই class-এর subject assign করা হয়নি.
+                    </small>
+                {% endif %}
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Date</label>
+                {{ form.date }}
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Start Time</label>
+                {{ form.start_time }}
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">End Time</label>
+                {{ form.end_time }}
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Total Marks</label>
+                {{ form.total_marks }}
+            </div>
+
+            {% if form.errors %}
+                <div class="col-md-12">
+                    <div class="alert alert-danger">
+                        {{ form.errors }}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="col-md-12 d-flex gap-2">
+                <button class="btn btn-success">
+                    💾 Save Routine
+                </button>
+
+                <a href="{% url 'class_subject_assign' %}" class="btn btn-warning">
+                    ✅ Assign Class Subjects
+                </a>
+            </div>
+        </form>
     </div>
+
+    <div class="card card-box p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0">📋 Routine List</h5>
+
+            {% if selected_class %}
+                <span class="badge bg-primary">
+                    Class: {{ selected_class }}
+                </span>
+            {% endif %}
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-success">
+                    <tr>
+                        <th>Date</th>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Exam</th>
+                        <th>Time</th>
+                        <th>Total Marks</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for r in routines %}
+                    <tr>
+                        <td>{{ r.date }}</td>
+                        <td>{{ r.school_class }}</td>
+                        <td>{{ r.subject }}</td>
+                        <td>{{ r.exam.name }}</td>
+                        <td>{{ r.start_time }} - {{ r.end_time }}</td>
+                        <td>{{ r.total_marks }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            No routine found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
 </div>
+
+<script>
+const classSelect = document.getElementById("id_school_class");
+
+if (classSelect) {
+    classSelect.addEventListener("change", function() {
+        const selectedClass = this.value;
+        const currentUrl = new URL(window.location.href);
+
+        if (selectedClass) {
+            currentUrl.searchParams.set("class", selectedClass);
+        } else {
+            currentUrl.searchParams.delete("class");
+        }
+
+        window.location.href = currentUrl.toString();
+    });
+}
+</script>
 
 {% endblock %}

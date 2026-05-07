@@ -4,7 +4,7 @@
 <div class="container mt-4">
 
     <div class="card shadow mb-4">
-        <div class="card-body d-flex align-items-center">
+        <div class="card-body d-flex align-items-center flex-wrap gap-3">
             <div>
                 {% if student.photo %}
                     <img src="{{ student.photo.url }}" width="120" height="120" style="border-radius:12px; object-fit:cover;">
@@ -15,7 +15,7 @@
                 {% endif %}
             </div>
 
-            <div class="ms-4">
+            <div class="ms-2">
                 <h3>{{ student.student_name }}</h3>
 
                 {% if student.is_active %}
@@ -35,6 +35,10 @@
                 <a href="{% url 'student_delete' student.id %}" class="btn btn-danger mb-2">Delete</a><br>
                 <a href="{% url 'add_sibling' student.id %}" class="btn btn-success mb-2">Add Sibling</a><br>
                 <a href="{% url 'complaint_add' student.id %}" class="btn btn-warning mb-2">Add Complaint</a><br>
+
+                <a href="/exams/report-card/?student_id={{ student.id }}" class="btn btn-dark mb-2">
+                    🖨 Print Result
+                </a><br>
 
                 {% if student.is_active %}
                     <a href="{% url 'student_discontinue' student.id %}" class="btn btn-dark mb-2">Discontinue</a><br>
@@ -93,20 +97,21 @@
     </div>
 
     <div class="card shadow mb-4">
-        <div class="card-header bg-dark text-white">Complaints</div>
-        <div class="card-body">
-
-            <a href="{% url 'complaint_add' student.id %}" class="btn btn-warning mb-3">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <span>Complaints</span>
+            <a href="{% url 'complaint_add' student.id %}" class="btn btn-warning btn-sm">
                 + Add Complaint
             </a>
+        </div>
 
-            <table class="table table-bordered table-sm">
-                <tr>
+        <div class="card-body">
+            <table class="table table-bordered table-sm align-middle">
+                <tr class="table-light">
                     <th>Title</th>
                     <th>Parent</th>
                     <th>Status</th>
                     <th>Solution</th>
-                    <th>Action</th>
+                    <th width="220">Action</th>
                 </tr>
 
                 {% for c in complaints %}
@@ -120,21 +125,23 @@
                             <span class="badge bg-danger">Pending</span>
                         {% endif %}
                     </td>
-                    <td>
-                        {% if c.solution %}
-                            {{ c.solution }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
+                    <td>{{ c.solution|default:"-" }}</td>
                     <td>
                         {% if c.status == 'Pending' %}
                             <a href="{% url 'complaint_solve' c.id %}" class="btn btn-sm btn-success">
                                 Solve
                             </a>
-                        {% else %}
-                            ✔
                         {% endif %}
+
+                        <a href="/complaints/edit/{{ c.id }}/" class="btn btn-sm btn-warning">
+                            Edit
+                        </a>
+
+                        <a href="/complaints/delete/{{ c.id }}/"
+                           onclick="return confirm('Delete this complaint?')"
+                           class="btn btn-sm btn-danger">
+                            Delete
+                        </a>
                     </td>
                 </tr>
                 {% empty %}
@@ -143,7 +150,6 @@
                 </tr>
                 {% endfor %}
             </table>
-
         </div>
     </div>
 
@@ -195,26 +201,69 @@
     </div>
 
     <div class="card shadow mb-4">
-        <div class="card-header bg-secondary text-white">Exam Details</div>
+        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+            <span>Exam Details</span>
+            <a href="/exams/report-card/?student_id={{ student.id }}" class="btn btn-light btn-sm fw-bold">
+                🖨 Print Result
+            </a>
+        </div>
+
         <div class="card-body">
-            <table class="table table-bordered table-sm">
-                <tr>
+            <table class="table table-bordered table-sm align-middle">
+                <tr class="table-light">
                     <th>Exam</th>
                     <th>Subject</th>
-                    <th>Marks</th>
+                    <th>Marks / Number</th>
+                    <th>Total Marks</th>
                     <th>Grade</th>
+                    <th>Print</th>
                 </tr>
 
                 {% for exam in exam_records %}
                 <tr>
                     <td>{{ exam.exam }}</td>
                     <td>{{ exam.subject }}</td>
-                    <td>{{ exam.marks }}</td>
-                    <td>{{ exam.grade }}</td>
+
+                    <td>
+                        {% if exam.marks %}
+                            {{ exam.marks }}
+                        {% elif exam.obtained_marks %}
+                            {{ exam.obtained_marks }}
+                        {% elif exam.number %}
+                            {{ exam.number }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if exam.total_marks %}
+                            {{ exam.total_marks }}
+                        {% elif exam.full_marks %}
+                            {{ exam.full_marks }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if exam.grade %}
+                            <span class="badge bg-primary">{{ exam.grade }}</span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        <a href="/exams/report-card/?student_id={{ student.id }}&exam_id={{ exam.id }}"
+                           class="btn btn-sm btn-dark">
+                            Print
+                        </a>
+                    </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="text-center">No exam record found.</td>
+                    <td colspan="6" class="text-center">No exam record found.</td>
                 </tr>
                 {% endfor %}
             </table>

@@ -7,6 +7,7 @@ from datetime import date
 from students.models import Student
 from teachers.models import Employee
 from attendance.models import StudentAttendance
+from django.shortcuts import render, redirect
 
 
 @login_required
@@ -377,3 +378,134 @@ def complaint_report(request):
         'records': records,
         'title': 'Complaint Report'
     })
+
+from django.contrib import messages
+
+
+@login_required
+def teacher_dashboard(request):
+
+    # 🔐 Employee get
+    employee = getattr(request.user, 'employee', None)
+
+    if not employee:
+        messages.error(request, "❌ No employee linked")
+        return redirect('/login/')
+
+    # 🔐 যদি inactive হয়
+    if not employee.is_active:
+        messages.error(request, "❌ You are inactive employee")
+        return redirect('/login/')
+
+    # 📊 Basic data
+    today = timezone.now().date()
+
+    total_students = 0
+    total_present = 0
+    total_absent = 0
+
+    try:
+        from students.models import Student
+        from attendance.models import StudentAttendance
+
+        total_students = Student.objects.filter(is_active=True).count()
+
+        today_attendance = StudentAttendance.objects.filter(date=today)
+
+        total_present = today_attendance.filter(status='Present').count()
+        total_absent = today_attendance.filter(status='Absent').count()
+
+    except:
+        pass
+
+    # 👨‍🏫 Teacher Attendance
+    teacher_status = "Not Marked"
+
+    try:
+        from attendance.models import TeacherAttendance
+
+        record = TeacherAttendance.objects.filter(
+            employee=employee,
+            date=today
+        ).first()
+
+        if record:
+            teacher_status = record.status
+
+    except:
+        pass
+
+    # 💰 Salary Summary
+    total_paid = 0
+    total_due = 0
+
+    try:
+        from payroll.models import Salary
+
+        records = Salary.objects.filter(employee=employee)
+
+        total_paid = sum(s.paid_amount for s in records)
+        total_due = sum(getattr(s, 'due_amount', 0) for s in records)
+
+    except:
+        pass
+
+    return render(request, 'core/teacher_dashboard.html', {
+        'employee': employee,
+
+        'total_students': total_students,
+        'total_present': total_present,
+        'total_absent': total_absent,
+
+        'teacher_status': teacher_status,
+
+        'total_paid': total_paid,
+        'total_due': total_due,
+    })
+
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from django.shortcuts import render, redirect
+
+
+def custom_login(request):
+    if request.user.is_authenticated:
+        if request.user.is_superuser or request.user.is_staff:
+            return redirect('/dashboard/')
+
+        emp = getattr(request.user, 'employee', None)
+        if emp:
+            return redirect('/teacher-dashboard/')
+
+        return redirect('/login/')
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is None:
+            messages.error(request, "❌ Invalid username or password.")
+            return redirect('/login/')
+
+        if user.is_superuser or user.is_staff:
+            login(request, user)
+            messages.success(request, "✅ Welcome Admin.")
+            return redirect('/dashboard/')
+
+        emp = getattr(user, 'employee', None)
+
+        if not emp:
+            messages.error(request, "❌ No employee profile linked.")
+            return redirect('/login/')
+
+        if not emp.is_active:
+            messages.error(request, "❌ Your account is inactive.")
+            return redirect('/login/')
+
+        login(request, user)
+        messages.success(request, f"✅ Welcome {emp.name}.")
+        return redirect('/teacher-dashboard/')
+
+    return render(request, 'login.html')

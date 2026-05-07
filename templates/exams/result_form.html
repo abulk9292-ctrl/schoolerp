@@ -1,16 +1,106 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="card card-box p-4">
-    <h3 class="fw-bold mb-3">Add Student Marks</h3>
+<div class="container mt-4">
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-4">
 
-        <button type="submit" class="btn btn-success">Save Marks</button>
-        <a href="/exams/results/" class="btn btn-secondary">Back</a>
-    </form>
+            <h3 class="fw-bold mb-4 text-primary">
+                📘 Add Student Marks
+            </h3>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    ⚠️ Please fix the errors below.
+                    {{ form.errors }}
+                </div>
+            {% endif %}
+
+            <!-- ✅ CLASS FILTER -->
+            <form method="get" class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Select Class</label>
+                    <select name="class" class="form-select" onchange="this.form.submit()">
+                        <option value="">Select Class</option>
+                        {% for c in classes %}
+                            <option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>
+                                {{ c }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <input type="hidden" name="class" value="{{ selected_class }}">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Student</label>
+                        {{ form.student }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Exam</label>
+                        {{ form.exam }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Subject</label>
+                        {{ form.subject }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Max Marks</label>
+                        {{ form.max_marks }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Written Marks</label>
+                        {{ form.written_marks }}
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">Oral Marks</label>
+                        {{ form.oral_marks }}
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold">Remarks</label>
+                        {{ form.remarks }}
+                    </div>
+
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success px-4">
+                        💾 Save Marks
+                    </button>
+
+                    <a href="{% url 'result_list' %}" class="btn btn-secondary px-4">
+                        ⬅ Back
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
 </div>
 
 {% endblock %}

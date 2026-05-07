@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card card-box p-4 mb-4">
+        <h3 class="fw-bold mb-3">✅ Class-wise Subject Assign</h3>
+
+        <form method="get" class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Select Class</label>
+                <select name="class" class="form-select" onchange="this.form.submit()">
+                    <option value="">Select Class</option>
+                    {% for c in classes %}
+                        <option value="{{ c.id }}" {% if selected_class and selected_class.id == c.id %}selected{% endif %}>
+                            {{ c.class_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Class</label>
+                    {{ form.school_class }}
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Full</label>
+                    {{ form.full_marks }}
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Pass</label>
+                    {{ form.pass_marks }}
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Written</label>
+                    {{ form.written_marks }}
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Oral</label>
+                    {{ form.oral_marks }}
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Practical</label>
+                    {{ form.practical_marks }}
+                </div>
+            </div>
+
+            <hr>
+
+            <h5 class="fw-bold mb-3">📚 Select Subjects</h5>
+
+            <div class="row">
+                {% for checkbox in form.subjects %}
+                    <div class="col-md-3 mb-2">
+                        <div class="border rounded p-2">
+                            {{ checkbox.tag }}
+                            <label class="ms-2">{{ checkbox.choice_label }}</label>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            {% if form.errors %}
+                <div class="alert alert-danger mt-3">
+                    {{ form.errors }}
+                </div>
+            {% endif %}
+
+            <button class="btn btn-success mt-3">
+                💾 Save Class Subjects
+            </button>
+        </form>
+    </div>
+
+    <div class="card card-box p-4">
+        <h5 class="fw-bold mb-3">📋 Assigned Subjects</h5>
+
+        <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+                <tr>
+                    <th>Class</th>
+                    <th>Subject</th>
+                    <th>Full</th>
+                    <th>Pass</th>
+                    <th>Written</th>
+                    <th>Oral</th>
+                    <th>Practical</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cs in class_subjects %}
+                    <tr>
+                        <td>{{ cs.school_class.class_name }}</td>
+                        <td>{{ cs.subject.subject_name }}</td>
+                        <td>{{ cs.full_marks }}</td>
+                        <td>{{ cs.pass_marks }}</td>
+                        <td>{{ cs.written_marks }}</td>
+                        <td>{{ cs.oral_marks }}</td>
+                        <td>{{ cs.practical_marks }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            No assigned subjects found
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

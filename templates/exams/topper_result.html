@@ -1,10 +1,215 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 
-<div class="card card-box p-4">
-    <h3 class="fw-bold mb-3">Topper List</h3>
+<style>
+@page{
+    size:A4 landscape;
+    margin:5mm;
+}
 
-    <form method="get" class="row g-2 mb-4">
+*{
+    box-sizing:border-box;
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+}
+
+body{
+    background:#eef2f7;
+}
+
+.no-print{
+    text-align:center;
+    margin-bottom:10px;
+}
+
+.topper-sheet{
+    width:285mm;
+    min-height:190mm;
+    margin:auto;
+    background:white;
+    border:3px solid #111;
+    padding:10mm;
+    position:relative;
+    overflow:hidden;
+}
+
+.watermark{
+    position:absolute;
+    width:420px;
+    opacity:0.06;
+    top:55%;
+    left:50%;
+    transform:translate(-50%,-50%);
+}
+
+.sheet-content{
+    position:relative;
+    z-index:2;
+}
+
+.header-img{
+    width:100%;
+    max-height:70px;
+    object-fit:contain;
+}
+
+.meta-title{
+    text-align:center;
+    font-size:24px;
+    font-weight:900;
+    color:#8b0000;
+    margin-top:8px;
+}
+
+.topper-title{
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+    position:absolute;
+    left:8mm;
+    top:42mm;
+    font-size:28px;
+    font-weight:900;
+    color:#8b0000;
+    letter-spacing:2px;
+}
+
+.topper-row{
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+    gap:22px;
+    margin-top:30px;
+}
+
+.topper-card{
+    width:78mm;
+    text-align:center;
+    position:relative;
+}
+
+.photo-frame{
+    width:60mm;
+    height:72mm;
+    margin:auto;
+    border:6px solid #ff4fb3;
+    background:#27e6f2;
+    border-radius:18px;
+    padding:4px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.25);
+    position:relative;
+}
+
+.photo-frame::before{
+    content:"🎀";
+    position:absolute;
+    top:-26px;
+    left:-18px;
+    font-size:42px;
+}
+
+.student-photo{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:12px;
+    background:white;
+}
+
+.photo-placeholder{
+    width:100%;
+    height:100%;
+    border-radius:12px;
+    background:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:900;
+    color:#555;
+}
+
+.rank-text{
+    font-size:34px;
+    font-weight:900;
+    color:#0026a3;
+    margin-top:10px;
+}
+
+.student-name{
+    font-size:20px;
+    font-weight:900;
+    color:#8b0000;
+    text-transform:uppercase;
+    line-height:1.1;
+}
+
+.total-text{
+    font-size:17px;
+    font-weight:900;
+    color:#8b0000;
+}
+
+.first-card{
+    transform:scale(1.08);
+}
+
+.second-card,
+.third-card{
+    transform:scale(0.98);
+}
+
+.filter-card{
+    max-width:900px;
+    margin:0 auto 10px auto;
+    background:white;
+    padding:12px;
+    border-radius:14px;
+    box-shadow:0 8px 22px rgba(0,0,0,0.12);
+}
+
+.small-list{
+    margin-top:25px;
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:8px;
+}
+
+.small-rank-card{
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:8px;
+    text-align:center;
+    background:#fff7ed;
+    font-weight:700;
+}
+
+@media print{
+    body{
+        background:white!important;
+    }
+
+    .no-print,
+    .sidebar,
+    .topbar,
+    .navbar,
+    header,
+    aside,
+    footer{
+        display:none!important;
+    }
+
+    .topper-sheet{
+        width:285mm!important;
+        min-height:190mm!important;
+        margin:0!important;
+        box-shadow:none!important;
+    }
+}
+</style>
+
+<div class="no-print filter-card">
+    <form method="get" class="row g-2 justify-content-center align-items-center">
+
         <div class="col-md-4">
             <select name="exam" class="form-control" required>
                 <option value="">Select Exam</option>
@@ -15,30 +220,116 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-2">
-            <button class="btn btn-success w-100">Show</button>
-        </div>
-    </form>
 
-    {% if selected_exam %}
-    <div class="row">
-        {% for t in toppers %}
-        <div class="col-md-4 mb-3">
-            <div class="card text-center p-3 shadow-sm">
-                <h2 class="fw-bold text-success">
-                    Rank {{ t.rank }}
-                </h2>
-                <h5>{{ t.student.student_name|default:t.student }}</h5>
-                <p class="mb-1">Total: <b>{{ t.total_marks }}/{{ t.max_total_marks }}</b></p>
-                <p class="mb-1">Percentage: <b>{{ t.percentage }}%</b></p>
-                <p>Grade: <span class="badge bg-success">{{ t.grade }}</span></p>
-            </div>
+        <div class="col-md-3">
+            <select name="class" class="form-control">
+                <option value="">All Classes</option>
+                {% for c in classes %}
+                <option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>
+                    {{ c }}
+                </option>
+                {% endfor %}
+            </select>
         </div>
-        {% empty %}
-        <p>No topper data found.</p>
-        {% endfor %}
-    </div>
-    {% endif %}
+
+        <div class="col-md-2">
+            <button class="btn btn-success w-100 fw-bold">Show</button>
+        </div>
+
+        <div class="col-md-2">
+            <button type="button" onclick="window.print()" class="btn btn-primary w-100 fw-bold">
+                🖨 Print
+            </button>
+        </div>
+
+    </form>
 </div>
+
+{% if selected_exam %}
+
+<div class="topper-sheet">
+
+    <img src="{% static 'images/logo.png' %}" class="watermark">
+
+    <div class="sheet-content">
+
+        <img src="{% static 'images/header.jpg' %}" class="header-img">
+
+        <div class="meta-title">
+            Topper List
+            &nbsp; || &nbsp;
+            {% if selected_class %}
+                {{ selected_class }}
+            {% else %}
+                All Classes
+            {% endif %}
+            &nbsp; || &nbsp;
+            {{ selected_exam.academic_session }}
+        </div>
+
+        <div class="topper-title">
+            Topper List
+            &nbsp; || &nbsp;
+            {% if selected_class %}{{ selected_class }}{% else %}All Classes{% endif %}
+            &nbsp; || &nbsp;
+            {{ selected_exam.academic_session }}
+        </div>
+
+        <div class="topper-row">
+
+            {% for t in toppers|slice:":3" %}
+            <div class="topper-card {% if forloop.counter == 1 %}first-card{% elif forloop.counter == 2 %}second-card{% else %}third-card{% endif %}">
+
+                <div class="photo-frame">
+                    {% if t.student.photo %}
+                        <img src="{{ t.student.photo.url }}" class="student-photo">
+                    {% else %}
+                        <div class="photo-placeholder">PHOTO</div>
+                    {% endif %}
+                </div>
+
+                <div class="rank-text">
+                    {% if forloop.counter == 1 %}
+                        1st
+                    {% elif forloop.counter == 2 %}
+                        2nd
+                    {% elif forloop.counter == 3 %}
+                        3rd
+                    {% else %}
+                        {{ forloop.counter }}th
+                    {% endif %}
+                </div>
+
+                <div class="student-name">
+                    {{ t.student.student_name|default:t.student }}
+                </div>
+
+                <div class="total-text">
+                    Total : {{ t.percentage }}
+                </div>
+
+            </div>
+            {% empty %}
+                <h4>No topper data found.</h4>
+            {% endfor %}
+
+        </div>
+
+        {% if toppers|length > 3 %}
+        <div class="small-list">
+            {% for t in toppers|slice:"3:10" %}
+            <div class="small-rank-card">
+                Rank {{ forloop.counter|add:"3" }}<br>
+                {{ t.student.student_name|default:t.student }}<br>
+                {{ t.percentage }}%
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endif %}
 
 {% endblock %}

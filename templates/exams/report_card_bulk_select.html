@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-5">
+
+            <h2 class="fw-bold text-center mb-4">
+                🖨 Bulk Report Card Print
+            </h2>
+
+            <form method="GET" action="{% url 'report_card_bulk_print' %}">
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        Select Exam
+                    </label>
+
+                    <select name="exam" class="form-select" required>
+                        <option value="">Choose Exam</option>
+
+                        {% for e in exams %}
+                            <option value="{{ e.id }}">
+                                {{ e.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">
+                        Select Class
+                    </label>
+
+                    <select name="class" class="form-select" required>
+                        <option value="">Choose Class</option>
+
+                        {% for c in classes %}
+                            <option value="{{ c }}">
+                                {{ c }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 py-2 fw-bold">
+                    🖨 Generate Bulk Report Card
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

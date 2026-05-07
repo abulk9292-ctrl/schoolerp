@@ -3,17 +3,37 @@
 {% block content %}
 
 <style>
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    * {
+        box-sizing: border-box;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    body {
+        background: #e5e7eb;
+    }
+
+    .print-btn-area {
+        margin-bottom: 12px;
+        text-align: center;
+    }
+
     .report-card {
-        width: 210mm;
-        min-height: 297mm;
+        width: 200mm;
+        min-height: 287mm;
         background: white;
         margin: auto;
-        padding: 8px;
+        padding: 6mm;
         border: 3px solid #111;
         position: relative;
         font-family: Arial, sans-serif;
         color: #111;
-        box-shadow: 0 0 15px rgba(0,0,0,0.12);
+        box-shadow: 0 0 15px rgba(0,0,0,0.18);
         overflow: hidden;
     }
 
@@ -22,10 +42,10 @@
         top: 49%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 460px;
-        height: 460px;
+        width: 430px;
+        height: 430px;
         object-fit: contain;
-        opacity: 0.12;
+        opacity: 0.10;
         z-index: 0;
         pointer-events: none;
     }
@@ -45,13 +65,13 @@
 
     .header-img {
         width: 100%;
-        max-height: 125px;
+        max-height: 112px;
         object-fit: contain;
         display: block;
     }
 
     .report-title {
-        font-size: 23px;
+        font-size: 21px;
         font-weight: 900;
         text-align: center;
         background: #f2f7ff;
@@ -63,8 +83,8 @@
 
     .student-info-grid {
         display: grid;
-        grid-template-columns: 1fr 205px 105px;
-        gap: 10px;
+        grid-template-columns: 1fr 198px 100px;
+        gap: 8px;
         align-items: start;
         margin-top: 6px;
     }
@@ -75,18 +95,19 @@
 
     .info-table td {
         padding: 1px 4px;
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 600;
         vertical-align: top;
-        line-height: 1.25;
+        line-height: 1.20;
     }
 
     .info-table td:first-child {
-        width: 110px;
+        width: 95px;
+        white-space: nowrap;
     }
 
     .number-panel {
-        width: 205px;
+        width: 198px;
     }
 
     .roll-reg-table,
@@ -97,7 +118,7 @@
     }
 
     .result-no-table {
-        margin-top: 8px;
+        margin-top: 6px;
     }
 
     .roll-reg-table td,
@@ -112,47 +133,55 @@
     .clean-label {
         background: #28f060;
         color: red;
-        font-size: 13px;
-        width: 78px;
+        font-size: 12px;
+        width: 72px;
         white-space: nowrap;
     }
 
     .clean-value {
         background: #fff;
         color: #111;
-        font-size: 13px;
+        font-size: 12px;
         white-space: nowrap;
     }
 
     .sid-value,
-    .reg-value {
-        font-size: 12px;
-    }
-
+    .reg-value,
     .result-value {
-        font-size: 12px;
-        letter-spacing: 0;
+        font-size: 11px;
     }
 
     .photo-panel {
-        width: 105px;
+        width: 100px;
         text-align: right;
     }
 
     .student-photo {
-        width: 95px;
-        height: 120px;
+        width: 92px;
+        height: 112px;
         border: 2px solid #222;
         object-fit: cover;
         background: #fff;
+    }
+
+    .photo-placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: bold;
     }
 
     .marks-table,
     .small-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 14px;
-        background: rgba(255,255,255,0.80);
+        font-size: 13px;
+        background: rgba(255,255,255,0.90);
+    }
+
+    .marks-table {
+        margin-top: 7px;
     }
 
     .marks-table th,
@@ -160,24 +189,25 @@
     .small-table th,
     .small-table td {
         border: 1px solid #777;
-        padding: 3px;
+        padding: 2px 3px;
         text-align: center;
         font-weight: 600;
+        line-height: 1.20;
     }
 
     .marks-title {
         background: #31f05b !important;
-        font-size: 16px;
+        font-size: 15px;
         color: #111;
     }
 
     .marks-table th {
-        background: #f2a3e8;
+        background: #03c5eb9f !important;
     }
 
     .subject-name {
         text-align: left !important;
-        padding-left: 10px !important;
+        padding-left: 8px !important;
     }
 
     .pink-head {
@@ -186,7 +216,7 @@
     }
 
     .green-cell {
-        background: #c8ffd4;
+        background: #c8ffd4 !important;
         color: #006400;
         font-weight: 900;
     }
@@ -194,90 +224,127 @@
     .bottom-section {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 42px;
-        margin-top: 15px;
+        gap: 28px;
+        margin-top: 10px;
     }
 
     .signature-area {
         display: grid;
-        grid-template-columns: 120px 1fr 1fr;
+        grid-template-columns: 115px 1fr 1fr;
         align-items: end;
-        margin-top: 82px;
+        margin-top: 48px;
         text-align: center;
         font-weight: bold;
+        font-size: 13px;
     }
 
     .qr-box {
-        width: 105px;
-        height: 105px;
+        width: 96px;
+        height: 96px;
         border: 2px solid #111;
         background: white;
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
     }
 
     .qr-box img {
-        width: 98px;
-        height: 98px;
+        width: 90px;
+        height: 90px;
         object-fit: contain;
     }
 
     .signature-line {
-        min-height: 58px;
+        min-height: 48px;
         display: flex;
         align-items: flex-end;
         justify-content: center;
     }
 
     .principal-sign-img {
-        width: 150px;
-        height: 65px;
+        width: 135px;
+        height: 55px;
         object-fit: contain;
         display: block;
         margin: 0 auto;
     }
 
-    .print-btn-area {
-        margin-bottom: 12px;
-    }
-
     @media print {
-        body { background: white !important; }
+        html,
+        body {
+            width: 210mm !important;
+            height: 297mm !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+        }
+
+        body * {
+            visibility: hidden !important;
+        }
+
+        .report-card,
+        .report-card * {
+            visibility: visible !important;
+        }
 
         .report-card {
-            width: 100%;
-            min-height: auto;
-            border: 3px solid #111;
-            margin: 0;
-            padding: 8px;
-            box-shadow: none;
+            position: fixed !important;
+            left: 5mm !important;
+            top: 5mm !important;
+            width: 200mm !important;
+            min-height: 287mm !important;
+            margin: 0 !important;
+            padding: 6mm !important;
+            border: 3px solid #111 !important;
+            box-shadow: none !important;
+            overflow: hidden !important;
+            page-break-after: always;
         }
 
-        .btn,
         .no-print,
+        .btn,
         .sidebar,
-        .topbar {
+        .topbar,
+        .navbar,
+        .footer,
+        header,
+        aside,
+        footer {
             display: none !important;
+            visibility: hidden !important;
         }
 
-        .content-area {
+        .content-area,
+        .main-content,
+        .container,
+        .container-fluid {
+            margin: 0 !important;
             padding: 0 !important;
+            width: 100% !important;
         }
 
         .header-img {
-            max-height: 118px;
+            width: 100% !important;
+            max-height: 112px !important;
+            object-fit: contain !important;
         }
 
         .watermark-logo {
-            opacity: 0.12;
+            opacity: 0.10 !important;
         }
     }
 </style>
 
 <div class="no-print print-btn-area">
-    <button onclick="window.print()" class="btn btn-success">Print / Save PDF</button>
-    <a href="/exams/report-card/" class="btn btn-secondary">Back</a>
+    <button onclick="window.print()" class="btn btn-success">
+        🖨 Print / Save PDF
+    </button>
+    <a href="{% url 'report_card_select' %}" class="btn btn-secondary">
+        ⬅ Back
+    </a>
 </div>
 
 <div class="report-card">
@@ -305,12 +372,30 @@
         <div class="student-info-grid">
             <div>
                 <table class="info-table">
-                    <tr><td>Name</td><td>: {{ student.student_name|default:student }}</td></tr>
-                    <tr><td>Father's</td><td>: {{ student.father_name }}</td></tr>
-                    <tr><td>Mother's</td><td>: {{ student.mother_name }}</td></tr>
-                    <tr><td>Address</td><td>: {{ student.address }}</td></tr>
-                    <tr><td>Class</td><td>: {{ student.school_class }} &nbsp;&nbsp; Section : {{ student.section }}</td></tr>
-                    <tr><td>Birth Date</td><td>: {{ student.date_of_birth }}</td></tr>
+                    <tr>
+                        <td>Name</td>
+                        <td>: {{ student.student_name|default:student }}</td>
+                    </tr>
+                    <tr>
+                        <td>Father's</td>
+                        <td>: {{ student.father_name|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Mother's</td>
+                        <td>: {{ student.mother_name|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Address</td>
+                        <td>: {{ student.address|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Class</td>
+                        <td>: {{ student.school_class|default:"-" }} &nbsp;&nbsp; Section : {{ student.section|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Birth Date</td>
+                        <td>: {{ student.date_of_birth|default:"-" }}</td>
+                    </tr>
                 </table>
             </div>
 
@@ -318,7 +403,7 @@
                 <table class="roll-reg-table">
                     <tr>
                         <td class="clean-label">Roll No</td>
-                        <td class="clean-value">{{ student.roll_no }}</td>
+                        <td class="clean-value">{{ student.roll_no|default:"-" }}</td>
                     </tr>
                     <tr>
                         <td class="clean-label">SID</td>
@@ -326,14 +411,20 @@
                     </tr>
                     <tr>
                         <td class="clean-label">Reg. No</td>
-                        <td class="clean-value reg-value">{{ student.registration_no }}</td>
+                        <td class="clean-value reg-value">{{ student.registration_no|default:"-" }}</td>
                     </tr>
                 </table>
 
                 <table class="result-no-table">
                     <tr>
                         <td class="clean-label">Result No</td>
-                        <td class="clean-value result-value">R{{ student.id }}E{{ exam.id }}</td>
+                        <td class="clean-value result-value">
+                            {% if result_no %}
+                                {{ result_no }}
+                            {% else %}
+                                R{{ student.id }}E{{ exam.id }}
+                            {% endif %}
+                        </td>
                     </tr>
                 </table>
             </div>
@@ -342,25 +433,25 @@
                 {% if student.photo %}
                     <img src="{{ student.photo.url }}" class="student-photo">
                 {% else %}
-                    <div class="student-photo d-flex align-items-center justify-content-center">Photo</div>
+                    <div class="student-photo photo-placeholder">Photo</div>
                 {% endif %}
             </div>
         </div>
 
-        <table class="marks-table mt-2">
+        <table class="marks-table">
             <thead>
                 <tr>
                     <th colspan="7" class="marks-title">
-                        Scholastic Areas &nbsp;&nbsp;&nbsp; {{ exam.name }} (100 Marks)
+                        Scholastic Areas &nbsp;&nbsp;&nbsp; {{ exam.name }} ({{ max_total|default:100 }} Marks)
                     </th>
                 </tr>
                 <tr>
-                    <th style="width:45px;">SL</th>
+                    <th style="width:38px;">SL</th>
                     <th>Subject</th>
                     <th>Written</th>
                     <th>Oral</th>
                     <th>Total</th>
-                    <th>Max. Mark</th>
+                    <th>Max</th>
                     <th>Grade</th>
                 </tr>
             </thead>
@@ -376,15 +467,19 @@
                     <td>{{ r.max_marks|default:100 }}</td>
                     <td>{{ r.grade }}</td>
                 </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">No marks found</td>
+                </tr>
                 {% endfor %}
 
                 <tr>
                     <td colspan="2"><b>Total</b></td>
-                    <td>---</td>
-                    <td>---</td>
-                    <td><b>{{ grand_total }}</b></td>
-                    <td><b>{{ max_total }}</b></td>
-                    <td></td>
+                    <td><b>{{ written_total|default:0 }}</b></td>
+                    <td><b>{{ oral_total|default:0 }}</b></td>
+                    <td><b>{{ grand_total|default:0 }}</b></td>
+                    <td><b>{{ max_total|default:0 }}</b></td>
+                    <td><b>{{ final_grade|default:"-" }}</b></td>
                 </tr>
             </tbody>
         </table>
@@ -392,20 +487,51 @@
         <div class="bottom-section">
             <div>
                 <table class="small-table">
-                    <tr><th colspan="2" class="pink-head">Co-Scholastic Areas</th></tr>
-                    <tr><td>Self Answering</td><td class="green-cell">A</td></tr>
-                    <tr><td>Problem Solving</td><td class="green-cell">A</td></tr>
-                    <tr><td>Decision Making</td><td class="green-cell">A</td></tr>
-                    <tr><td>Effective</td><td class="green-cell">A</td></tr>
+                    <tr>
+                        <th colspan="2" class="pink-head">Co-Scholastic Areas</th>
+                    </tr>
+                    <tr>
+                        <td>Self Answering</td>
+                        <td class="green-cell">A</td>
+                    </tr>
+                    <tr>
+                        <td>Problem Solving</td>
+                        <td class="green-cell">A</td>
+                    </tr>
+                    <tr>
+                        <td>Decision Making</td>
+                        <td class="green-cell">A</td>
+                    </tr>
+                    <tr>
+                        <td>Effective Communication</td>
+                        <td class="green-cell">A</td>
+                    </tr>
                 </table>
 
-                <table class="small-table mt-2">
-                    <tr><th colspan="2" class="pink-head">Exam Result</th></tr>
-                    <tr><td>Percentage</td><td class="green-cell">{{ percentage }}%</td></tr>
-                    <tr><td>Attendance</td><td class="green-cell">{{ attendance_percentage }}%</td></tr>
-                    <tr><td>Grade</td><td class="green-cell">{{ final_grade }}</td></tr>
-                    <tr><td>Result</td><td class="green-cell">{{ result_status }}</td></tr>
-                    <tr><td>Class Rank</td><td>{{ class_rank|default:"-" }}</td></tr>
+                <table class="small-table" style="margin-top:7px;">
+                    <tr>
+                        <th colspan="2" class="pink-head">Exam Result</th>
+                    </tr>
+                    <tr>
+                        <td>Percentage</td>
+                        <td class="green-cell">{{ percentage|default:0 }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Attendance</td>
+                        <td class="green-cell">{{ attendance_percentage|default:0 }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Grade</td>
+                        <td class="green-cell">{{ final_grade|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Result</td>
+                        <td class="green-cell">{{ result_status|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Class Rank</td>
+                        <td>{{ class_rank|default:"-" }}</td>
+                    </tr>
                 </table>
             </div>
 
@@ -415,31 +541,26 @@
                         <th class="pink-head">Mark Range (%)</th>
                         <th class="pink-head">Grade</th>
                     </tr>
-                    <tr><td>90% &gt;=</td><td>AA</td></tr>
-                    <tr><td>80% &gt;=</td><td>A+</td></tr>
-                    <tr><td>60% &gt;=</td><td>A</td></tr>
-                    <tr><td>45% &gt;=</td><td>B+</td></tr>
-                    <tr><td>40% &gt;=</td><td>B</td></tr>
-                    <tr><td>35% &gt;=</td><td>C+</td></tr>
-                    <tr><td>24% &gt;=</td><td>C</td></tr>
-                    <tr><td>0% &gt;=</td><td>D</td></tr>
+                    <tr><td>90% - 100%</td><td>AA</td></tr>
+                    <tr><td>80% - 89%</td><td>A+</td></tr>
+                    <tr><td>60% - 79%</td><td>A</td></tr>
+                    <tr><td>45% - 59%</td><td>B+</td></tr>
+                    <tr><td>40% - 44%</td><td>B</td></tr>
+                    <tr><td>35% - 39%</td><td>C+</td></tr>
+                    <tr><td>24% - 34%</td><td>C</td></tr>
+                    <tr><td>Below 24%</td><td>D</td></tr>
                 </table>
             </div>
         </div>
 
-
-
         <div class="signature-area">
             <div>
-
-
-
-                
                 <div class="qr-box">
                     {% if qr_code %}
                         <img src="{{ qr_code }}">
                     {% else %}
-                        <img src="{% static 'images/qr.png' %}" onerror="this.style.display='none'; this.parentElement.innerHTML='QR CODE';">
+                        <img src="{% static 'images/qr.png' %}"
+                             onerror="this.style.display='none'; this.parentElement.innerHTML='QR CODE';">
                     {% endif %}
                 </div>
             </div>

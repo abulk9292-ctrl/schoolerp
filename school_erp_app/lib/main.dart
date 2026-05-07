@@ -1603,102 +1603,189 @@ class StudentAttendancePage extends StatefulWidget {
   const StudentAttendancePage({super.key});
 
   @override
-  State<StudentAttendancePage> createState() => _StudentAttendancePageState();
+  State<StudentAttendancePage> createState() =>
+      _StudentAttendancePageState();
 }
 
-class _StudentAttendancePageState extends State<StudentAttendancePage> {
-  final TextEditingController studentIdController =
-      TextEditingController(text: '1');
-  final TextEditingController remarksController = TextEditingController();
+class _StudentAttendancePageState
+    extends State<StudentAttendancePage> {
 
-  String selectedStatus = 'Present';
+  final List<String> classes = [
+    'Nursery',
+    'KG',
+    'I',
+    'II',
+    'III',
+    'IV',
+    'V',
+    'VI',
+    'VII',
+    'VIII',
+    'IX',
+    'X',
+  ];
+
+  String selectedClass = 'VI';
+
+  bool isLoading = false;
   bool isSubmitting = false;
-  String resultMessage = '';
 
-  Future<void> submitStudentAttendance() async {
-    if (studentIdController.text.trim().isEmpty) {
-      setState(() {
-        resultMessage = 'Student ID required';
-      });
-      return;
-    }
+  String message = '';
+
+  List students = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadStudents();
+  }
+
+  Future<void> loadStudents() async {
 
     setState(() {
-      isSubmitting = true;
-      resultMessage = '';
+      isLoading = true;
+      message = '';
     });
 
     try {
+
+      final response = await http.get(
+        Uri.parse(
+          '$baseUrl/mobile-api/students-by-class/$selectedClass/',
+        ),
+        headers: {
+          'Authorization': 'Token ${AppSession.token}',
+        },
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 &&
+          data['status'] == 'success') {
+
+        students = data['students'];
+
+        for (var student in students) {
+          student['status'] = student['status'] ?? 'Present';
+          student['remarks'] = student['remarks'] ?? '';
+        }
+
+      } else {
+
+        message = data['message'] ?? 'Failed';
+
+      }
+
+    } catch (e) {
+
+      message = 'Error: $e';
+
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future<void> submitBulkAttendance() async {
+
+    setState(() {
+      isSubmitting = true;
+      message = '';
+    });
+
+    try {
+
+      List attendanceData = [];
+
+      for (var student in students) {
+
+        attendanceData.add({
+          'student_id': student['id'],
+          'status': student['status'],
+          'remarks': '',
+        });
+
+      }
+
       final response = await http.post(
-        Uri.parse('$baseUrl/mobile-api/student-attendance/mark/'),
+        Uri.parse(
+          '$baseUrl/mobile-api/student-attendance/bulk-mark/',
+        ),
+
         headers: {
           'Authorization': 'Token ${AppSession.token}',
           'Content-Type': 'application/json',
         },
+
         body: jsonEncode({
-          'student_id': studentIdController.text.trim(),
-          'status': selectedStatus,
-          'remarks': remarksController.text.trim(),
+          'attendance': attendanceData,
         }),
       );
 
       final data = jsonDecode(response.body);
 
-      setState(() {
-        if (response.statusCode == 200 && data['status'] == 'success') {
-          resultMessage = data['message'] ?? 'Student attendance marked';
-        } else {
-          resultMessage = data['message'] ?? 'Student attendance failed';
-        }
-      });
+      if (response.statusCode == 200 &&
+          data['status'] == 'success') {
+
+        message = data['message'];
+
+      } else {
+
+        message = data['message'] ?? 'Failed';
+
+      }
+
     } catch (e) {
-      setState(() {
-        resultMessage = 'Server connection error: $e';
-      });
-    } finally {
-      setState(() {
-        isSubmitting = false;
-      });
+
+      message = 'Server Error: $e';
+
     }
+
+    setState(() {
+      isSubmitting = false;
+    });
   }
 
-  Widget statusChip(String status) {
-    final bool isSelected = selectedStatus == status;
+  Widget statusButton(
+    int index,
+    String status,
+    Color color,
+  ) {
 
-    Color bg;
-    Color fg;
-
-    if (status == 'Present') {
-      bg = isSelected ? AppColors.green : AppColors.green.withOpacity(0.10);
-      fg = isSelected ? Colors.white : AppColors.greenDark;
-    } else if (status == 'Absent') {
-      bg = isSelected ? AppColors.red : AppColors.red.withOpacity(0.10);
-      fg = isSelected ? Colors.white : AppColors.red;
-    } else {
-      bg = isSelected ? AppColors.orange : AppColors.orange.withOpacity(0.10);
-      fg = isSelected ? Colors.white : AppColors.orange;
-    }
+    bool active = students[index]['status'] == status;
 
     return Expanded(
       child: GestureDetector(
         onTap: () {
+
           setState(() {
-            selectedStatus = status;
+            students[index]['status'] = status;
           });
+
         },
+
         child: Container(
-          height: 48,
+          height: 36,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: bg,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: bg),
+            color: active
+                ? color
+                : color.withOpacity(0.12),
+
+            borderRadius: BorderRadius.circular(10),
           ),
+
           child: Text(
             status,
+
             style: TextStyle(
-              color: fg,
-              fontWeight: FontWeight.w700,
+              color: active
+                  ? Colors.white
+                  : color,
+
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
             ),
           ),
         ),
@@ -1706,111 +1793,212 @@ class _StudentAttendancePageState extends State<StudentAttendancePage> {
     );
   }
 
+  Widget studentCard(int index) {
+
+    final student = students[index];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+
+      padding: const EdgeInsets.all(16),
+
+      decoration: UiHelpers.cardDecoration(),
+
+      child: Column(
+        crossAxisAlignment:
+            CrossAxisAlignment.start,
+
+        children: [
+
+          Text(
+            student['name'] ?? '',
+
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+
+          const SizedBox(height: 4),
+
+          Text(
+            'Roll: ${student['roll_no']} | ID: ${student['student_id']}',
+          ),
+
+          const SizedBox(height: 14),
+
+          Row(
+            children: [
+
+              statusButton(
+                index,
+                'Present',
+                AppColors.green,
+              ),
+
+              const SizedBox(width: 8),
+
+              statusButton(
+                index,
+                'Absent',
+                AppColors.red,
+              ),
+
+              const SizedBox(width: 8),
+
+              statusButton(
+                index,
+                'Late',
+                AppColors.orange,
+              ),
+
+            ],
+          )
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
+
       backgroundColor: AppColors.bg,
+
       appBar: AppBar(
         backgroundColor: AppColors.dark,
         foregroundColor: Colors.white,
-        title: const Text('Student Attendance Panel'),
+
+        title: const Text(
+          'Bulk Student Attendance',
+        ),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 620),
-            child: Container(
-              padding: const EdgeInsets.all(24),
-              decoration: UiHelpers.cardDecoration(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  UiHelpers.sectionTitle(
-                    'Mark Student Attendance',
-                    subtitle: 'Student ID, status and remarks based attendance',
-                  ),
-                  const SizedBox(height: 22),
-                  TextField(
-                    controller: studentIdController,
-                    keyboardType: TextInputType.number,
+
+      body: Column(
+        children: [
+
+          Padding(
+            padding: const EdgeInsets.all(16),
+
+            child: Row(
+              children: [
+
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+
+                    value: selectedClass,
+
+                    items: classes.map((e) {
+
+                      return DropdownMenuItem(
+                        value: e,
+                        child: Text(e),
+                      );
+
+                    }).toList(),
+
+                    onChanged: (value) {
+
+                      if (value != null) {
+
+                        selectedClass = value;
+
+                        loadStudents();
+
+                      }
+                    },
+
                     decoration: const InputDecoration(
-                      labelText: 'Student ID',
-                      prefixIcon: Icon(Icons.badge_outlined),
+                      labelText: 'Select Class',
                     ),
                   ),
-                  const SizedBox(height: 14),
-                  const Text(
-                    'Select Status',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textDark,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      statusChip('Present'),
-                      const SizedBox(width: 10),
-                      statusChip('Absent'),
-                      const SizedBox(width: 10),
-                      statusChip('Late'),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  TextField(
-                    controller: remarksController,
-                    decoration: const InputDecoration(
-                      labelText: 'Remarks',
-                      prefixIcon: Icon(Icons.edit_note_outlined),
-                    ),
-                  ),
-                  const SizedBox(height: 18),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 54,
-                    child: ElevatedButton.icon(
-                      onPressed: isSubmitting ? null : submitStudentAttendance,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.blue,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      icon: const Icon(Icons.check_circle_outline),
-                      label: Text(
-                        isSubmitting ? 'Submitting...' : 'Mark Student Attendance',
-                        style: const TextStyle(fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ),
-                  if (resultMessage.isNotEmpty) ...[
-                    const SizedBox(height: 18),
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: AppColors.blue.withOpacity(0.08),
-                        border: Border.all(
-                          color: AppColors.blue.withOpacity(0.35),
-                        ),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(
-                        resultMessage,
-                        style: const TextStyle(
-                          color: AppColors.textDark,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ]
-                ],
-              ),
+                ),
+
+                const SizedBox(width: 12),
+
+                ElevatedButton(
+                  onPressed: loadStudents,
+
+                  child: const Text('Load'),
+                )
+
+              ],
             ),
           ),
-        ),
+
+          Expanded(
+
+            child: isLoading
+
+                ? const Center(
+                    child:
+                        CircularProgressIndicator(),
+                  )
+
+                : ListView.builder(
+                    padding:
+                        const EdgeInsets.all(16),
+
+                    itemCount: students.length,
+
+                    itemBuilder: (context, index) {
+
+                      return studentCard(index);
+
+                    },
+                  ),
+          ),
+
+          Container(
+            padding: const EdgeInsets.all(16),
+
+            child: Column(
+              children: [
+
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+
+                  child: ElevatedButton(
+
+                    onPressed: isSubmitting
+                        ? null
+                        : submitBulkAttendance,
+
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          AppColors.green,
+                      foregroundColor:
+                          Colors.white,
+                    ),
+
+                    child: Text(
+                      isSubmitting
+                          ? 'Submitting...'
+                          : 'Submit Bulk Attendance',
+                    ),
+                  ),
+                ),
+
+                if (message.isNotEmpty) ...[
+
+                  const SizedBox(height: 10),
+
+                  Text(
+                    message,
+
+                    style: const TextStyle(
+                      color: AppColors.red,
+                      fontWeight:
+                          FontWeight.bold,
+                    ),
+                  ),
+                ]
+              ],
+            ),
+          )
+        ],
       ),
     );
   }
@@ -1824,31 +2012,33 @@ class StudentReportPage extends StatefulWidget {
 }
 
 class _StudentReportPageState extends State<StudentReportPage> {
-  final TextEditingController studentIdController =
-      TextEditingController(text: '1');
+  final List<String> classes = [
+    'Nursery', 'KG', 'I', 'II', 'III', 'IV', 'V',
+    'VI', 'VII', 'VIII', 'IX', 'X',
+  ];
+
+  String selectedClass = 'X';
+  String startDate = '2026-05-01';
+  String endDate = '2026-05-07';
 
   bool isLoading = false;
   String message = '';
-  List<dynamic> records = [];
 
-  Future<void> fetchStudentReport() async {
-    if (studentIdController.text.trim().isEmpty) {
-      setState(() {
-        message = 'Student ID required';
-      });
-      return;
-    }
+  List dates = [];
+  List rows = [];
 
+  Future<void> fetchRegister() async {
     setState(() {
       isLoading = true;
       message = '';
-      records = [];
+      dates = [];
+      rows = [];
     });
 
     try {
       final response = await http.get(
         Uri.parse(
-          '$baseUrl/mobile-api/student-attendance-report/${studentIdController.text.trim()}/',
+          '$baseUrl/mobile-api/student-attendance-register/?class=$selectedClass&start_date=$startDate&end_date=$endDate',
         ),
         headers: {
           'Authorization': 'Token ${AppSession.token}',
@@ -1859,16 +2049,17 @@ class _StudentReportPageState extends State<StudentReportPage> {
 
       if (response.statusCode == 200 && data['status'] == 'success') {
         setState(() {
-          records = data['results'] ?? [];
+          dates = data['dates'] ?? [];
+          rows = data['rows'] ?? [];
         });
       } else {
         setState(() {
-          message = data['message'] ?? 'Failed to load student report';
+          message = data['message'] ?? 'Failed to load attendance register';
         });
       }
     } catch (e) {
       setState(() {
-        message = 'Student report load error: $e';
+        message = 'Register load error: $e';
       });
     } finally {
       setState(() {
@@ -1876,59 +2067,64 @@ class _StudentReportPageState extends State<StudentReportPage> {
       });
     }
   }
-  
 
-  Widget reportCard(dynamic item) {
-    String status = item['status']?.toString() ?? '';
-    Color statusColor = AppColors.greenDark;
+  Color statusColor(String value) {
+    if (value == 'P') return AppColors.greenDark;
+    if (value == 'A') return AppColors.red;
+    if (value == 'L') return AppColors.orange;
+    return AppColors.textLight;
+  }
 
-    if (status.toLowerCase() == 'absent') {
-      statusColor = AppColors.red;
-    } else if (status.toLowerCase() == 'late') {
-      statusColor = AppColors.orange;
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 14),
-      padding: const EdgeInsets.all(18),
-      decoration: UiHelpers.cardDecoration(),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 52,
-            width: 52,
-            decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(
-              Icons.school_rounded,
-              color: statusColor,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Date: ${item['date'] ?? ''}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textDark,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text('Status: ${item['status'] ?? ''}'),
-                Text('Remarks: ${item['remarks'] ?? ''}'),
-              ],
-            ),
-          ),
+  Widget registerTable() {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        headingRowColor: WidgetStateProperty.all(AppColors.dark),
+        headingTextStyle: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+        columns: [
+          const DataColumn(label: Text('Roll')),
+          const DataColumn(label: Text('Name')),
+          ...dates.map((d) => DataColumn(label: Text(d['day'].toString()))),
+          const DataColumn(label: Text('P')),
+          const DataColumn(label: Text('A')),
+          const DataColumn(label: Text('L')),
         ],
+        rows: rows.map<DataRow>((student) {
+          final days = student['days'] ?? [];
+
+          return DataRow(
+            cells: [
+              DataCell(Text('${student['roll_no'] ?? ''}')),
+              DataCell(Text('${student['name'] ?? ''}')),
+              ...days.map<DataCell>((d) {
+                final s = d['status'].toString();
+                return DataCell(
+                  Text(
+                    s,
+                    style: TextStyle(
+                      color: statusColor(s),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                );
+              }).toList(),
+              DataCell(Text('${student['present'] ?? 0}')),
+              DataCell(Text('${student['absent'] ?? 0}')),
+              DataCell(Text('${student['late'] ?? 0}')),
+            ],
+          );
+        }).toList(),
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchRegister();
   }
 
   @override
@@ -1938,79 +2134,110 @@ class _StudentReportPageState extends State<StudentReportPage> {
       appBar: AppBar(
         backgroundColor: AppColors.dark,
         foregroundColor: Colors.white,
-        title: const Text('Student Attendance Report'),
+        title: const Text('Attendance Register'),
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 820),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(22),
-                  decoration: UiHelpers.cardDecoration(),
-                  child: Column(
-                    children: [
-                      UiHelpers.sectionTitle(
-                        'Student Attendance Report',
-                        subtitle: 'Student-wise attendance history panel',
-                      ),
-                      const SizedBox(height: 18),
-                      TextField(
-                        controller: studentIdController,
-                        keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Student ID',
-                          prefixIcon: Icon(Icons.badge_outlined),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        height: 52,
-                        child: ElevatedButton.icon(
-                          onPressed: isLoading ? null : fetchStudentReport,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.blue,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          icon: const Icon(Icons.search),
-                          label: Text(
-                            isLoading ? 'Loading...' : 'Load Student Report',
-                            style: const TextStyle(fontWeight: FontWeight.w700),
-                          ),
-                        ),
-                      ),
-                      if (message.isNotEmpty) ...[
-                        const SizedBox(height: 14),
-                        Text(
-                          message,
-                          style: const TextStyle(
-                            color: AppColors.red,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ]
-                    ],
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(18),
+              decoration: UiHelpers.cardDecoration(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  UiHelpers.sectionTitle(
+                    'Attendance Register',
+                    subtitle: 'Class wise date range attendance report',
                   ),
-                ),
-                const SizedBox(height: 18),
-                if (records.isNotEmpty)
-                  ListView.builder(
-                    itemCount: records.length,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return reportCard(records[index]);
+                  const SizedBox(height: 16),
+
+                  DropdownButtonFormField<String>(
+                    value: selectedClass,
+                    items: classes.map((c) {
+                      return DropdownMenuItem(
+                        value: c,
+                        child: Text(c),
+                      );
+                    }).toList(),
+                    onChanged: (value) {
+                      if (value != null) {
+                        setState(() {
+                          selectedClass = value;
+                        });
+                      }
                     },
+                    decoration: const InputDecoration(
+                      labelText: 'Select Class',
+                    ),
                   ),
-              ],
+
+                  const SizedBox(height: 12),
+
+                  TextField(
+                    decoration: const InputDecoration(
+                      labelText: 'Start Date',
+                      hintText: 'YYYY-MM-DD',
+                    ),
+                    controller: TextEditingController(text: startDate),
+                    onChanged: (v) => startDate = v,
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  TextField(
+                    decoration: const InputDecoration(
+                      labelText: 'End Date',
+                      hintText: 'YYYY-MM-DD',
+                    ),
+                    controller: TextEditingController(text: endDate),
+                    onChanged: (v) => endDate = v,
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: isLoading ? null : fetchRegister,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.blue,
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: const Icon(Icons.search),
+                      label: Text(isLoading ? 'Loading...' : 'Show Register'),
+                    ),
+                  ),
+
+                  if (message.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      message,
+                      style: const TextStyle(
+                        color: AppColors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
-          ),
+
+            const SizedBox(height: 18),
+
+            if (isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (rows.isNotEmpty)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: UiHelpers.cardDecoration(),
+                child: registerTable(),
+              )
+            else
+              const Text('No register data found'),
+          ],
         ),
       ),
     );

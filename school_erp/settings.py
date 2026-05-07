@@ -15,16 +15,25 @@ ALLOWED_HOSTS = [
     'www.alrahmanmission.in',
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://alrahman-erp.onrender.com',
+    'https://alrahmanmission.in',
+    'https://www.alrahmanmission.in',
+]
+
 INSTALLED_APPS = [
     'corsheaders',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
     'rest_framework',
     'rest_framework.authtoken',
+
     'core',
     'students',
     'teachers',
@@ -44,19 +53,23 @@ INSTALLED_APPS = [
     'expenses',
     'backup',
     'website',
+    'homework',
+    'notices',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-
-    # ✅ Render/Online static files fix
     'whitenoise.middleware.WhiteNoiseMiddleware',
 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+
+    'core.middleware.EmployeeAccessMiddleware',
+
     'django.contrib.messages.middleware.MessageMiddleware',
 ]
 
@@ -67,7 +80,9 @@ ROOT_URLCONF = 'school_erp.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [
+            BASE_DIR / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -112,13 +127,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_DIR = BASE_DIR / 'static'
+
 STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+    STATIC_DIR,
+] if STATIC_DIR.exists() else []
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# ✅ WhiteNoise compressed static storage
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
@@ -126,9 +142,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = '/admin/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/admin/login/'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/dashboard/'
+LOGOUT_REDIRECT_URL = '/login/'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

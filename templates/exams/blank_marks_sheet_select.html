@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow border-0 rounded-4">
+
+        <div class="card-body">
+
+            <h3 class="fw-bold mb-4">
+                📝 Blank Marks Sheet
+            </h3>
+
+            <form method="GET"
+                  action="{% url 'blank_marks_sheet_print' %}"
+                  target="_blank">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+
+                        <label class="fw-bold">
+                            Select Exam
+                        </label>
+
+                        <select name="exam"
+                                class="form-select"
+                                required>
+
+                            <option value="">
+                                -- Select Exam --
+                            </option>
+
+                            {% for e in exams %}
+
+                            <option value="{{ e.id }}">
+                                {{ e.name }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <label class="fw-bold">
+                            Select Class
+                        </label>
+
+                        <select name="class"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Class --
+                            </option>
+
+                            {% for c in classes %}
+
+                            <option value="{{ c }}">
+                                {{ c }}
+                            </option>
+
+                            {% endfor %}
+
+                        </select>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <label class="fw-bold">
+                            Subject Name
+                        </label>
+
+                        <input type="text"
+                               name="subject"
+                               class="form-control"
+                               placeholder="Example: Mathematics">
+
+                    </div>
+
+                </div>
+
+                <div class="mt-4">
+
+                    <button class="btn btn-success">
+
+                        🖨 Generate Blank Sheet
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

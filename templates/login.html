@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login | AL RAHMAN MISSION ERP</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background:
+                linear-gradient(135deg, rgba(0, 77, 64, 0.95), rgba(0, 150, 136, 0.85)),
+                url("{% static 'images/header.jpg' %}");
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .login-card {
+            width: 420px;
+            max-width: 92%;
+            padding: 35px;
+            border-radius: 28px;
+            background: rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+            color: white;
+            text-align: center;
+        }
+
+        .logo {
+            width: 88px;
+            height: 88px;
+            object-fit: contain;
+            background: white;
+            padding: 8px;
+            border-radius: 50%;
+            margin-bottom: 12px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 900;
+        }
+
+        .sub {
+            margin: 8px 0 25px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .field {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .field input {
+            width: 100%;
+            height: 48px;
+            border-radius: 14px;
+            border: none;
+            outline: none;
+            padding: 0 15px;
+            font-size: 16px;
+        }
+
+        .btn-login {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #16a34a, #0f766e);
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+        }
+
+        .error {
+            background: rgba(220, 38, 38, 0.9);
+            padding: 10px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .hint {
+            margin-top: 18px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="login-card">
+    <img src="{% static 'images/logo.png' %}" class="logo">
+
+    <h2>AL RAHMAN MISSION</h2>
+    <div class="sub">ERP Login Panel</div>
+
+    {% if form.errors %}
+        <div class="error">
+            Invalid username or password
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="field">
+            <label>Username</label>
+            <input type="text" name="username" placeholder="Example: EMP1" required>
+        </div>
+
+        <div class="field">
+            <label>Password</label>
+            <input type="password" name="password" placeholder="Enter password" required>
+        </div>
+
+        <button type="submit" class="btn-login">
+            Login
+        </button>
+    </form>
+
+    <div class="hint">
+        Teacher Username: EMP ID | Password: Phone Number
+    </div>
+</div>
+
+</body>
+</html>

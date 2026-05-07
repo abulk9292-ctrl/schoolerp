@@ -1,0 +1,597 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+
+.print-actions{
+    margin-bottom:15px;
+}
+
+.page-wrap{
+    width:210mm;
+    margin:auto;
+    background:#fff;
+    padding:5mm;
+    box-sizing:border-box;
+}
+
+.top-summary{
+    border:2px solid #0b2f5b;
+    border-radius:14px;
+    padding:18px;
+    margin-bottom:18px;
+    background:linear-gradient(135deg,#f8fbff,#eef5ff);
+    box-shadow:0 8px 24px rgba(15,23,42,.08);
+}
+
+.summary-title{
+    font-size:28px;
+    font-weight:900;
+    color:#0b2f5b;
+    margin-bottom:5px;
+}
+
+.summary-sub{
+    color:#555;
+    font-size:14px;
+}
+
+.summary-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:12px;
+    margin-top:18px;
+}
+
+.summary-card{
+    background:#fff;
+    border-radius:12px;
+    padding:12px;
+    text-align:center;
+    border:1px solid #dbe4ff;
+}
+
+.summary-card small{
+    display:block;
+    color:#64748b;
+    font-weight:700;
+    margin-bottom:6px;
+}
+
+.summary-card h4{
+    margin:0;
+    font-weight:900;
+}
+
+.salary-slip{
+    border:1.5px solid #0b2f5b;
+    border-radius:10px;
+    margin-bottom:16px;
+    overflow:hidden;
+    position:relative;
+    page-break-inside:avoid;
+    background:#fff;
+}
+
+.watermark{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    opacity:.04;
+    z-index:0;
+}
+
+.watermark img{
+    width:220px;
+    height:220px;
+    object-fit:contain;
+}
+
+.slip-body{
+    position:relative;
+    z-index:2;
+    padding:14px;
+}
+
+.slip-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:2px solid #0b2f5b;
+    padding-bottom:10px;
+    margin-bottom:12px;
+}
+
+.school-left{
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.logo{
+    width:60px;
+    height:60px;
+    object-fit:contain;
+}
+
+.school-name{
+    font-size:24px;
+    font-weight:900;
+    color:#0b2f5b;
+    line-height:1;
+}
+
+.school-sub{
+    font-size:11px;
+    color:#444;
+}
+
+.slip-title{
+    text-align:right;
+}
+
+.slip-title h3{
+    margin:0;
+    font-size:18px;
+    color:#0b2f5b;
+    font-weight:900;
+}
+
+.slip-title p{
+    margin:3px 0 0;
+    font-size:12px;
+}
+
+.info-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-bottom:12px;
+}
+
+.info-box{
+    border:1px solid #ddd;
+    border-radius:8px;
+    padding:10px;
+    background:#fafafa;
+}
+
+.info-row{
+    display:grid;
+    grid-template-columns:110px 10px 1fr;
+    margin-bottom:4px;
+    font-size:13px;
+}
+
+.salary-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    font-size:13px;
+}
+
+.salary-table th{
+    background:#0b2f5b;
+    color:#fff;
+    padding:7px;
+    border:1px solid #0b2f5b;
+}
+
+.salary-table td{
+    border:1px solid #ccc;
+    padding:6px;
+}
+
+.total-row{
+    background:#f4f8ff;
+    font-weight:900;
+}
+
+.status-paid{
+    color:#16a34a;
+    font-weight:900;
+}
+
+.status-partial{
+    color:#f59e0b;
+    font-weight:900;
+}
+
+.status-unpaid{
+    color:#dc2626;
+    font-weight:900;
+}
+
+.status-advance{
+    color:#0284c7;
+    font-weight:900;
+}
+
+.sign-area{
+    display:flex;
+    justify-content:space-between;
+    margin-top:25px;
+}
+
+.sign-box{
+    width:30%;
+    text-align:center;
+    border-top:1px solid #111;
+    padding-top:5px;
+    font-size:12px;
+}
+
+.footer-note{
+    background:#0b2f5b;
+    color:#fff;
+    text-align:center;
+    padding:5px;
+    font-size:11px;
+    font-weight:700;
+    margin-top:12px;
+}
+
+.empty-box{
+    padding:60px;
+    text-align:center;
+    border:2px dashed #ccc;
+    border-radius:14px;
+    background:#fafafa;
+}
+
+@media print{
+
+    @page{
+        size:A4;
+        margin:5mm;
+    }
+
+    .sidebar,
+    .topbar,
+    .print-actions,
+    .no-print{
+        display:none!important;
+    }
+
+    .content-area{
+        margin:0!important;
+        padding:0!important;
+    }
+
+    .page-wrap{
+        width:100%;
+        padding:0;
+    }
+
+    .salary-slip{
+        page-break-inside:avoid;
+    }
+}
+
+</style>
+
+<div class="print-actions no-print">
+    <button onclick="window.print()" class="btn btn-dark">
+        🖨 Print All Slips
+    </button>
+
+    <a href="{% url 'employee_detail' employee.id %}"
+       class="btn btn-secondary">
+        Back
+    </a>
+</div>
+
+<div class="page-wrap">
+
+    <!-- TOP SUMMARY -->
+    <div class="top-summary">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+            <div>
+
+                <div class="summary-title">
+                    {{ employee.name }}
+                </div>
+
+                <div class="summary-sub">
+                    Employee ID:
+                    <b>{{ employee.employee_id }}</b>
+                </div>
+
+                <div class="summary-sub">
+                    Designation:
+                    <b>{{ employee.designation }}</b>
+                </div>
+
+            </div>
+
+            <div class="text-end">
+
+                <div class="summary-sub">
+                    Generated:
+                    {% now "d M Y h:i A" %}
+                </div>
+
+                <div class="summary-sub">
+                    Total Salary Records:
+                    <b>{{ salary_records|length }}</b>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="summary-grid">
+
+            <div class="summary-card">
+                <small>Total Payable</small>
+                <h4 class="text-dark">
+                    ₹{{ total_payable }}
+                </h4>
+            </div>
+
+            <div class="summary-card">
+                <small>Total Paid</small>
+                <h4 class="text-success">
+                    ₹{{ total_paid }}
+                </h4>
+            </div>
+
+            <div class="summary-card">
+                <small>Total Due</small>
+                <h4 class="text-danger">
+                    ₹{{ total_due }}
+                </h4>
+            </div>
+
+            <div class="summary-card">
+                <small>Total Advance</small>
+                <h4 class="text-primary">
+                    ₹{{ total_advance }}
+                </h4>
+            </div>
+
+        </div>
+
+    </div>
+
+    {% for s in salary_records %}
+
+    <div class="salary-slip">
+
+        <div class="watermark">
+            <img src="{% static 'images/logo.png' %}">
+        </div>
+
+        <div class="slip-body">
+
+            <div class="slip-header">
+
+                <div class="school-left">
+
+                    <img src="{% static 'images/logo.png' %}"
+                         class="logo">
+
+                    <div>
+
+                        <div class="school-name">
+                            AL RAHMAN MISSION
+                        </div>
+
+                        <div class="school-sub">
+                            Bangla + English Medium
+                        </div>
+
+                        <div class="school-sub">
+                            Uttar Dinajpur, West Bengal
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="slip-title">
+
+                    <h3>
+                        SALARY SLIP
+                    </h3>
+
+                    <p>
+                        {{ s.month }} {{ s.year }}
+                    </p>
+
+                </div>
+
+            </div>
+
+            <div class="info-grid">
+
+                <div class="info-box">
+
+                    <div class="info-row">
+                        <b>Name</b>
+                        <span>:</span>
+                        <span>{{ employee.name }}</span>
+                    </div>
+
+                    <div class="info-row">
+                        <b>Employee ID</b>
+                        <span>:</span>
+                        <span>{{ employee.employee_id }}</span>
+                    </div>
+
+                    <div class="info-row">
+                        <b>Designation</b>
+                        <span>:</span>
+                        <span>{{ employee.designation }}</span>
+                    </div>
+
+                    <div class="info-row">
+                        <b>Phone</b>
+                        <span>:</span>
+                        <span>{{ employee.phone|default:"-" }}</span>
+                    </div>
+
+                </div>
+
+                <div class="info-box">
+
+                    <div class="info-row">
+                        <b>Month Days</b>
+                        <span>:</span>
+                        <span>{{ s.month_days }}</span>
+                    </div>
+
+                    <div class="info-row">
+                        <b>Absent Days</b>
+                        <span>:</span>
+                        <span>{{ s.absent_days }}</span>
+                    </div>
+
+                    <div class="info-row">
+                        <b>Payment Date</b>
+                        <span>:</span>
+                        <span>{{ s.payment_date }}</span>
+                    </div>
+
+                    <div class="info-row">
+                        <b>Status</b>
+                        <span>:</span>
+                        <span>
+
+                            {% if s.status == 'Paid' %}
+                                <span class="status-paid">
+                                    PAID
+                                </span>
+
+                            {% elif s.status == 'Partial' %}
+                                <span class="status-partial">
+                                    PARTIAL
+                                </span>
+
+                            {% elif s.status == 'Advance' %}
+                                <span class="status-advance">
+                                    ADVANCE
+                                </span>
+
+                            {% else %}
+                                <span class="status-unpaid">
+                                    UNPAID
+                                </span>
+
+                            {% endif %}
+
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <table class="salary-table">
+
+                <tr>
+                    <th>Earnings</th>
+                    <th>Amount</th>
+                    <th>Deductions</th>
+                    <th>Amount</th>
+                </tr>
+
+                <tr>
+                    <td>Basic Salary</td>
+                    <td>₹{{ s.basic_salary }}</td>
+
+                    <td>Attendance Deduction</td>
+                    <td>₹{{ s.attendance_deduction }}</td>
+                </tr>
+
+                <tr>
+                    <td>Bonus</td>
+                    <td>₹{{ s.bonus }}</td>
+
+                    <td>Extra Deduction</td>
+                    <td>₹{{ s.extra_deduction }}</td>
+                </tr>
+
+                <tr class="total-row">
+
+                    <td>Net Salary</td>
+                    <td>₹{{ s.net_salary }}</td>
+
+                    <td>Previous Due</td>
+                    <td>₹{{ s.previous_due }}</td>
+
+                </tr>
+
+                <tr class="total-row">
+
+                    <td>Total Payable</td>
+                    <td>₹{{ s.payable_amount }}</td>
+
+                    <td>Total Paid</td>
+                    <td>₹{{ s.paid_amount }}</td>
+
+                </tr>
+
+                <tr class="total-row">
+
+                    <td>Due Amount</td>
+                    <td class="text-danger">
+                        ₹{{ s.due_amount }}
+                    </td>
+
+                    <td>Advance Amount</td>
+                    <td class="text-primary">
+                        ₹{{ s.advance_amount }}
+                    </td>
+
+                </tr>
+
+            </table>
+
+            <div class="sign-area">
+
+                <div class="sign-box">
+                    Employee Signature
+                </div>
+
+                <div class="sign-box">
+                    Accountant Signature
+                </div>
+
+                <div class="sign-box">
+                    Principal Signature
+                </div>
+
+            </div>
+
+            <div class="footer-note">
+                AL RAHMAN MISSION ERP - Payroll Archive
+            </div>
+
+        </div>
+
+    </div>
+
+    {% empty %}
+
+    <div class="empty-box">
+
+        <h4>
+            No Salary Records Found
+        </h4>
+
+        <p class="text-muted">
+            No payroll history available for this employee.
+        </p>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

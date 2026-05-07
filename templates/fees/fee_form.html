@@ -7,8 +7,12 @@
 
 <div class="card card-box">
     <div class="card-body">
-        <form method="post">
+        <form method="post" id="feeForm">
             {% csrf_token %}
+
+            <div id="paidMonthAlert" class="alert alert-warning d-none">
+                ⚠️ This month's fee already collected for this student. Monthly fee has been set to 0.00.
+            </div>
 
             <div class="row g-3">
 
@@ -119,7 +123,7 @@
             </div>
 
             <div class="mt-4">
-                <button type="submit" class="btn btn-success">Submit Fees</button>
+                <button type="submit" id="submitFeeBtn" class="btn btn-success">Submit Fees</button>
                 <a href="/fees/" class="btn btn-secondary">Back</a>
             </div>
 
@@ -131,6 +135,8 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
+let originalMonthlyFee = null;
+
 $(document).ready(function() {
     $('.student-select').select2({
         placeholder: "Search Student...",
@@ -145,38 +151,63 @@ $(document).ready(function() {
             fetch(`/fees/get-student-old-due/?student_id=${studentId}`)
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('id_previous_balance').value = data.previous_balance;
+                    const previousBalanceInput = document.getElementById('id_previous_balance');
+                    if (previousBalanceInput) {
+                        previousBalanceInput.value = data.previous_balance;
+                    }
                     calculateLiveTotals();
                 });
 
             fetch(`/fees/get-student-fee-structure/?student_id=${studentId}`)
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('id_monthly_fee').value = data.monthly_fee;
-                    document.getElementById('id_admission_fee').value = data.admission_fee;
-                    document.getElementById('id_registration_fee').value = data.registration_fee;
-                    document.getElementById('id_art_material').value = data.art_material;
-                    document.getElementById('id_transport_fee').value = data.transport_fee;
-                    document.getElementById('id_books_fee').value = data.books_fee;
-                    document.getElementById('id_uniform_fee').value = data.uniform_fee;
+                    setInputValue('id_monthly_fee', data.monthly_fee);
+                    setInputValue('id_admission_fee', data.admission_fee);
+                    setInputValue('id_registration_fee', data.registration_fee);
+                    setInputValue('id_art_material', data.art_material);
+                    setInputValue('id_transport_fee', data.transport_fee);
+                    setInputValue('id_books_fee', data.books_fee);
+                    setInputValue('id_uniform_fee', data.uniform_fee);
+
+                    originalMonthlyFee = data.monthly_fee;
+
                     calculateLiveTotals();
+                    checkAlreadyPaidMonth();
                 });
         } else {
-            document.getElementById('id_previous_balance').value = '0.00';
-            document.getElementById('id_monthly_fee').value = '0.00';
-            document.getElementById('id_admission_fee').value = '0.00';
-            document.getElementById('id_registration_fee').value = '0.00';
-            document.getElementById('id_art_material').value = '0.00';
-            document.getElementById('id_transport_fee').value = '0.00';
-            document.getElementById('id_books_fee').value = '0.00';
-            document.getElementById('id_uniform_fee').value = '0.00';
+            setInputValue('id_previous_balance', '0.00');
+            setInputValue('id_monthly_fee', '0.00');
+            setInputValue('id_admission_fee', '0.00');
+            setInputValue('id_registration_fee', '0.00');
+            setInputValue('id_art_material', '0.00');
+            setInputValue('id_transport_fee', '0.00');
+            setInputValue('id_books_fee', '0.00');
+            setInputValue('id_uniform_fee', '0.00');
+
+            originalMonthlyFee = null;
+            hidePaidMonthAlert();
             calculateLiveTotals();
         }
     });
+
+    $('#id_fees_month').on('change', function() {
+        checkAlreadyPaidMonth();
+    });
 });
+
+function setInputValue(id, value) {
+    const el = document.getElementById(id);
+    if (el) {
+        el.value = value || '0.00';
+    }
+}
 
 function getValue(id) {
     const el = document.getElementById(id);
+    if (!el) {
+        return 0;
+    }
+
     const val = parseFloat(el.value);
     return isNaN(val) ? 0 : val;
 }
@@ -195,14 +226,96 @@ function calculateLiveTotals() {
     const discount_percent = getValue('id_discount_percent');
     const deposit_amount = getValue('id_deposit_amount');
 
-    const grossTotal = monthly_fee + admission_fee + registration_fee + art_material + transport_fee + books_fee + uniform_fee + fine + others + previous_balance;
+    const grossTotal =
+        monthly_fee +
+        admission_fee +
+        registration_fee +
+        art_material +
+        transport_fee +
+        books_fee +
+        uniform_fee +
+        fine +
+        others +
+        previous_balance;
+
     const discountAmount = (grossTotal * discount_percent) / 100;
     const finalTotal = grossTotal - discountAmount;
-    const dueBalance = finalTotal - deposit_amount;
 
-    document.getElementById('gross_total_preview').value = grossTotal.toFixed(2);
-    document.getElementById('discount_amount_preview').value = discountAmount.toFixed(2);
-    document.getElementById('due_balance_preview').value = dueBalance.toFixed(2);
+    let dueBalance = finalTotal - deposit_amount;
+
+    if (dueBalance < 0) {
+        dueBalance = 0;
+    }
+
+    const grossPreview = document.getElementById('gross_total_preview');
+    const discountPreview = document.getElementById('discount_amount_preview');
+    const duePreview = document.getElementById('due_balance_preview');
+
+    if (grossPreview) {
+        grossPreview.value = grossTotal.toFixed(2);
+    }
+
+    if (discountPreview) {
+        discountPreview.value = discountAmount.toFixed(2);
+    }
+
+    if (duePreview) {
+        duePreview.value = dueBalance.toFixed(2);
+    }
+}
+
+function showPaidMonthAlert() {
+    const alertBox = document.getElementById('paidMonthAlert');
+    if (alertBox) {
+        alertBox.classList.remove('d-none');
+    }
+}
+
+function hidePaidMonthAlert() {
+    const alertBox = document.getElementById('paidMonthAlert');
+    if (alertBox) {
+        alertBox.classList.add('d-none');
+    }
+}
+
+function checkAlreadyPaidMonth() {
+    const studentInput = document.getElementById('id_student');
+    const monthInput = document.getElementById('id_fees_month');
+
+    if (!studentInput || !monthInput) {
+        return;
+    }
+
+    const studentId = studentInput.value;
+    const month = monthInput.value;
+
+    if (!studentId || !month) {
+        hidePaidMonthAlert();
+
+        if (originalMonthlyFee !== null) {
+            setInputValue('id_monthly_fee', originalMonthlyFee);
+        }
+
+        calculateLiveTotals();
+        return;
+    }
+
+    fetch(`/fees/check-paid-month/?student_id=${studentId}&month=${month}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.already_paid) {
+                showPaidMonthAlert();
+                setInputValue('id_monthly_fee', '0.00');
+            } else {
+                hidePaidMonthAlert();
+
+                if (originalMonthlyFee !== null) {
+                    setInputValue('id_monthly_fee', originalMonthlyFee);
+                }
+            }
+
+            calculateLiveTotals();
+        });
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -230,6 +343,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
     calculateLiveTotals();
 });
+
+const feeForm = document.getElementById('feeForm');
+
+if (feeForm) {
+    feeForm.addEventListener('submit', function(event) {
+        const grossTotal = getValue('gross_total_preview');
+        const depositAmount = getValue('id_deposit_amount');
+
+        if (depositAmount < 0) {
+            event.preventDefault();
+            alert("Deposit amount cannot be negative.");
+            return false;
+        }
+
+        if (grossTotal <= 0 && depositAmount <= 0) {
+            event.preventDefault();
+            alert("Please enter fee amount or deposit amount.");
+            return false;
+        }
+    });
+}
 </script>
 
 {% endblock %}

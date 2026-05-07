@@ -5,10 +5,10 @@
 <style>
 .print-actions{margin-bottom:10px}
 .a4-page{width:210mm;min-height:297mm;margin:auto;background:#fff;padding:5mm;box-sizing:border-box}
-.salary-slip{height:138mm;border:1.5px solid #0b2f5b;margin-bottom:3mm;position:relative;overflow:hidden;box-sizing:border-box}
+.salary-slip{height:138mm;border:1.5px solid #0b2f5b;margin-bottom:3mm;position:relative;overflow:hidden;box-sizing:border-box;background:#fff}
 .left-copy{position:absolute;left:0;top:0;width:13mm;height:100%;border-right:1px dashed #777;display:flex;align-items:center;justify-content:center}
 .left-copy span{transform:rotate(-90deg);font-weight:900;color:#0b2f5b;font-size:14px;white-space:nowrap}
-.slip-body{margin-left:13mm;padding:4mm}
+.slip-body{margin-left:13mm;padding:4mm;position:relative;z-index:2}
 .header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #ddd;padding-bottom:4px}
 .school{display:flex;gap:8px;align-items:center}
 .logo{width:48px;height:48px;object-fit:contain}
@@ -20,12 +20,13 @@
 .pay-date{background:#0b2f5b;color:#fff;padding:3px 12px;border-radius:5px;font-size:10px;font-weight:800}
 .info-box{border:1px solid #ccc;border-radius:6px;margin-top:5px;padding:5px;display:grid;grid-template-columns:1fr 1fr;gap:5px;font-size:9.5px}
 .info-row{display:grid;grid-template-columns:95px 8px 1fr;margin-bottom:2px}
+.info-row span:last-child{font-weight:600}
 .section-table{width:100%;border-collapse:collapse;margin-top:6px;font-size:9.5px}
 .section-table th{background:#0b2f5b;color:#fff;padding:4px;border:1px solid #0b2f5b}
 .section-table td{padding:3px 5px;border:1px solid #ccc}
 .total-row td{font-weight:900;background:#eee6d8;color:#0b2f5b}
 .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
-.summary-box,.payment-box{border:1px solid #ccc;border-radius:6px;padding:5px;font-size:9.5px}
+.summary-box,.payment-box{border:1px solid #ccc;border-radius:6px;padding:5px;font-size:9.5px;background:#fafafa}
 .net-line{background:#0b2f5b;color:#fff;font-weight:900;padding:5px;margin-top:4px;display:flex;justify-content:space-between}
 .due-line{background:#ffe8e8;color:#b00020;font-weight:900;padding:5px;margin-top:4px;display:flex;justify-content:space-between}
 .advance-line{background:#e7f5ff;color:#055160;font-weight:900;padding:5px;margin-top:4px;display:flex;justify-content:space-between}
@@ -36,6 +37,14 @@
 .principal-sign{height:28px;object-fit:contain;display:block;margin:0 auto 2px}
 .footer-blue{position:absolute;bottom:0;left:13mm;right:0;background:#0b2f5b;color:#fff;text-align:center;font-size:9px;padding:4px}
 .cut-line{text-align:center;font-size:8px;color:#777;border-top:1px dashed #777;margin:0 0 2mm}
+
+.watermark{position:absolute;top:50%;left:55%;transform:translate(-50%,-50%);opacity:0.04;z-index:0;pointer-events:none}
+.watermark img{width:240px;height:240px;object-fit:contain}
+
+.status-paid{color:#0f9d58;font-weight:900}
+.status-partial{color:#ff9800;font-weight:900}
+.status-unpaid{color:#d32f2f;font-weight:900}
+.status-advance{color:#1565c0;font-weight:900}
 
 @media print{
     @page{size:A4 portrait;margin:4mm}
@@ -56,6 +65,11 @@
 <!-- OFFICE COPY -->
 <div class="salary-slip">
     <div class="left-copy"><span>OFFICE COPY</span></div>
+
+    <div class="watermark">
+        <img src="{% static 'images/logo.png' %}">
+    </div>
+
     <div class="slip-body">
         <div class="header">
             <div class="school">
@@ -67,6 +81,7 @@
                     <div class="school-sub">Printed By: {{ request.user.username }}</div>
                 </div>
             </div>
+
             <div class="title">
                 <h3>TEACHER SALARY PAYMENT SLIP</h3>
                 <p>For <b>{{ salary.month }} {{ salary.year }}</b></p>
@@ -79,13 +94,33 @@
                 <div class="info-row"><b>Teacher ID</b><span>:</span><span>{{ salary.employee.employee_id|default:"-" }}</span></div>
                 <div class="info-row"><b>Name</b><span>:</span><span>{{ salary.employee.name }}</span></div>
                 <div class="info-row"><b>Designation</b><span>:</span><span>{{ salary.employee.designation|default:"-" }}</span></div>
-                <div class="info-row"><b>Status</b><span>:</span><span>{{ salary.status }}</span></div>
+                <div class="info-row"><b>Phone</b><span>:</span><span>{{ salary.employee.phone|default:"-" }}</span></div>
+                <div class="info-row"><b>Aadhaar</b><span>:</span><span>{{ salary.employee.aadhaar_number|default:"-" }}</span></div>
+
+                <div class="info-row">
+                    <b>Status</b>
+                    <span>:</span>
+                    <span>
+                        {% if salary.status == 'Paid' %}
+                            <span class="status-paid">PAID</span>
+                        {% elif salary.status == 'Partial' %}
+                            <span class="status-partial">PARTIAL</span>
+                        {% elif salary.status == 'Advance' %}
+                            <span class="status-advance">ADVANCE</span>
+                        {% else %}
+                            <span class="status-unpaid">UNPAID</span>
+                        {% endif %}
+                    </span>
+                </div>
             </div>
+
             <div>
                 <div class="info-row"><b>Month Days</b><span>:</span><span>{{ salary.month_days }}</span></div>
                 <div class="info-row"><b>Absent Days</b><span>:</span><span>{{ salary.absent_days }}</span></div>
                 <div class="info-row"><b>Payable Absent</b><span>:</span><span>{{ salary.payable_absent_days }}</span></div>
                 <div class="info-row"><b>Per Day</b><span>:</span><span>₹{{ salary.per_day_salary }}</span></div>
+                <div class="info-row"><b>Slip No</b><span>:</span><span>ARM-SAL-{{ salary.id }}</span></div>
+                <div class="info-row"><b>Generated</b><span>:</span><span>{% now "d M Y h:i A" %}</span></div>
             </div>
         </div>
 
@@ -114,20 +149,37 @@
             <div class="summary-box">
                 <div>Current Net Salary <span style="float:right">₹{{ salary.net_salary }}</span></div>
                 <div>Previous Due <span style="float:right">₹{{ salary.previous_due|default:"0.00" }}</span></div>
-                <div class="net-line"><span>Total Payable</span><span>₹{{ salary.payable_amount|default:salary.net_salary }}</span></div>
+
+                <div class="net-line">
+                    <span>Total Payable</span>
+                    <span>₹{{ salary.payable_amount|default:salary.net_salary }}</span>
+                </div>
+
                 <div>Paid Amount <span style="float:right">₹{{ salary.paid_amount }}</span></div>
-                <div class="due-line"><span>Due Balance</span><span>₹{{ salary.due_amount }}</span></div>
+
+                {% if salary.due_amount > 0 %}
+                <div class="due-line">
+                    <span>Due Balance</span>
+                    <span>₹{{ salary.due_amount }}</span>
+                </div>
+                {% endif %}
+
                 {% if salary.advance_amount > 0 %}
-                <div class="advance-line"><span>Advance</span><span>₹{{ salary.advance_amount }}</span></div>
+                <div class="advance-line">
+                    <span>Advance Balance</span>
+                    <span>₹{{ salary.advance_amount }}</span>
+                </div>
                 {% endif %}
             </div>
+
             <div class="payment-box">
                 <div class="payment-title">PAYMENT DETAILS</div>
                 <div class="info-row"><b>Mode</b><span>:</span><span>Cash / Bank</span></div>
                 <div class="info-row"><b>Reference</b><span>:</span><span>ARM-SAL-{{ salary.id }}</span></div>
                 <div class="info-row"><b>Total Paid</b><span>:</span><span>₹{{ salary.paid_amount }}</span></div>
                 <div class="info-row"><b>Balance Due</b><span>:</span><span>₹{{ salary.due_amount }}</span></div>
-                <div class="info-row"><b>Generated</b><span>:</span><span>{% now "d M Y" %}</span></div>
+                <div class="info-row"><b>Advance</b><span>:</span><span>₹{{ salary.advance_amount }}</span></div>
+                <div class="info-row"><b>Generated</b><span>:</span><span>{% now "d M Y h:i A" %}</span></div>
             </div>
         </div>
 
@@ -144,6 +196,7 @@
             </div>
         </div>
     </div>
+
     <div class="footer-blue">Thank you for your dedication and contribution to education.</div>
 </div>
 
@@ -152,6 +205,11 @@
 <!-- TEACHER COPY -->
 <div class="salary-slip">
     <div class="left-copy"><span>TEACHER COPY</span></div>
+
+    <div class="watermark">
+        <img src="{% static 'images/logo.png' %}">
+    </div>
+
     <div class="slip-body">
         <div class="header">
             <div class="school">
@@ -163,6 +221,7 @@
                     <div class="school-sub">Printed By: {{ request.user.username }}</div>
                 </div>
             </div>
+
             <div class="title">
                 <h3>TEACHER SALARY PAYMENT SLIP</h3>
                 <p>For <b>{{ salary.month }} {{ salary.year }}</b></p>
@@ -175,13 +234,33 @@
                 <div class="info-row"><b>Teacher ID</b><span>:</span><span>{{ salary.employee.employee_id|default:"-" }}</span></div>
                 <div class="info-row"><b>Name</b><span>:</span><span>{{ salary.employee.name }}</span></div>
                 <div class="info-row"><b>Designation</b><span>:</span><span>{{ salary.employee.designation|default:"-" }}</span></div>
-                <div class="info-row"><b>Status</b><span>:</span><span>{{ salary.status }}</span></div>
+                <div class="info-row"><b>Phone</b><span>:</span><span>{{ salary.employee.phone|default:"-" }}</span></div>
+                <div class="info-row"><b>Aadhaar</b><span>:</span><span>{{ salary.employee.aadhaar_number|default:"-" }}</span></div>
+
+                <div class="info-row">
+                    <b>Status</b>
+                    <span>:</span>
+                    <span>
+                        {% if salary.status == 'Paid' %}
+                            <span class="status-paid">PAID</span>
+                        {% elif salary.status == 'Partial' %}
+                            <span class="status-partial">PARTIAL</span>
+                        {% elif salary.status == 'Advance' %}
+                            <span class="status-advance">ADVANCE</span>
+                        {% else %}
+                            <span class="status-unpaid">UNPAID</span>
+                        {% endif %}
+                    </span>
+                </div>
             </div>
+
             <div>
                 <div class="info-row"><b>Month Days</b><span>:</span><span>{{ salary.month_days }}</span></div>
                 <div class="info-row"><b>Absent Days</b><span>:</span><span>{{ salary.absent_days }}</span></div>
                 <div class="info-row"><b>Payable Absent</b><span>:</span><span>{{ salary.payable_absent_days }}</span></div>
                 <div class="info-row"><b>Per Day</b><span>:</span><span>₹{{ salary.per_day_salary }}</span></div>
+                <div class="info-row"><b>Slip No</b><span>:</span><span>ARM-SAL-{{ salary.id }}</span></div>
+                <div class="info-row"><b>Generated</b><span>:</span><span>{% now "d M Y h:i A" %}</span></div>
             </div>
         </div>
 
@@ -210,20 +289,37 @@
             <div class="summary-box">
                 <div>Current Net Salary <span style="float:right">₹{{ salary.net_salary }}</span></div>
                 <div>Previous Due <span style="float:right">₹{{ salary.previous_due|default:"0.00" }}</span></div>
-                <div class="net-line"><span>Total Payable</span><span>₹{{ salary.payable_amount|default:salary.net_salary }}</span></div>
+
+                <div class="net-line">
+                    <span>Total Payable</span>
+                    <span>₹{{ salary.payable_amount|default:salary.net_salary }}</span>
+                </div>
+
                 <div>Paid Amount <span style="float:right">₹{{ salary.paid_amount }}</span></div>
-                <div class="due-line"><span>Due Balance</span><span>₹{{ salary.due_amount }}</span></div>
+
+                {% if salary.due_amount > 0 %}
+                <div class="due-line">
+                    <span>Due Balance</span>
+                    <span>₹{{ salary.due_amount }}</span>
+                </div>
+                {% endif %}
+
                 {% if salary.advance_amount > 0 %}
-                <div class="advance-line"><span>Advance</span><span>₹{{ salary.advance_amount }}</span></div>
+                <div class="advance-line">
+                    <span>Advance Balance</span>
+                    <span>₹{{ salary.advance_amount }}</span>
+                </div>
                 {% endif %}
             </div>
+
             <div class="payment-box">
                 <div class="payment-title">PAYMENT DETAILS</div>
                 <div class="info-row"><b>Mode</b><span>:</span><span>Cash / Bank</span></div>
                 <div class="info-row"><b>Reference</b><span>:</span><span>ARM-SAL-{{ salary.id }}</span></div>
                 <div class="info-row"><b>Total Paid</b><span>:</span><span>₹{{ salary.paid_amount }}</span></div>
                 <div class="info-row"><b>Balance Due</b><span>:</span><span>₹{{ salary.due_amount }}</span></div>
-                <div class="info-row"><b>Generated</b><span>:</span><span>{% now "d M Y" %}</span></div>
+                <div class="info-row"><b>Advance</b><span>:</span><span>₹{{ salary.advance_amount }}</span></div>
+                <div class="info-row"><b>Generated</b><span>:</span><span>{% now "d M Y h:i A" %}</span></div>
             </div>
         </div>
 
@@ -240,6 +336,7 @@
             </div>
         </div>
     </div>
+
     <div class="footer-blue">Thank you for your dedication and contribution to education.</div>
 </div>
 

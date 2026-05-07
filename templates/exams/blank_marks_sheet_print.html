@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+@page{
+    size:A4;
+    margin:4mm;
+}
+
+*{
+    box-sizing:border-box;
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+}
+
+body{
+    background:#e5e7eb;
+    font-family:Arial, sans-serif;
+}
+
+.no-print{
+    text-align:center;
+    margin-bottom:5px;
+}
+
+.sheet{
+    width:194mm;
+    min-height:200mm;
+    margin:auto;
+    background:white;
+    padding:6mm;
+    border:2px solid #111;
+    position:relative;
+}
+
+.watermark{
+    position:absolute;
+    width:300px;
+    opacity:0.06;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+}
+
+.content{
+    position:relative;
+    z-index:2;
+}
+
+.header-img{
+    width:100%;
+    max-height:50px;
+    object-fit:contain;
+}
+
+.title{
+    text-align:center;
+    font-size:16px;
+    font-weight:700;
+    border:2px solid #111;
+    background:#f3f4f6;
+    padding:5px;
+    margin-top:3px;
+}
+
+.meta-table{
+    width:100%;
+    margin-top:1px;
+    font-size:9px;
+    font-weight:700;
+}
+
+.meta-table td{
+    padding:3px;
+}
+
+.marks-table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:1px;
+    font-size:7px;
+    table-layout:fixed;
+    word-wrap:break-word;
+}
+
+.marks-table th,
+.marks-table td{
+    border:1px solid #111;
+    padding:2px;
+    text-align:center;
+    vertical-align:middle;
+}
+
+.marks-table th{
+    background:#111827;
+    color:white;
+    font-size:7px;
+    line-height:1.1;
+}
+
+.blank-cell{
+    height:12px;
+}
+
+.text-left{
+    text-align:left !important;
+    font-size:7px;
+    padding-left:3px !important;
+}
+
+.blank-cell{
+    height:26px;
+}
+
+.signature-row{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:12px;
+    margin-top:35px;
+    text-align:center;
+    font-size:12px;
+    font-weight:700;
+}
+
+.sign-line{
+    border-top:1px solid #111;
+    padding-top:5px;
+}
+
+@media print{
+    body{
+        background:white !important;
+    }
+
+    .no-print,
+    .sidebar,
+    .topbar,
+    .navbar,
+    header,
+    aside,
+    footer{
+        display:none !important;
+    }
+
+    .sheet{
+        width:194mm !important;
+        margin:0 auto !important;
+        box-shadow:none !important;
+    }
+}
+</style>
+
+<div class="no-print">
+    <button onclick="window.print()" class="btn btn-success">
+        🖨 Print / Save PDF
+    </button>
+
+    <a href="{% url 'blank_marks_sheet_select' %}" class="btn btn-secondary">
+        ⬅ Back
+    </a>
+</div>
+
+<div class="sheet">
+
+    <img src="{{ logo_url|default:'/static/images/logo.png' }}" class="watermark">
+
+    <div class="content">
+
+        <img src="{{ header_url|default:'/static/images/header.jpg' }}" class="header-img">
+
+        <div class="title">
+            BLANK MARKS SHEET
+        </div>
+
+        <table class="meta-table">
+            <tr>
+                <td width="120">Exam</td>
+                <td>: {{ exam.name }}</td>
+                <td width="120">Session</td>
+                <td>: {{ exam.academic_session }}</td>
+            </tr>
+
+            <tr>
+                <td>Class</td>
+                <td>: {{ selected_class|default:"-" }}</td>
+                <td>Date</td>
+                <td>: __________________</td>
+
+            </tr>
+        </table>
+
+        <div style="overflow-x:auto;">
+
+        <table class="marks-table">
+        
+            <thead>
+        
+                <tr>
+        
+                    <th width="20">SL</th>
+        
+                    <th width="20">Roll</th>
+        
+                    <th class="text-left">
+                        Student Name
+                    </th>
+        
+                    <th width="25">
+                        Student ID
+                    </th>
+        
+                    {% for cs in subjects %}
+        
+                        <th>
+                            {{ cs.subject.subject_name }}<br>
+        
+                            <small>
+                                F: {{ cs.full_marks }}
+                            </small>
+                        </th>
+        
+                    {% empty %}
+        
+                        <th>
+                            No Subject Assigned
+                        </th>
+        
+                    {% endfor %}
+        
+                    <th width="40">
+                        Total
+                    </th>
+        
+                    <th width="30">
+                        Remark
+                    </th>
+        
+                </tr>
+        
+            </thead>
+        
+            <tbody>
+        
+                {% for student in students %}
+        
+                <tr>
+        
+                    <td>
+                        {{ forloop.counter }}
+                    </td>
+        
+                    <td>
+                        {{ student.roll_no|default:"-" }}
+                    </td>
+        
+                    <td class="text-left">
+        
+                        {% if student.student_name %}
+        
+                            {{ student.student_name }}
+        
+                        {% elif student.name %}
+        
+                            {{ student.name }}
+        
+                        {% elif student.full_name %}
+        
+                            {{ student.full_name }}
+        
+                        {% else %}
+        
+                            {{ student }}
+        
+                        {% endif %}
+        
+                    </td>
+        
+                    <td>
+                        {{ student.student_id|default:student.id }}
+                    </td>
+        
+                    {% for cs in subjects %}
+        
+                        <td class="blank-cell"></td>
+        
+                    {% empty %}
+        
+                        <td class="blank-cell"></td>
+        
+                    {% endfor %}
+        
+                    <td class="blank-cell"></td>
+        
+                    <td class="blank-cell"></td>
+        
+                </tr>
+        
+                {% empty %}
+        
+                <tr>
+        
+                    <td colspan="50">
+                        No students found.
+                    </td>
+        
+                </tr>
+        
+                {% endfor %}
+        
+            </tbody>
+
+        </table>
+        
+        </div>
+
+        <div class="signature-row">
+            <div class="sign-line">
+                Subject Teacher
+            </div>
+
+            <div class="sign-line">
+                Exam Controller
+            </div>
+
+            <div class="sign-line">
+                Principal
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

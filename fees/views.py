@@ -573,3 +573,29 @@ def bulk_demand_slip_print(request):
         'slips': slips,
         'active_session': active_session,
     })
+
+
+@login_required
+def check_paid_month(request):
+    student_id = request.GET.get('student_id')
+    month = request.GET.get('month')
+
+    if not student_id or not month:
+        return JsonResponse({'already_paid': False})
+
+    # ✅ Active session
+    session = get_active_session()
+
+    qs = FeeCollection.objects.filter(
+        student_id=student_id,
+        fees_month=month
+    )
+
+    # ✅ Session wise filter
+    if session:
+        qs = qs.filter(session=session)
+
+    return JsonResponse({
+        'already_paid': qs.exists()
+    })
+

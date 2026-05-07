@@ -1,0 +1,383 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+@page{
+    size:A4;
+    margin:5mm;
+}
+
+*{
+    box-sizing:border-box;
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+}
+
+body{
+    background:#e5e7eb;
+    font-family:Arial,sans-serif;
+}
+
+.no-print{
+    text-align:center;
+    margin-bottom:15px;
+}
+
+.sheet{
+    width:200mm;
+    margin:auto;
+}
+
+.page{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:6mm;
+    margin-bottom:4mm;
+    page-break-after:always;
+}
+
+.admit-card{
+    width:100%;
+    height:138mm;
+    background:white;
+    border:2px solid #111;
+    position:relative;
+    overflow:hidden;
+    padding:5mm;
+}
+
+.watermark{
+    position:absolute;
+    width:220px;
+    opacity:0.07;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+}
+
+.content{
+    position:relative;
+    z-index:2;
+}
+
+.header-img{
+    width:100%;
+    max-height:62px;
+    object-fit:contain;
+}
+
+.title{
+    text-align:center;
+    font-size:18px;
+    font-weight:900;
+    border:1px solid #111;
+    padding:4px;
+    background:#f3f4f6;
+    margin-top:4px;
+}
+
+.exam-name{
+    color:#dc2626;
+}
+
+.top-grid{
+    display:grid;
+    grid-template-columns:1fr 80px;
+    gap:8px;
+    margin-top:5px;
+}
+
+.info-table{
+    width:100%;
+}
+
+.info-table td{
+    font-size:12px;
+    padding:1px 3px;
+    font-weight:700;
+    line-height:1.20;
+}
+
+.info-table td:first-child{
+    width:85px;
+}
+
+.photo{
+    width:76px;
+    height:86px;
+    border:2px solid #111;
+    object-fit:cover;
+}
+
+.routine{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:5px;
+    font-size:10px;
+}
+
+.routine th,
+.routine td{
+    border:1px solid #777;
+    padding:2px;
+    text-align:center;
+}
+
+.routine th{
+    background:#16a34a;
+    color:white;
+    font-weight:800;
+}
+
+.note-box{
+    margin-top:5px;
+    border:1px solid #777;
+    padding:4px 6px;
+    font-size:9px;
+    line-height:1.25;
+    background:#fafafa;
+}
+
+.signature-table{
+    width:100%;
+    margin-top:9px;
+}
+
+.signature-table td{
+    width:50%;
+    text-align:center;
+    vertical-align:bottom;
+}
+
+.principal-sign{
+    width:70px;
+    height:24px;
+    object-fit:contain;
+    display:block;
+    margin:0 auto -2px auto;
+}
+
+.sign-line{
+    border-top:1px solid #111;
+    width:150px;
+    margin:auto;
+    padding-top:3px;
+    font-size:10px;
+    font-weight:700;
+}
+
+.footer-note{
+    text-align:center;
+    font-size:9px;
+    margin-top:4px;
+    color:#555;
+}
+
+@media print{
+    body{
+        background:white !important;
+    }
+
+    .no-print,
+    .sidebar,
+    .topbar,
+    .navbar,
+    header,
+    aside,
+    footer{
+        display:none !important;
+    }
+
+    .sheet{
+        width:200mm !important;
+        margin:0 auto !important;
+    }
+
+    .page{
+        page-break-after:always !important;
+    }
+
+    .admit-card{
+        box-shadow:none !important;
+        page-break-inside:avoid !important;
+    }
+}
+</style>
+
+<div class="no-print">
+    <button onclick="window.print()" class="btn btn-success">
+        🖨 Print / Save PDF
+    </button>
+
+    <a href="{% url 'admit_card_select' %}" class="btn btn-secondary">
+        ⬅ Back
+    </a>
+</div>
+
+<div class="sheet">
+
+{% for student in students %}
+
+    {% if forloop.counter0|divisibleby:2 %}
+    <div class="page">
+    {% endif %}
+
+    <div class="admit-card">
+
+        <img src="{{ logo_url|default:'/static/images/logo.png' }}" class="watermark">
+
+        <div class="content">
+
+            <img src="{{ header_url|default:'/static/images/header.jpg' }}" class="header-img">
+
+            <div class="title">
+                ADMIT CARD —
+                <span class="exam-name">{{ exam.name }}</span>
+            </div>
+
+            <div class="top-grid">
+
+                <div>
+                    <table class="info-table">
+                        <tr>
+                            <td>Name</td>
+                            <td>
+                                :
+                                {% if student.student_name %}
+                                    {{ student.student_name }}
+                                {% elif student.name %}
+                                    {{ student.name }}
+                                {% elif student.full_name %}
+                                    {{ student.full_name }}
+                                {% else %}
+                                    {{ student }}
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Father</td>
+                            <td>: {{ student.father_name|default:"-" }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Class</td>
+                            <td>
+                                :
+                                {% if student.class_assigned %}
+                                    {{ student.class_assigned.class_name }}
+                                {% else %}
+                                    {{ selected_class|default:"-" }}
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Roll</td>
+                            <td>: {{ student.roll_no|default:"-" }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Student ID</td>
+                            <td>: {{ student.student_id|default:student.id }}</td>
+                        </tr>
+
+                        <tr>
+                            <td>Reg. No</td>
+                            <td>: {{ student.registration_no|default:"-" }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div>
+                    {% if student.photo %}
+                        <img src="{{ student.photo.url }}" class="photo">
+                    {% else %}
+                        <img src="{% static 'images/logo.png' %}" class="photo">
+                    {% endif %}
+                </div>
+
+            </div>
+
+            <table class="routine">
+                <thead>
+                    <tr>
+                        <th width="35">SL</th>
+                        <th>Subject</th>
+                        <th width="80">Date</th>
+                        <th width="120">Time</th>
+                        <th width="50">Marks</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for r in routines %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ r.subject }}</td>
+                        <td>{{ r.date|date:"d M Y" }}</td>
+                        <td>{{ r.start_time|time:"h:i A" }} - {{ r.end_time|time:"h:i A" }}</td>
+                        <td>{{ r.total_marks }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No routine found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="note-box">
+                <b>Instructions:</b><br>
+                1. Bring Admit Card compulsory. 2. No entry without Admit Card. 3. Reach 30 mins before exam. 4. Maintain discipline.<br>
+                5. Mobile prohibited. 6. Wear proper uniform. 7. Carry own stationery. 8. Follow invigilator instructions.
+                
+            </div>
+
+            <table class="signature-table">
+                <tr>
+                    <td>
+                        <div class="sign-line">
+                            Class Teacher
+                        </div>
+                    </td>
+
+                    <td>
+                        {% if settings_obj.principal_signature %}
+                            <img src="{{ settings_obj.principal_signature.url }}" class="principal-sign">
+                        {% elif principal_sign %}
+                            <img src="{{ principal_sign }}" class="principal-sign">
+                        {% else %}
+                            <img src="{% static 'images/principal_sign.png' %}" class="principal-sign">
+                        {% endif %}
+
+                        <div class="sign-line">
+                            Principal
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="footer-note">
+                AL RAHMAN MISSION • Bangla + English Medium
+            </div>
+
+        </div>
+    </div>
+
+    {% if forloop.counter|divisibleby:2 or forloop.last %}
+    </div>
+    {% endif %}
+
+{% empty %}
+
+<div class="alert alert-warning">
+    No students found.
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

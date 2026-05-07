@@ -18,15 +18,18 @@ class StudentAttendance(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Present')
     remarks = models.CharField(max_length=255, null=True, blank=True)
 
+    class Meta:
+        unique_together = ('student', 'date')
+        ordering = ['-date', 'student']
+
     def __str__(self):
         return f"{self.student} - {self.date} - {self.status}"
 
-    # 🔥 AUTO ALERT CREATE (Student)
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
         if self.status in ['Absent', 'Late']:
-            AttendanceAlert.objects.get_or_create(
+            AttendanceAlert.objects.update_or_create(
                 alert_type='Student',
                 student=self.student,
                 date=self.date,
@@ -34,6 +37,7 @@ class StudentAttendance(models.Model):
                     'status': self.status,
                     'message_en': f"{self.student.student_name} is {self.status} today.",
                     'message_bn': f"{self.student.student_name} আজ {self.status} আছে।",
+                    'approval_status': 'Pending',
                 }
             )
 
@@ -57,20 +61,32 @@ class TeacherAttendance(models.Model):
     distance_meters = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     within_range = models.BooleanField(default=False)
-    selfie = models.ImageField(upload_to='teacher_attendance_selfies/', null=True, blank=True)
-    remarks = models.CharField(max_length=255, null=True, blank=True)
 
+    selfie = models.ImageField(
+        upload_to='teacher_attendance_selfies/',
+        null=True,
+        blank=True
+    )
+
+    address = models.TextField(null=True, blank=True)
+    device_info = models.CharField(max_length=255, null=True, blank=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    remarks = models.CharField(max_length=255, null=True, blank=True)
     marked_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    class Meta:
+        unique_together = ('employee', 'date')
+        ordering = ['-date', '-marked_at']
 
     def __str__(self):
         return f"{self.employee} - {self.date} - {self.status}"
 
-    # 🔥 AUTO ALERT CREATE (Teacher)
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
 
         if self.status in ['Absent', 'Late']:
-            AttendanceAlert.objects.get_or_create(
+            AttendanceAlert.objects.update_or_create(
                 alert_type='Teacher',
                 employee=self.employee,
                 date=self.date,
@@ -78,12 +94,13 @@ class TeacherAttendance(models.Model):
                     'status': self.status,
                     'message_en': f"{self.employee.name} is {self.status} today.",
                     'message_bn': f"{self.employee.name} আজ {self.status} আছেন।",
+                    'approval_status': 'Pending',
                 }
             )
 
 
 # =========================
-# 🔥 AI ALERT MODEL (NEW)
+# ATTENDANCE ALERT MODEL
 # =========================
 class AttendanceAlert(models.Model):
 
@@ -104,9 +121,8 @@ class AttendanceAlert(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, null=True, blank=True)
 
     date = models.DateField()
-    status = models.CharField(max_length=10)  # Absent / Late
+    status = models.CharField(max_length=10)
 
-    # 🔥 Dual Language Message
     message_en = models.TextField()
     message_bn = models.TextField()
 
@@ -117,6 +133,9 @@ class AttendanceAlert(models.Model):
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
         if self.alert_type == 'Student':

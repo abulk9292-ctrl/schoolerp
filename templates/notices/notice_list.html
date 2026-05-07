@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3>📢 Notices</h3>
+        <a href="{% url 'notice_add' %}" class="btn btn-success">
+            + Add Notice
+        </a>
+    </div>
+
+    <div class="card card-box mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-2">
+                <div class="col-md-3">
+                    <input type="text" name="search" value="{{ search|default:'' }}" class="form-control" placeholder="Search notice">
+                </div>
+
+                <div class="col-md-2">
+                    <select name="type" class="form-control">
+                        <option value="">All Type</option>
+                        <option value="General" {% if notice_type == "General" %}selected{% endif %}>General</option>
+                        <option value="Urgent" {% if notice_type == "Urgent" %}selected{% endif %}>Urgent</option>
+                        <option value="Exam" {% if notice_type == "Exam" %}selected{% endif %}>Exam</option>
+                        <option value="Holiday" {% if notice_type == "Holiday" %}selected{% endif %}>Holiday</option>
+                        <option value="Homework" {% if notice_type == "Homework" %}selected{% endif %}>Homework</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <select name="target" class="form-control">
+                        <option value="">All Target</option>
+                        <option value="All" {% if target == "All" %}selected{% endif %}>All</option>
+                        <option value="Students" {% if target == "Students" %}selected{% endif %}>Students</option>
+                        <option value="Teachers" {% if target == "Teachers" %}selected{% endif %}>Teachers</option>
+                        <option value="Parents" {% if target == "Parents" %}selected{% endif %}>Parents</option>
+                        <option value="Class Wise" {% if target == "Class Wise" %}selected{% endif %}>Class Wise</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <input type="text" name="class" value="{{ class_name|default:'' }}" class="form-control" placeholder="Class">
+                </div>
+
+                <div class="col-md-1">
+                    <select name="status" class="form-control">
+                        <option value="">Status</option>
+                        <option value="Active" {% if status == "Active" %}selected{% endif %}>Active</option>
+                        <option value="Inactive" {% if status == "Inactive" %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+
+                <div class="col-md-1">
+                    <button class="btn btn-primary w-100">Filter</button>
+                </div>
+
+                <div class="col-md-1">
+                    <a href="{% url 'notice_list' %}" class="btn btn-secondary w-100">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card card-box">
+        <div class="card-body table-responsive">
+
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Target</th>
+                        <th>Class</th>
+                        <th>Published By</th>
+                        <th>Publish Date</th>
+                        <th>Expiry</th>
+                        <th>Status</th>
+                        <th>Pinned</th>
+                        <th>Attachment</th>
+                        <th width="150">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for n in notices %}
+                    <tr>
+                        <td>{{ n.title }}</td>
+                        <td>{{ n.notice_type }}</td>
+                        <td>{{ n.target }}</td>
+                        <td>{{ n.school_class|default:"-" }}</td>
+                        <td>{{ n.published_by|default:"-" }}</td>
+                        <td>{{ n.publish_date }}</td>
+                        <td>{{ n.expiry_date|default:"-" }}</td>
+                        <td>
+                            {% if n.status == "Active" %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if n.is_pinned %}
+                                <span class="badge bg-warning text-dark">Pinned</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if n.attachment %}
+                                <a href="{{ n.attachment.url }}" target="_blank" class="btn btn-sm btn-info">View</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex gap-1">
+                                <a href="{% url 'notice_edit' n.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                <a href="{% url 'notice_delete' n.id %}"
+                                   onclick="return confirm('Delete this notice?')"
+                                   class="btn btn-sm btn-danger">
+                                    Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="11" class="text-center text-muted">
+                            No notice found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

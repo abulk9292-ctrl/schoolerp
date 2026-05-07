@@ -44,6 +44,33 @@ def complaint_solve(request, pk):
         complaint.solved_at = timezone.now()
         complaint.save()
 
-        return redirect('complaint_list')
+        return redirect('student_detail', pk=complaint.student.id)
 
     return render(request, 'complaints/solve.html', {'complaint': complaint})
+
+
+# 🔥 NEW: EDIT
+@login_required
+def complaint_edit(request, pk):
+    complaint = get_object_or_404(Complaint, pk=pk)
+
+    if request.method == 'POST':
+        complaint.title = request.POST.get('title')
+        complaint.description = request.POST.get('description')
+        complaint.parent_name = request.POST.get('parent_name')
+        complaint.save()
+
+        return redirect('student_detail', pk=complaint.student.id)
+
+    return render(request, 'complaints/edit.html', {'complaint': complaint})
+
+
+# 🔥 NEW: DELETE
+@login_required
+def complaint_delete(request, pk):
+    complaint = get_object_or_404(Complaint, pk=pk)
+    student_id = complaint.student.id
+
+    complaint.delete()
+
+    return redirect('student_detail', pk=student_id)

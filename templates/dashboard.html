@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
 
+{% with emp=request.user.employee %}
+
 <style>
 body{background:#eef7f1;}
 .dash-wrap{padding:10px;}
@@ -14,30 +16,18 @@ body{background:#eef7f1;}
     color:white;border-radius:20px;padding:25px;margin-bottom:22px;
 }
 .hero h1{font-weight:900;letter-spacing:1px;}
-
 .backup-btn{
-    background:#dc3545;
-    color:#fff;
-    padding:11px 16px;
-    border-radius:12px;
-    font-weight:900;
-    text-decoration:none;
-    display:inline-block;
-    margin-top:10px;
+    background:#dc3545;color:#fff;padding:11px 16px;border-radius:12px;
+    font-weight:900;text-decoration:none;display:inline-block;margin-top:10px;
     box-shadow:0 6px 16px rgba(0,0,0,.18);
 }
-.backup-btn:hover{
-    background:#b02a37;
-    color:#fff;
-    text-decoration:none;
-}
-
+.backup-btn:hover{background:#b02a37;color:#fff;text-decoration:none;}
 .stat-icon{
-    width:52px;height:52px;border-radius:14px;
-    display:flex;align-items:center;justify-content:center;
-    font-size:28px;margin-bottom:12px;color:white;
+    width:52px;height:52px;border-radius:14px;display:flex;
+    align-items:center;justify-content:center;font-size:28px;margin-bottom:12px;color:white;
 }
-.green{background:#198754}.red{background:#dc3545}.yellow{background:#ffc107;color:#111}.blue{background:#0d6efd}.darkgreen{background:#0b6b3a}
+.green{background:#198754}.red{background:#dc3545}.yellow{background:#ffc107;color:#111}
+.blue{background:#0d6efd}.darkgreen{background:#0b6b3a}
 .stat-card h6{color:#0b6b3a;font-weight:800}
 .stat-card h2{color:#006b3b;font-weight:900}
 .section-title{color:#0b6b3a;font-weight:900;margin-bottom:15px}
@@ -46,14 +36,8 @@ body{background:#eef7f1;}
 .small-row{border-bottom:1px solid #edf2ef;padding:9px 0}
 .badge-green{background:#e7f7ee;color:#198754;padding:5px 10px;border-radius:20px;font-weight:700}
 .badge-red{background:#fdeaea;color:#dc3545;padding:5px 10px;border-radius:20px;font-weight:700}
-.chart-small{
-    height:260px!important;
-    max-height:260px!important;
-}
-.graph-card canvas{
-    width:100%!important;
-    height:260px!important;
-}
+.chart-small{height:260px!important;max-height:260px!important;}
+.graph-card canvas{width:100%!important;height:260px!important;}
 </style>
 
 <div class="dash-wrap">
@@ -67,9 +51,11 @@ body{background:#eef7f1;}
             <div class="col-md-4 text-md-end">
                 <b>Today:</b> {% now "d M Y" %}
                 <br>
+                {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_backup %}
                 <a href="{% url 'manual_backup' %}" class="backup-btn">
                     🔥 Download Full Backup
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -103,6 +89,7 @@ body{background:#eef7f1;}
             </a>
         </div>
 
+        {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_teachers %}
         <div class="col-md-3">
             <a href="/teachers/" class="click-card">
                 <div class="stat-card">
@@ -112,6 +99,7 @@ body{background:#eef7f1;}
                 </div>
             </a>
         </div>
+        {% endif %}
 
         <div class="col-md-3">
             <a href="{% url 'today_attendance_report' %}" class="click-card">
@@ -123,6 +111,7 @@ body{background:#eef7f1;}
             </a>
         </div>
 
+        {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin %}
         <div class="col-md-3">
             <a href="{% url 'complaint_report' %}" class="click-card">
                 <div class="stat-card">
@@ -132,6 +121,7 @@ body{background:#eef7f1;}
                 </div>
             </a>
         </div>
+        {% endif %}
     </div>
 
     <div class="row">
@@ -153,11 +143,13 @@ body{background:#eef7f1;}
             </a>
         </div>
 
+        {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_fees %}
         <div class="col-md-3">
             <a href="{% url 'fees_report' %}" class="click-card">
                 <div class="stat-card"><div class="stat-icon green">₹</div><h6>Today Collection</h6><h2>₹{{ today_collection }}</h2></div>
             </a>
         </div>
+        {% endif %}
     </div>
 
     <div class="row">
@@ -170,6 +162,7 @@ body{background:#eef7f1;}
             </a>
         </div>
 
+        {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin %}
         <div class="col-md-4">
             <a href="{% url 'teacher_attendance_report' %}" class="click-card">
                 <div class="graph-card">
@@ -178,7 +171,9 @@ body{background:#eef7f1;}
                 </div>
             </a>
         </div>
+        {% endif %}
 
+        {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_fees %}
         <div class="col-md-4">
             <a href="{% url 'fees_report' %}" class="click-card">
                 <div class="graph-card text-center">
@@ -197,8 +192,10 @@ body{background:#eef7f1;}
                 </div>
             </a>
         </div>
+        {% endif %}
     </div>
 
+    {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin %}
     <div class="row">
         <div class="col-md-8">
             <a href="{% url 'fees_report' %}" class="click-card">
@@ -222,6 +219,7 @@ body{background:#eef7f1;}
             </a>
         </div>
     </div>
+    {% endif %}
 
     <div class="row">
         <div class="col-md-6">
@@ -261,6 +259,7 @@ body{background:#eef7f1;}
             </a>
         </div>
 
+        {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin %}
         <div class="col-md-6">
             <a href="{% url 'complaint_report' %}" class="click-card">
                 <div class="list-card">
@@ -281,6 +280,7 @@ body{background:#eef7f1;}
                 </div>
             </a>
         </div>
+        {% endif %}
     </div>
 
     <div class="list-card">
@@ -311,11 +311,7 @@ body{background:#eef7f1;}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-
-// ================= STUDENT ATTENDANCE =================
 const studentCtx = document.getElementById('studentAttendanceChart');
 if (studentCtx) {
     new Chart(studentCtx, {
@@ -323,23 +319,16 @@ if (studentCtx) {
         data: {
             labels: ['Present', 'Absent', 'Late'],
             datasets: [{
-                data: [
-                    {{ present|default:0 }},
-                    {{ absent|default:0 }},
-                    {{ late|default:0 }}
-                ],
+                data: [{{ present|default:0 }}, {{ absent|default:0 }}, {{ late|default:0 }}],
                 backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
                 borderWidth: 3
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
+        options: { responsive: true, maintainAspectRatio: false }
     });
 }
 
-// ================= TEACHER ATTENDANCE =================
+{% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin %}
 const teacherCtx = document.getElementById('teacherAttendanceChart');
 if (teacherCtx) {
     new Chart(teacherCtx, {
@@ -347,47 +336,15 @@ if (teacherCtx) {
         data: {
             labels: ['Present', 'Absent', 'Late'],
             datasets: [{
-                data: [
-                    {{ teacher_present|default:0 }},
-                    {{ teacher_absent|default:0 }},
-                    {{ teacher_late|default:0 }}
-                ],
+                data: [{{ teacher_present|default:0 }}, {{ teacher_absent|default:0 }}, {{ teacher_late|default:0 }}],
                 backgroundColor: ['#0d6efd', '#dc3545', '#ffc107'],
                 borderWidth: 3
             }]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false
-        }
+        options: { responsive: true, maintainAspectRatio: false }
     });
 }
 
-// ================= FEE ESTIMATE =================
-const feeEstimateCtx = document.getElementById('feeEstimateChart');
-if (feeEstimateCtx) {
-    new Chart(feeEstimateCtx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Collection', 'Remaining'],
-            datasets: [{
-                data: [
-                    {{ monthly_collection|default:0 }},
-                    {{ remaining_month_fee|default:0 }}
-                ],
-                backgroundColor: ['#20c997', '#ff6b81'],
-                borderWidth: 4
-            }]
-        },
-        options: {
-            cutout: '70%',
-            responsive: true,
-            maintainAspectRatio: false
-        }
-    });
-}
-
-// ================= MONTHLY COLLECTION =================
 const monthlyCtx = document.getElementById('monthlyFeeChart');
 if (monthlyCtx) {
     new Chart(monthlyCtx, {
@@ -401,9 +358,7 @@ if (monthlyCtx) {
                     borderColor: '#4c6ef5',
                     backgroundColor: 'rgba(76,110,245,0.45)',
                     fill: true,
-                    tension: 0.45,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
+                    tension: 0.45
                 },
                 {
                     label: 'Expenses',
@@ -411,30 +366,14 @@ if (monthlyCtx) {
                     borderColor: '#ff6b7a',
                     backgroundColor: 'rgba(255,107,122,0.35)',
                     fill: true,
-                    tension: 0.45,
-                    pointRadius: 5,
-                    pointHoverRadius: 7
+                    tension: 0.45
                 }
             ]
         },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'top'
-                }
-            },
-            scales: {
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
     });
 }
 
-// ================= PROFIT LOSS =================
 const profitCtx = document.getElementById('profitLossChart');
 if (profitCtx) {
     new Chart(profitCtx, {
@@ -442,22 +381,34 @@ if (profitCtx) {
         data: {
             labels: ['Profit', 'Loss'],
             datasets: [{
-                data: [
-                    {{ total_profit|default:0 }},
-                    {{ total_loss|default:0 }}
-                ],
+                data: [{{ total_profit|default:0 }}, {{ total_loss|default:0 }}],
                 backgroundColor: ['#198754', '#dc3545'],
                 borderWidth: 4
             }]
         },
-        options: {
-            cutout: '65%',
-            responsive: true,
-            maintainAspectRatio: false
-        }
+        options: { cutout: '65%', responsive: true, maintainAspectRatio: false }
     });
 }
+{% endif %}
 
+{% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_fees %}
+const feeEstimateCtx = document.getElementById('feeEstimateChart');
+if (feeEstimateCtx) {
+    new Chart(feeEstimateCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Collection', 'Remaining'],
+            datasets: [{
+                data: [{{ monthly_collection|default:0 }}, {{ remaining_month_fee|default:0 }}],
+                backgroundColor: ['#20c997', '#ff6b81'],
+                borderWidth: 4
+            }]
+        },
+        options: { cutout: '70%', responsive: true, maintainAspectRatio: false }
+    });
+}
+{% endif %}
 </script>
 
+{% endwith %}
 {% endblock %}

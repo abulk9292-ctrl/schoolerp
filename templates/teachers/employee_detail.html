@@ -1,132 +1,561 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<style>
+.profile-card{
+    border:0;
+    border-radius:20px;
+    overflow:hidden;
+    box-shadow:0 10px 30px rgba(15,23,42,.08);
+}
+
+.profile-top{
+    background:linear-gradient(135deg,#064e3b,#0f766e);
+    color:#fff;
+    padding:25px;
+}
+
+.profile-img{
+    width:120px;
+    height:120px;
+    border-radius:16px;
+    object-fit:cover;
+    border:4px solid rgba(255,255,255,.3);
+    background:#fff;
+}
+
+.info-card{
+    border:0;
+    border-radius:18px;
+    overflow:hidden;
+    box-shadow:0 8px 22px rgba(15,23,42,.06);
+}
+
+.info-header{
+    font-weight:800;
+    font-size:15px;
+}
+
+.summary-card{
+    border:0;
+    border-radius:16px;
+    box-shadow:0 6px 18px rgba(15,23,42,.06);
+}
+
+.summary-title{
+    font-size:13px;
+    color:#64748b;
+    font-weight:700;
+}
+
+.summary-value{
+    font-size:24px;
+    font-weight:900;
+}
+
+.salary-table th{
+    background:#0b2f5b!important;
+    color:#fff!important;
+    font-size:13px;
+    white-space:nowrap;
+}
+
+.salary-table td{
+    vertical-align:middle;
+    font-size:13px;
+    white-space:nowrap;
+}
+
+.status-paid{
+    background:#16a34a;
+}
+
+.status-partial{
+    background:#f59e0b;
+}
+
+.status-unpaid{
+    background:#dc2626;
+}
+
+.status-advance{
+    background:#0284c7;
+}
+
+.latest-salary-box{
+    border-radius:16px;
+    background:linear-gradient(135deg,#0f172a,#1e3a8a);
+    color:#fff;
+    padding:20px;
+}
+
+.latest-title{
+    font-size:13px;
+    opacity:.8;
+}
+
+.latest-value{
+    font-size:28px;
+    font-weight:900;
+}
+
+.progress{
+    height:20px;
+    border-radius:30px;
+}
+
+.progress-bar{
+    font-weight:700;
+}
+</style>
+
 <div class="container mt-4">
 
-    <div class="card shadow mb-4">
-        <div class="card-body d-flex align-items-center">
-            <div>
-                {% if employee.photo %}
-                    <img src="{{ employee.photo.url }}" width="120" height="120" style="border-radius:12px; object-fit:cover;">
-                {% else %}
-                    <div style="width:120px;height:120px;background:#ddd;border-radius:12px;display:flex;align-items:center;justify-content:center;">
-                        No Photo
+    <!-- TOP PROFILE -->
+    <div class="card profile-card mb-4">
+
+        <div class="profile-top">
+            <div class="d-flex align-items-center flex-wrap">
+
+                <div>
+                    {% if employee.photo %}
+                        <img src="{{ employee.photo.url }}"
+                             class="profile-img">
+                    {% else %}
+                        <div class="profile-img d-flex align-items-center justify-content-center text-dark">
+                            No Photo
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="ms-4">
+
+                    <h2 class="fw-bold mb-1">
+                        {{ employee.name }}
+                    </h2>
+
+                    <div class="mb-2">
+                        {% if employee.is_active %}
+                            <span class="badge bg-success">
+                                Active
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger">
+                                Discontinued
+                            </span>
+                        {% endif %}
                     </div>
-                {% endif %}
-            </div>
 
-            <div class="ms-4">
-                <h3>{{ employee.name }}</h3>
+                    <p class="mb-1">
+                        <b>ID:</b>
+                        {{ employee.employee_id }}
+                    </p>
 
-                {% if employee.is_active %}
-                    <span class="badge bg-success mb-2">Active</span>
-                {% else %}
-                    <span class="badge bg-danger mb-2">Discontinued</span>
-                {% endif %}
+                    <p class="mb-1">
+                        <b>Designation:</b>
+                        {{ employee.designation }}
+                    </p>
 
-                <p><b>ID:</b> {{ employee.employee_id }}</p>
-                <p><b>Designation:</b> {{ employee.designation }}</p>
-                <p><b>Salary:</b> ₹{{ employee.salary }}</p>
-                <p><b>Joining Date:</b> {{ employee.joining_date }}</p>
-            </div>
+                    <p class="mb-1">
+                        <b>Salary:</b>
+                        ₹{{ employee.salary }}
+                    </p>
 
-            <div class="ms-auto">
-                <a href="{% url 'employee_edit' employee.id %}" class="btn btn-primary mb-2">Edit</a><br>
-                <a href="{% url 'employee_delete' employee.id %}" class="btn btn-danger mb-2">Delete</a><br>
+                    <p class="mb-0">
+                        <b>Joining Date:</b>
+                        {{ employee.joining_date }}
+                    </p>
 
-                {% if employee.is_active %}
-                    <a href="{% url 'employee_discontinue' employee.id %}" class="btn btn-dark mb-2">Discontinue</a>
-                {% else %}
-                    <a href="{% url 'employee_rejoin' employee.id %}" class="btn btn-success mb-2">Re-Join</a>
-                {% endif %}
+                </div>
+
+                <div class="ms-auto mt-3 mt-md-0">
+
+                    <a href="{% url 'employee_edit' employee.id %}"
+                       class="btn btn-light btn-sm mb-2">
+                        ✏ Edit
+                    </a>
+
+                    <br>
+
+                    <a href="{% url 'employee_delete' employee.id %}"
+                       class="btn btn-danger btn-sm mb-2">
+                        🗑 Delete
+                    </a>
+
+                    <br>
+
+                    {% if employee.is_active %}
+                        <a href="{% url 'employee_discontinue' employee.id %}"
+                           class="btn btn-dark btn-sm">
+                            Discontinue
+                        </a>
+                    {% else %}
+                        <a href="{% url 'employee_rejoin' employee.id %}"
+                           class="btn btn-success btn-sm">
+                            Re-Join
+                        </a>
+                    {% endif %}
+
+                </div>
+
             </div>
         </div>
+
     </div>
 
-    <div class="row">
+    <!-- SUMMARY -->
+    <div class="row g-3 mb-4">
 
-        <div class="col-md-6">
-            <div class="card shadow mb-3">
-                <div class="card-header bg-primary text-white">Employee Details</div>
-                <div class="card-body">
-                    <p><b>Name:</b> {{ employee.name }}</p>
-                    <p><b>Qualification:</b> {{ employee.qualification }}</p>
-                    <p><b>Subject Specialization:</b> {{ employee.subject_specialization }}</p>
-                    <p><b>Phone:</b> {{ employee.phone }}</p>
-                    <p><b>Aadhaar:</b> {{ employee.aadhaar_number }}</p>
+        <div class="col-md-3">
+            <div class="card summary-card p-3">
+                <div class="summary-title">
+                    Total Salary Paid
+                </div>
+
+                <div class="summary-value text-success">
+                    ₹{{ total_salary_paid }}
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="card shadow mb-3">
-                <div class="card-header bg-warning">Attendance Summary</div>
+        <div class="col-md-3">
+            <div class="card summary-card p-3">
+                <div class="summary-title">
+                    Total Due
+                </div>
+
+                <div class="summary-value text-danger">
+                    ₹{{ total_salary_due }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card summary-card p-3">
+                <div class="summary-title">
+                    Total Advance
+                </div>
+
+                <div class="summary-value text-primary">
+                    ₹{{ total_salary_advance }}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card summary-card p-3">
+                <div class="summary-title">
+                    Total Payable
+                </div>
+
+                <div class="summary-value text-dark">
+                    ₹{{ total_salary_payable }}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- DETAILS -->
+    <div class="row g-3">
+
+        <div class="col-lg-6">
+
+            <div class="card info-card mb-3">
+
+                <div class="card-header bg-primary text-white info-header">
+                    👨‍🏫 Employee Details
+                </div>
+
                 <div class="card-body">
-                    <h4>{{ attendance_percentage }}%</h4>
-                    <p><b>Total Days:</b> {{ attendance_total }}</p>
-                    <p><b>Present:</b> {{ attendance_present }}</p>
-                    <p><b>Absent:</b> {{ attendance_absent }}</p>
-                    <p><b>Late:</b> {{ attendance_late }}</p>
+
+                    <p><b>Name:</b> {{ employee.name }}</p>
+
+                    <p><b>Qualification:</b>
+                        {{ employee.qualification|default:"-" }}
+                    </p>
+
+                    <p><b>Subject Specialization:</b>
+                        {{ employee.subject_specialization|default:"-" }}
+                    </p>
+
+                    <p><b>Phone:</b>
+                        {{ employee.phone|default:"-" }}
+                    </p>
+
+                    <p><b>Aadhaar:</b>
+                        {{ employee.aadhaar_number|default:"-" }}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+            <div class="card info-card mb-3">
+
+                <div class="card-header bg-warning info-header">
+                    📊 Attendance Summary
+                </div>
+
+                <div class="card-body">
+
+                    <h3 class="fw-bold">
+                        {{ attendance_percentage }}%
+                    </h3>
+
+                    <p><b>Total Days:</b>
+                        {{ attendance_total }}
+                    </p>
+
+                    <p><b>Present:</b>
+                        {{ attendance_present }}
+                    </p>
+
+                    <p><b>Absent:</b>
+                        {{ attendance_absent }}
+                    </p>
+
+                    <p><b>Late:</b>
+                        {{ attendance_late }}
+                    </p>
 
                     <div class="progress">
-                        <div class="progress-bar bg-success" style="width: {{ attendance_percentage }}%;">
+                        <div class="progress-bar bg-success"
+                             style="width: {{ attendance_percentage }}%;">
                             {{ attendance_percentage }}%
                         </div>
                     </div>
+
                 </div>
+
             </div>
+
         </div>
 
     </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header bg-danger text-white">Salary Summary</div>
-        <div class="card-body">
-            <p><b>Total Paid:</b> ₹{{ total_salary_paid }}</p>
-            <p><b>Total Due:</b> ₹{{ total_salary_due }}</p>
+    <!-- LATEST SALARY -->
+    {% if latest_salary %}
+    <div class="latest-salary-box mb-4">
 
-            <table class="table table-bordered table-sm">
-                <tr>
-                    <th>Month</th>
-                    <th>Year</th>
-                    <th>Basic</th>
-                    <th>Absent</th>
-                    <th>Deduction</th>
-                    <th>Bonus</th>
-                    <th>Paid</th>
-                    <th>Due</th>
-                    <th>Status</th>
-                </tr>
-
-                {% for s in salary_records %}
-                <tr>
-                    <td>{{ s.month }}</td>
-                    <td>{{ s.year }}</td>
-                    <td>₹{{ s.basic_salary }}</td>
-                    <td>{{ s.absent_days }}</td>
-                    <td>₹{{ s.attendance_deduction }}</td>
-                    <td>₹{{ s.bonus }}</td>
-                    <td>₹{{ s.paid_amount }}</td>
-                    <td>₹{{ s.due_amount }}</td>
-                    <td>
-                        {% if s.status == 'Paid' %}
-                            <span class="badge bg-success">Paid</span>
-                        {% elif s.status == 'Partial' %}
-                            <span class="badge bg-warning">Partial</span>
-                        {% elif s.status == 'Advance' %}
-                            <span class="badge bg-info">Advance</span>
-                        {% else %}
-                            <span class="badge bg-danger">Unpaid</span>
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="9" class="text-center">No salary record found.</td>
-                </tr>
-                {% endfor %}
-            </table>
+        <div class="latest-title">
+            Latest Salary Status
         </div>
+
+        <div class="latest-value">
+            ₹{{ latest_salary.payable_amount }}
+        </div>
+
+        <div class="mt-2">
+
+            {{ latest_salary.month }}
+            {{ latest_salary.year }}
+
+            |
+
+            {% if latest_salary.status == 'Paid' %}
+                <span class="badge bg-success">
+                    Paid
+                </span>
+
+            {% elif latest_salary.status == 'Partial' %}
+                <span class="badge bg-warning text-dark">
+                    Partial
+                </span>
+
+            {% elif latest_salary.status == 'Advance' %}
+                <span class="badge bg-info text-dark">
+                    Advance
+                </span>
+
+            {% else %}
+                <span class="badge bg-danger">
+                    Unpaid
+                </span>
+            {% endif %}
+
+        </div>
+
+    </div>
+    {% endif %}
+
+    <!-- SALARY HISTORY -->
+    <div class="card info-card mb-4">
+
+        <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+
+            <span class="fw-bold">
+                💰 Salary History
+            </span>
+
+            {% if latest_salary %}
+            <a href="{% url 'salary_print' latest_salary.id %}"
+               class="btn btn-light btn-sm">
+                🖨 Print Latest Slip
+            </a>
+            <a href="{% url 'employee_salary_slips_print' employee.id %}"
+               class="btn btn-dark btn-sm">
+                📄 Print All Slips
+            </a>
+            {% endif %}
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row g-3 mb-3">
+
+                <div class="col-md-3">
+                    <div class="alert alert-success mb-0">
+                        <b>Paid Salary:</b>
+                        {{ paid_salary_count }}
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="alert alert-danger mb-0">
+                        <b>Unpaid:</b>
+                        {{ unpaid_salary_count }}
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="alert alert-warning mb-0">
+                        <b>Partial:</b>
+                        {{ partial_salary_count }}
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="alert alert-info mb-0">
+                        <b>Advance:</b>
+                        {{ advance_salary_count }}
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-striped salary-table">
+
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Year</th>
+                            <th>Basic</th>
+                            <th>Absent</th>
+                            <th>Bonus</th>
+                            <th>Deduction</th>
+                            <th>Payable</th>
+                            <th>Paid</th>
+                            <th>Due</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for s in salary_records %}
+                        <tr>
+
+                            <td>{{ s.month }}</td>
+
+                            <td>{{ s.year }}</td>
+
+                            <td>
+                                ₹{{ s.basic_salary }}
+                            </td>
+
+                            <td>
+                                {{ s.absent_days }}
+                            </td>
+
+                            <td class="text-success">
+                                ₹{{ s.bonus }}
+                            </td>
+
+                            <td class="text-danger">
+                                ₹{{ s.attendance_deduction|add:s.extra_deduction }}
+                            </td>
+
+                            <td>
+                                ₹{{ s.payable_amount }}
+                            </td>
+
+                            <td class="text-success">
+                                ₹{{ s.paid_amount }}
+                            </td>
+
+                            <td class="text-danger">
+                                ₹{{ s.due_amount }}
+                            </td>
+
+                            <td>
+
+                                {% if s.status == 'Paid' %}
+                                    <span class="badge status-paid">
+                                        Paid
+                                    </span>
+
+                                {% elif s.status == 'Partial' %}
+                                    <span class="badge status-partial text-dark">
+                                        Partial
+                                    </span>
+
+                                {% elif s.status == 'Advance' %}
+                                    <span class="badge status-advance">
+                                        Advance
+                                    </span>
+
+                                {% else %}
+                                    <span class="badge status-unpaid">
+                                        Unpaid
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                <a href="{% url 'salary_detail' s.id %}"
+                                   class="btn btn-sm btn-primary">
+                                    View
+                                </a>
+
+                                <a href="{% url 'salary_print' s.id %}"
+                                   class="btn btn-sm btn-dark">
+                                    Print
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="11" class="text-center py-4">
+                                No salary record found.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
     </div>
 
 </div>

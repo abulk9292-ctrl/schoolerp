@@ -1,198 +1,295 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<div class="card card-box p-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="fw-bold mb-0">Popup Result Entry</h3>
-        <a href="/exams/results/" class="btn btn-secondary">Result List</a>
+<style>
+.card-box{border:none;border-radius:22px;box-shadow:0 10px 28px rgba(0,0,0,0.08);}
+.top-box{background:linear-gradient(135deg,#0f172a,#1e293b);color:white;border-radius:20px;padding:18px 22px;}
+.table th{white-space:nowrap;}
+.rank-badge{font-size:13px;padding:5px 9px;}
+.student-row:hover{background:#f8fafc;}
+.search-box{border-radius:14px;}
+
+.modal-dialog{max-width:560px!important;}
+.modal-content{border-radius:16px;overflow:hidden;}
+.modal-header{padding:8px 14px!important;}
+.modal-title{font-size:15px!important;font-weight:800;}
+.modal-body{padding:10px 14px!important;max-height:72vh;overflow-y:auto;}
+.modal-footer{padding:8px 14px!important;}
+.modal-body label{font-size:13px;margin-bottom:3px;}
+.modal-body .form-control{height:32px;font-size:13px;border-radius:8px;}
+.subject-box{background:#f8fafc;border:1px solid #e5e7eb;border-radius:12px;padding:8px;margin-bottom:7px;}
+.subject-title{font-size:13px;font-weight:800;margin-bottom:5px;}
+</style>
+
+<div class="container mt-4">
+
+    <div class="top-box mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="fw-bold mb-1">⚡ Quick Marks Entry</h3>
+                <small>Class wise serial subject marks entry system</small>
+            </div>
+
+            <a href="{% url 'result_list' %}" class="btn btn-light fw-bold">
+                📊 Result List
+            </a>
+        </div>
     </div>
 
-    <form method="get" class="row g-2 mb-4">
-        <div class="col-md-4">
-            <select name="exam" class="form-control" required>
-                <option value="">Select Exam</option>
-                {% for e in exams %}
+    <div class="card card-box p-4">
+
+        <form method="get" class="row g-3 mb-4">
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Exam</label>
+                <select name="exam" class="form-select" required>
+                    <option value="">Select Exam</option>
+                    {% for e in exams %}
                     <option value="{{ e.id }}" {% if selected_exam and selected_exam.id == e.id %}selected{% endif %}>
                         {{ e.name }} - {{ e.academic_session }}
                     </option>
-                {% endfor %}
-            </select>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Class</label>
+                <select name="class" class="form-select" required>
+                    <option value="">Select Class</option>
+                    {% for c in classes %}
+                    <option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>
+                        {{ c }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Search Student</label>
+                <input type="text"
+                       name="search"
+                       value="{{ search }}"
+                       class="form-control search-box"
+                       placeholder="Search name / SID / roll">
+            </div>
+
+            <div class="col-md-12">
+                <button class="btn btn-success px-4">🔍 Load Students</button>
+            </div>
+
+        </form>
+
+        {% if selected_exam %}
+
+        <div class="alert alert-info">
+            <b>Exam:</b> {{ selected_exam.name }}
+            |
+            <b>Session:</b> {{ selected_exam.academic_session }}
+            |
+            <b>Class:</b> {{ selected_class|default:"-" }}
         </div>
 
-        <div class="col-md-2">
-            <button class="btn btn-success w-100">Load</button>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Roll</th>
+                        <th>Student</th>
+                        <th>Total</th>
+                        <th>%</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                        <th>Rank</th>
+                        <th>Marks</th>
+                        <th>Report</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in summaries %}
+                    <tr class="student-row">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ item.student.roll_no|default:"-" }}</td>
+
+                        <td class="fw-semibold">
+                            {{ item.student.name|default:item.student.student_name|default:item.student }}
+                        </td>
+
+                        <td>
+                            {% if item.summary %}
+                                <b>{{ item.summary.total_marks }}</b> / {{ item.summary.max_total_marks }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if item.summary %}
+                                {{ item.summary.percentage }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if item.summary %}
+                                <span class="badge bg-info text-dark">{{ item.summary.grade }}</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if item.summary %}
+                                {% if item.summary.result_status == "Pass" %}
+                                    <span class="badge bg-success rank-badge">Pass</span>
+                                {% else %}
+                                    <span class="badge bg-danger rank-badge">Fail</span>
+                                {% endif %}
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if item.summary and item.summary.rank %}
+                                <span class="badge bg-warning text-dark rank-badge">#{{ item.summary.rank }}</span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <button type="button"
+                                    class="btn btn-primary btn-sm"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#marksModal{{ item.student.id }}">
+                                ✍ Enter
+                            </button>
+                        </td>
+
+                        <td>
+                            <a href="{% url 'report_card_select' %}?student_id={{ item.student.id }}&exam_id={{ selected_exam.id }}"
+                               class="btn btn-dark btn-sm">
+                                🖨 Print
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- ✅ STUDENT WISE MODAL WITH PREVIOUS MARKS -->
+                    <div class="modal fade" id="marksModal{{ item.student.id }}" tabindex="-1">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow-lg">
+
+                                <form method="post">
+                                    {% csrf_token %}
+
+                                    <div class="modal-header bg-primary text-white">
+                                        <h5 class="modal-title">
+                                            ✍ Enter Class Subject Marks
+                                        </h5>
+                                        <button type="button"
+                                                class="btn-close btn-close-white"
+                                                data-bs-dismiss="modal"></button>
+                                    </div>
+
+                                    <div class="modal-body">
+
+                                        <input type="hidden" name="exam" value="{{ selected_exam.id }}">
+                                        <input type="hidden" name="student" value="{{ item.student.id }}">
+                                        <input type="hidden" name="class" value="{{ selected_class }}">
+
+                                        <div class="mb-2">
+                                            <label class="form-label fw-bold">Student</label>
+                                            <input type="text"
+                                                   class="form-control"
+                                                   value="{{ item.student.name|default:item.student.student_name|default:item.student }}"
+                                                   readonly>
+                                        </div>
+
+                                        {% for mark in item.subject_marks %}
+                                        <div class="subject-box">
+
+                                            <div class="subject-title">
+                                                {{ forloop.counter }}. {{ mark.name }}
+                                            </div>
+
+                                            <input type="hidden" name="subject[]" value="{{ mark.name }}">
+
+                                            <div class="row g-2">
+                                                <div class="col-4">
+                                                    <input type="number"
+                                                           name="written_marks[]"
+                                                           class="form-control mark-input"
+                                                           placeholder="Written"
+                                                           value="{{ mark.written }}"
+                                                           min="0">
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <input type="number"
+                                                           name="oral_marks[]"
+                                                           class="form-control mark-input"
+                                                           placeholder="Oral"
+                                                           value="{{ mark.oral }}"
+                                                           min="0">
+                                                </div>
+
+                                                <div class="col-4">
+                                                    <input type="number"
+                                                           name="max_marks[]"
+                                                           class="form-control mark-input"
+                                                           placeholder="Max"
+                                                           value="{{ mark.max|default:100 }}"
+                                                           min="1">
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        {% endfor %}
+
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="button"
+                                                class="btn btn-secondary btn-sm"
+                                                data-bs-dismiss="modal">
+                                            Close
+                                        </button>
+
+                                        <button type="submit"
+                                                class="btn btn-success btn-sm">
+                                            💾 Save All Marks
+                                        </button>
+                                    </div>
+
+                                </form>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center text-muted py-4">
+                            No students found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-    </form>
 
-    {% if selected_exam %}
-    <div class="alert alert-info">
-        Selected Exam: <b>{{ selected_exam.name }}</b> | Session: <b>{{ selected_exam.academic_session }}</b>
+        {% else %}
+
+        <div class="alert alert-warning">
+            ⚠️ Please select exam and class first.
+        </div>
+
+        {% endif %}
+
     </div>
-
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover text-center align-middle">
-            <thead class="table-success">
-                <tr>
-                    <th>Roll</th>
-                    <th>Student Name</th>
-                    <th>Total</th>
-                    <th>Percentage</th>
-                    <th>Grade</th>
-                    <th>Rank</th>
-                    <th>Action</th>
-                    <th>Report Card</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for item in summaries %}
-                <tr>
-                    <td>{{ item.student.roll_no }}</td>
-                    <td class="text-start">{{ item.student.student_name|default:item.student }}</td>
-                    <td>
-                        {% if item.summary %}
-                            {{ item.summary.total_marks }}/{{ item.summary.max_total_marks }}
-                        {% else %}
-                            0
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if item.summary %}
-                            {{ item.summary.percentage }}%
-                        {% else %}
-                            0%
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if item.summary %}
-                            <span class="badge bg-success">{{ item.summary.grade }}</span>
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                    <td>
-                        {% if item.summary and item.summary.rank %}
-                            {{ item.summary.rank }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                    <td>
-                        <button type="button"
-                                class="btn btn-primary btn-sm"
-                                data-bs-toggle="modal"
-                                data-bs-target="#marksModal"
-                                data-student-id="{{ item.student.id }}"
-                                data-student-name="{{ item.student.student_name|default:item.student }}"
-                                data-exam-id="{{ selected_exam.id }}">
-                            Enter Marks
-                        </button>
-                    </td>
-                    <td>
-                        <a href="/exams/report-card/?student_id={{ item.student.id }}&exam_id={{ selected_exam.id }}"
-                           class="btn btn-dark btn-sm">
-                            Print
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="8">No student found</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-        <div class="alert alert-warning">Please select an exam first.</div>
-    {% endif %}
 </div>
-
-
-<!-- POPUP MODAL -->
-<div class="modal fade" id="marksModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-
-            <form method="post">
-                {% csrf_token %}
-
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title">Enter Marks</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-
-                <div class="modal-body">
-                    <input type="hidden" name="exam" id="modalExamId">
-                    <input type="hidden" name="student" id="modalStudentId">
-
-                    <div class="mb-2">
-                        <label class="fw-bold">Student</label>
-                        <input type="text" id="modalStudentName" class="form-control" readonly>
-                    </div>
-
-                    <div class="mb-2">
-                        <label class="fw-bold">Subject</label>
-                        <input type="text" name="subject" class="form-control" placeholder="Example: Bengali" required>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-4 mb-2">
-                            <label class="fw-bold">Written</label>
-                            <input type="number" name="written_marks" id="writtenMarks" class="form-control" value="0">
-                        </div>
-
-                        <div class="col-md-4 mb-2">
-                            <label class="fw-bold">Oral</label>
-                            <input type="number" name="oral_marks" id="oralMarks" class="form-control" value="0">
-                        </div>
-
-                        <div class="col-md-4 mb-2">
-                            <label class="fw-bold">Max</label>
-                            <input type="number" name="max_marks" class="form-control" value="100">
-                        </div>
-                    </div>
-
-                    <div class="alert alert-light border mt-2">
-                        Total Marks: <b id="liveTotal">0</b>
-                    </div>
-                </div>
-
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success">Save Marks</button>
-                </div>
-
-            </form>
-
-        </div>
-    </div>
-</div>
-
-
-<script>
-const marksModal = document.getElementById('marksModal');
-
-marksModal.addEventListener('show.bs.modal', function (event) {
-    const button = event.relatedTarget;
-
-    document.getElementById('modalStudentId').value = button.getAttribute('data-student-id');
-    document.getElementById('modalStudentName').value = button.getAttribute('data-student-name');
-    document.getElementById('modalExamId').value = button.getAttribute('data-exam-id');
-
-    document.getElementById('writtenMarks').value = 0;
-    document.getElementById('oralMarks').value = 0;
-    document.getElementById('liveTotal').innerText = 0;
-});
-
-function updateLiveTotal() {
-    const written = parseInt(document.getElementById('writtenMarks').value || 0);
-    const oral = parseInt(document.getElementById('oralMarks').value || 0);
-    document.getElementById('liveTotal').innerText = written + oral;
-}
-
-document.getElementById('writtenMarks').addEventListener('input', updateLiveTotal);
-document.getElementById('oralMarks').addEventListener('input', updateLiveTotal);
-</script>
 
 {% endblock %}
