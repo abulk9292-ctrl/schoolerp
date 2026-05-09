@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <h3 class="mb-3">📝 Online Admission Applications</h3>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-info">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow">
+        <div class="card-body table-responsive">
+
+            <table class="table table-bordered table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>SL</th>
+                        <th>Student</th>
+                        <th>Father</th>
+                        <th>Class</th>
+                        <th>Phone</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for admission in admissions %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ admission.student_name }}</td>
+                        <td>{{ admission.father_name }}</td>
+                        <td>{{ admission.class_applied }}</td>
+                        <td>{{ admission.phone }}</td>
+                        <td>
+                            {% if admission.status == "Approved" %}
+                                <span class="badge bg-success">Approved</span>
+                            {% elif admission.status == "Rejected" %}
+                                <span class="badge bg-danger">Rejected</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if admission.status == "Pending" %}
+                                <a href="{% url 'approve_admission' admission.id %}"
+                                   class="btn btn-success btn-sm"
+                                   onclick="return confirm('Approve and add this student?');">
+                                    ✅ Approve
+                                </a>
+
+                                <a href="{% url 'reject_admission' admission.id %}"
+                                   class="btn btn-danger btn-sm"
+                                   onclick="return confirm('Reject this admission?');">
+                                    ❌ Reject
+                                </a>
+                            {% else %}
+                                Done
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center text-muted">
+                            No admission application found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

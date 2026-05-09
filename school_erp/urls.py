@@ -52,6 +52,8 @@ urlpatterns = [
         '',
         home_redirect
     ),
+    
+    path("admissions/", include("admissions.urls")),
 
     # =====================================================
     # PUBLIC WEBSITE
