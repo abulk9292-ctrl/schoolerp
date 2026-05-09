@@ -61,3 +61,38 @@ def reject_admission(request, pk):
 
     messages.success(request, "Admission rejected.")
     return redirect("online_admission_list")
+
+from .forms import OnlineAdmissionForm
+
+
+def admission_apply(request):
+
+    if request.method == "POST":
+
+        form = OnlineAdmissionForm(
+            request.POST,
+            request.FILES
+        )
+
+        if form.is_valid():
+
+            form.save()
+
+            messages.success(
+                request,
+                "Admission Form Submitted Successfully."
+            )
+
+            return redirect("admission_apply")
+
+    else:
+
+        form = OnlineAdmissionForm()
+
+    return render(
+        request,
+        "admissions/admission_apply.html",
+        {
+            "form": form
+        }
+    )
