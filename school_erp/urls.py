@@ -237,29 +237,4 @@ if settings.DEBUG:
 
     
 
-from django.http import HttpResponse
-from django.contrib.auth import get_user_model
-
-def create_temp_admin(request):
-    key = request.GET.get("key")
-
-    if key != "arm2026secure":
-        return HttpResponse("Permission denied")
-
-    User = get_user_model()
-
-    username = "admin"
-    password = "Admin@12345"
-
-    user, created = User.objects.get_or_create(username=username)
-    user.is_staff = True
-    user.is_superuser = True
-    user.set_password(password)
-    user.save()
-
-    return HttpResponse("Admin created successfully. Username: admin Password: Admin@12345")
-
-
-urlpatterns += [
-    path("create-temp-admin/", create_temp_admin),
-]
+    
