@@ -1204,7 +1204,6 @@ def bulk_marks_entry_api(request):
         "saved_count": saved_count,
         "skipped_count": skipped_count,
     })
-
 # =========================================================
 # QR ATTENDANCE API
 # =========================================================
@@ -1221,20 +1220,24 @@ def qr_student_attendance_api(request):
             "message": "QR data required"
         }, status=400)
 
+    # QR থেকে last value বের করবে
     qr_value = qr_data.rstrip("/").split("/")[-1].strip()
 
+    # ARM1 / ARM5 / Student ID search
     student = Student.objects.filter(
-        student_id=qr_value,
-        is_active=True
+        student_id=qr_value
     ).first()
 
+    # যদি numeric হয় তাহলে database ID দিয়েও search করবে
     if student is None and qr_value.isdigit():
+
         student = Student.objects.filter(
-            id=int(qr_value),
-            is_active=True
+            id=int(qr_value)
         ).first()
 
+    # Still not found
     if student is None:
+
         return Response({
             "status": "error",
             "message": f"Student not found for QR: {qr_value}"
@@ -1243,8 +1246,10 @@ def qr_student_attendance_api(request):
     today = timezone.now().date()
 
     attendance, created = StudentAttendance.objects.update_or_create(
+
         student=student,
         date=today,
+
         defaults={
             "status": "Present",
             "remarks": f"QR Mobile Attendance: {qr_value}"
@@ -1252,9 +1257,13 @@ def qr_student_attendance_api(request):
     )
 
     return Response({
+
         "status": "success",
+
         "message": f"{student.student_name} attendance marked",
+
         "already_marked": not created,
+
         "student": {
             "id": student.id,
             "student_id": student.student_id,
@@ -1262,8 +1271,10 @@ def qr_student_attendance_api(request):
             "class": get_student_class_name(student),
             "roll_no": student.roll_no,
         },
+
         "attendance": {
             "date": str(today),
             "status": attendance.status,
         }
+
     })
