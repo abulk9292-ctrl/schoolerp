@@ -348,9 +348,8 @@ def export_students_excel(request):
 def student_id_card(request, pk):
     student = get_object_or_404(Student, pk=pk)
 
-    qr_url = request.build_absolute_uri(
-        reverse('student_qr_attendance', args=[student.pk])
-    )
+    qr_url = student.student_id
+    
 
     qr_img = qrcode.make(qr_url)
     buffer = BytesIO()
@@ -399,9 +398,8 @@ def student_id_cards_print(request):
         )
 
         for student in students:
-            qr_url = request.build_absolute_uri(
-                reverse("student_qr_attendance", args=[student.pk])
-            )
+            qr_url = student.student_id
+            
 
             qr_img = qrcode.make(qr_url)
             buffer = BytesIO()
