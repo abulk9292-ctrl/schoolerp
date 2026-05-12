@@ -20,6 +20,29 @@
     }
 </style>
 
+
+{% if holiday_info.is_holiday %}
+<div class="alert {% if holiday_info.is_half_day %}alert-warning{% else %}alert-danger{% endif %} shadow-sm mb-3">
+
+    <h5 class="mb-1">
+        📅 {{ holiday_info.title }}
+    </h5>
+
+    <strong>Status:</strong>
+    {{ holiday_info.status }}
+
+    {% if not holiday_info.is_half_day %}
+        <br>
+        Today is Full Holiday.
+        Attendance marking is disabled.
+    {% else %}
+        <br>
+        Today is Half Day.
+    {% endif %}
+
+</div>
+{% endif %}
+
 <div class="att-head">
     <h3 class="mb-1">📋 Student Attendance</h3>
     <div>Class-wise attendance marking and report view</div>

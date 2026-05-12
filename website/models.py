@@ -54,6 +54,31 @@ class Admission(models.Model):
 
     def __str__(self):
         return f"{self.student_name} - {self.admission_no}"
+    
+class Student(models.Model):
+    admission_no = models.CharField(max_length=100, unique=True)
+    student_name = models.CharField(max_length=200)
+    father_name = models.CharField(max_length=200)
+    mother_name = models.CharField(max_length=200, blank=True, null=True)
+
+    student_class = models.CharField(max_length=50)
+
+    mobile = models.CharField(max_length=15)
+    guardian_mobile = models.CharField(max_length=15, blank=True, null=True)
+
+    address = models.TextField()
+
+    date_of_birth = models.DateField(blank=True, null=True)
+    gender = models.CharField(max_length=20, blank=True, null=True)
+
+    student_photo = models.ImageField(upload_to='student_photos/', blank=True, null=True)
+
+    session = models.CharField(max_length=50, default='2025-26')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.student_name} - {self.admission_no}"
 
 
 class ContactMessage(models.Model):

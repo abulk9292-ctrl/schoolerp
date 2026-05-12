@@ -16,6 +16,9 @@ dependencies:
   # API
   http: ^1.2.2
 
+  # QR Scanner
+  mobile_scanner: ^7.1.3
+
   # Location
   geolocator: ^12.0.0
 

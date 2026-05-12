@@ -141,3 +141,43 @@ class AttendanceAlert(models.Model):
         if self.alert_type == 'Student':
             return f"{self.student} - {self.status} ({self.approval_status})"
         return f"{self.employee} - {self.status} ({self.approval_status})"
+
+
+# =========================
+# HOLIDAY MODEL
+# =========================
+class Holiday(models.Model):
+
+    HOLIDAY_TYPE_CHOICES = [
+        ('Weekly', 'Weekly Holiday'),
+        ('Special', 'Special Holiday'),
+        ('Emergency', 'Emergency Holiday'),
+        ('Festival', 'Festival Holiday'),
+        ('Government', 'Government Holiday'),
+    ]
+
+    title = models.CharField(max_length=150)
+    date = models.DateField()
+
+    holiday_type = models.CharField(
+        max_length=30,
+        choices=HOLIDAY_TYPE_CHOICES,
+        default='Special'
+    )
+
+    is_half_day = models.BooleanField(default=False)
+
+    note = models.TextField(
+        blank=True,
+        null=True
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    class Meta:
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"{self.title} - {self.date}"

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 void main() {
   runApp(const MyApp());
@@ -400,73 +401,155 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget topBanner() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 24),
-      decoration: UiHelpers.cardDecoration(color: AppColors.dark, radius: 26),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 28,
-            backgroundColor: AppColors.green,
-            child: Text(
-              AppSession.username.isNotEmpty
-                  ? AppSession.username[0].toUpperCase()
-                  : 'A',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                fontSize: 22,
+Widget topBanner() {
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+    decoration: UiHelpers.cardDecoration(color: AppColors.dark, radius: 26),
+    child: LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isSmall = constraints.maxWidth < 520;
+
+        if (isSmall) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 26,
+                    backgroundColor: AppColors.green,
+                    child: Text(
+                      AppSession.username.isNotEmpty
+                          ? AppSession.username[0].toUpperCase()
+                          : 'A',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 22,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      'Hello ${AppSession.username} 👋',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                reportDate.isNotEmpty
+                    ? 'Attendance overview for $reportDate'
+                    : 'Your daily attendance dashboard',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.75),
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _bannerAction(
+                      icon: Icons.refresh,
+                      label: 'Refresh',
+                      onTap: fetchSummary,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _bannerAction(
+                      icon: Icons.logout,
+                      label: 'Logout',
+                      onTap: logout,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        }
+
+        return Row(
+          children: [
+            CircleAvatar(
+              radius: 28,
+              backgroundColor: AppColors.green,
+              child: Text(
+                AppSession.username.isNotEmpty
+                    ? AppSession.username[0].toUpperCase()
+                    : 'A',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 22,
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Hello ${AppSession.username} 👋',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    reportDate.isNotEmpty
+                        ? 'Attendance overview for $reportDate'
+                        : 'Your daily attendance dashboard',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.white.withOpacity(0.75),
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Wrap(
+              spacing: 10,
+              runSpacing: 10,
               children: [
-                Text(
-                  'Hello ${AppSession.username} 👋',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.w800,
-                  ),
+                _bannerAction(
+                  icon: Icons.refresh,
+                  label: 'Refresh',
+                  onTap: fetchSummary,
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  reportDate.isNotEmpty
-                      ? 'Attendance overview for $reportDate'
-                      : 'Your daily attendance dashboard',
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.75),
-                    fontSize: 14,
-                  ),
+                _bannerAction(
+                  icon: Icons.logout,
+                  label: 'Logout',
+                  onTap: logout,
                 ),
               ],
             ),
-          ),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
-            children: [
-              _bannerAction(
-                icon: Icons.refresh,
-                label: 'Refresh',
-                onTap: fetchSummary,
-              ),
-              _bannerAction(
-                icon: Icons.logout,
-                label: 'Logout',
-                onTap: logout,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+          ],
+        );
+      },
+    ),
+  );
+}
 
   Widget _bannerAction({
     required IconData icon,
@@ -801,6 +884,18 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
         ),
         const SizedBox(height: 16),
+        actionButton(
+          title: 'QR Scan Student Attendance',
+          icon: Icons.qr_code_scanner_rounded,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const QRStudentAttendancePage()),
+            );
+          },
+          bg: AppColors.blue,
+        ),
+        const SizedBox(height: 12),
         actionButton(
           title: 'Open Student Attendance Panel',
           icon: Icons.fact_check_outlined,
@@ -2239,6 +2334,160 @@ class _StudentReportPageState extends State<StudentReportPage> {
               const Text('No register data found'),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class QRStudentAttendancePage extends StatefulWidget {
+  const QRStudentAttendancePage({super.key});
+
+  @override
+  State<QRStudentAttendancePage> createState() =>
+      _QRStudentAttendancePageState();
+}
+
+class _QRStudentAttendancePageState extends State<QRStudentAttendancePage> {
+  bool isProcessing = false;
+  String message = 'Scan student ID card QR code';
+
+  Future<void> markAttendance(String qrData) async {
+    if (isProcessing) return;
+
+    setState(() {
+      isProcessing = true;
+      message = 'Processing QR...';
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/mobile-api/qr-attendance/mark/'),
+        headers: {
+          'Authorization': 'Token ${AppSession.token}',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'qr_data': qrData,
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && data['status'] == 'success') {
+        setState(() {
+          message =
+              '${data['message']}\n'
+              'Name: ${data['student']['name']}\n'
+              'Class: ${data['student']['class']}\n'
+              'Roll: ${data['student']['roll_no']}\n'
+              'Date: ${data['attendance']['date']}\n'
+              'Status: ${data['attendance']['status']}';
+        });
+
+        if (!mounted) return;
+
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Attendance Success ✅'),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  setState(() {
+                    isProcessing = false;
+                    message = 'Scan next student QR code';
+                  });
+                },
+                child: const Text('Scan Next'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                child: const Text('Close'),
+              ),
+            ],
+          ),
+        );
+      } else {
+        setState(() {
+          message = data['message'] ?? 'QR attendance failed';
+          isProcessing = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        message = 'Server error: $e';
+        isProcessing = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.bg,
+      appBar: AppBar(
+        backgroundColor: AppColors.dark,
+        foregroundColor: Colors.white,
+        title: const Text('QR Student Attendance'),
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            flex: 5,
+            child: MobileScanner(
+              onDetect: (capture) {
+                final barcodes = capture.barcodes;
+
+                if (barcodes.isNotEmpty) {
+                  final value = barcodes.first.rawValue;
+
+                  if (value != null && value.isNotEmpty) {
+                    markAttendance(value);
+                  }
+                }
+              },
+            ),
+          ),
+
+          Expanded(
+            flex: 2,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    isProcessing
+                        ? Icons.hourglass_top
+                        : Icons.qr_code_scanner,
+                    size: 46,
+                    color: isProcessing ? AppColors.orange : AppColors.blue,
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textDark,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

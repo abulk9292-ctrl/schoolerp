@@ -5,6 +5,17 @@
     <h2 class="mb-0">Student Daily Attendance Report</h2>
 </div>
 
+{% if holiday_info.is_holiday %}
+<div class="alert {% if holiday_info.is_half_day %}alert-warning{% else %}alert-info{% endif %} shadow-sm mb-3">
+    📅 <strong>{{ selected_date }}</strong> —
+    {{ holiday_info.title }} / {{ holiday_info.status }}
+
+    {% if not holiday_info.is_half_day %}
+        <br>No absent count today because this is a full holiday.
+    {% endif %}
+</div>
+{% endif %}
+
 <div class="card card-box mb-4">
     <div class="card-body">
         <form method="get" class="row g-3">
@@ -46,37 +57,60 @@
                 <th>Status</th>
             </tr>
         </thead>
+
         <tbody>
-            {% for item in records %}
-            <tr>
-                <td>{{ forloop.counter }}</td>
-                <td>
-                    {% if item.student.photo %}
-                        <img src="{{ item.student.photo.url }}" width="45" height="45" style="object-fit: cover; border-radius: 6px;">
-                    {% else %}
-                        No Photo
-                    {% endif %}
-                </td>
-                <td>{{ item.student.student_id }}</td>
-                <td>{{ item.student.registration_no }}</td>
-                <td>{{ item.student.student_name }}</td>
-                <td>{{ item.student.class_assigned }}</td>
-                <td>{{ item.student.roll_no }}</td>
-                <td>
-                    {% if item.status == 'Present' %}
-                        <span class="badge bg-success">Present</span>
-                    {% elif item.status == 'Late' %}
-                        <span class="badge bg-warning text-dark">Late</span>
-                    {% else %}
-                        <span class="badge bg-danger">Absent</span>
-                    {% endif %}
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="8" class="text-center">No attendance records found.</td>
-            </tr>
-            {% endfor %}
+            {% if records %}
+                {% for item in records %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+
+                    <td>
+                        {% if item.student.photo %}
+                            <img src="{{ item.student.photo.url }}" width="45" height="45" style="object-fit: cover; border-radius: 6px;">
+                        {% else %}
+                            No Photo
+                        {% endif %}
+                    </td>
+
+                    <td>{{ item.student.student_id }}</td>
+                    <td>{{ item.student.registration_no }}</td>
+                    <td>{{ item.student.student_name }}</td>
+                    <td>{{ item.student.class_assigned }}</td>
+                    <td>{{ item.student.roll_no }}</td>
+
+                    <td>
+                        {% if item.status == 'Present' %}
+                            <span class="badge bg-success">Present</span>
+                        {% elif item.status == 'Late' %}
+                            <span class="badge bg-warning text-dark">Late</span>
+                        {% elif item.status == 'Absent' %}
+                            <span class="badge bg-danger">Absent</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ item.status }}</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+
+            {% else %}
+                {% if holiday_info.is_holiday %}
+                <tr>
+                    <td colspan="8" class="text-center">
+                        {% if holiday_info.is_half_day %}
+                            <span class="badge bg-warning text-dark">Half Day</span>
+                        {% else %}
+                            <span class="badge bg-info text-dark">Holiday</span>
+                        {% endif %}
+                        <br>
+                        {{ holiday_info.title }} — No attendance records required.
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center">No attendance records found.</td>
+                </tr>
+                {% endif %}
+            {% endif %}
         </tbody>
     </table>
 </div>

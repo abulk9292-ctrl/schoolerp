@@ -4,6 +4,19 @@ from .models import Admission
 
 class AdmissionForm(forms.ModelForm):
 
+    GENDER_CHOICES = [
+        ("", "Select Gender"),
+        ("Male", "Male"),
+        ("Female", "Female"),
+        ("Other", "Other"),
+    ]
+
+    gender = forms.ChoiceField(
+        choices=GENDER_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
     class Meta:
         model = Admission
 
@@ -25,67 +38,34 @@ class AdmissionForm(forms.ModelForm):
         ]
 
         widgets = {
+            "student_name": forms.TextInput(attrs={"class": "form-control"}),
+            "father_name": forms.TextInput(attrs={"class": "form-control"}),
+            "mother_name": forms.TextInput(attrs={"class": "form-control"}),
 
-            "student_name": forms.TextInput(
-                attrs={"class": "form-control"}
-            ),
+            "date_of_birth": forms.DateInput(attrs={
+                "class": "form-control",
+                "type": "date"
+            }),
 
-            "father_name": forms.TextInput(
-                attrs={"class": "form-control"}
-            ),
+            "student_class": forms.TextInput(attrs={"class": "form-control"}),
+            "aadhaar_no": forms.TextInput(attrs={"class": "form-control"}),
+            "mobile": forms.TextInput(attrs={"class": "form-control"}),
+            "guardian_mobile": forms.TextInput(attrs={"class": "form-control"}),
 
-            "mother_name": forms.TextInput(
-                attrs={"class": "form-control"}
-            ),
+            "address": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 2
+            }),
 
-            "date_of_birth": forms.DateInput(
-                attrs={
-                    "class": "form-control",
-                    "type": "date"
-                }
-            ),
+            "previous_school": forms.TextInput(attrs={"class": "form-control"}),
 
-            "gender": forms.Select(
-                attrs={"class": "form-select"}
-            ),
+            "transport_required": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
 
-            "student_class": forms.TextInput(
-                attrs={"class": "form-control"}
-            ),
+            "hostel_required": forms.CheckboxInput(attrs={
+                "class": "form-check-input"
+            }),
 
-            "aadhaar_no": forms.TextInput(
-                attrs={"class": "form-control"}
-            ),
-
-            "mobile": forms.TextInput(
-                attrs={"class": "form-control"}
-            ),
-
-            "guardian_mobile": forms.TextInput(
-                attrs={"class": "form-control"}
-            ),
-
-            "address": forms.Textarea(
-                attrs={
-                    "class": "form-control",
-                    "rows": 2
-                }
-            ),
-
-            "previous_school": forms.TextInput(
-                attrs={"class": "form-control"}
-            ),
-
-            "transport_required": forms.CheckboxInput(
-                attrs={"class": "form-check-input"}
-            ),
-
-            "hostel_required": forms.CheckboxInput(
-                attrs={"class": "form-check-input"}
-            ),
-
-            "student_photo": forms.FileInput(
-                attrs={"class": "form-control"}
-            ),
-
+            "student_photo": forms.FileInput(attrs={"class": "form-control"}),
         }

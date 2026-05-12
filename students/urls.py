@@ -39,6 +39,7 @@ urlpatterns = [
     path('id-card/<int:pk>/', views.student_id_card, name='student_id_card'),
     path('id-cards-print/', views.student_id_cards_print, name='student_id_cards_print'),
     path('qr-profile/<int:pk>/', views.student_qr_profile, name='student_qr_profile'),
+    path('qr-attendance/<int:pk>/', views.student_qr_attendance, name='student_qr_attendance'),
 
     # ======================
     # 🔥 IMPORT SYSTEM (FULL)

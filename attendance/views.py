@@ -13,22 +13,30 @@ from students.models import Student
 from teachers.models import Employee
 from academics.models import Class
 
-from .models import StudentAttendance, TeacherAttendance, AttendanceAlert
-from .utils import send_whatsapp_message, send_sms_message
+from .models import StudentAttendance, TeacherAttendance, AttendanceAlert, Holiday
+from .forms import HolidayForm
+from .utils import send_whatsapp_message, send_sms_message, get_holiday_status
 
 
 # =========================
 # SCHOOL LOCATION SETTINGS
 # =========================
-SCHOOL_LATITUDE = 25.0000000      # এখানে তোমার school latitude বসাবে
-SCHOOL_LONGITUDE = 88.0000000     # এখানে তোমার school longitude বসাবে
-SCHOOL_RADIUS_METERS = 150        # 150 meter radius allowed
+SCHOOL_LATITUDE = 25.0000000
+SCHOOL_LONGITUDE = 88.0000000
+SCHOOL_RADIUS_METERS = 150
+
+
+def parse_date_safe(date_value):
+    if hasattr(date_value, "weekday"):
+        return date_value
+
+    try:
+        return datetime.strptime(str(date_value), "%Y-%m-%d").date()
+    except Exception:
+        return timezone.now().date()
 
 
 def calculate_distance_meters(lat1, lon1, lat2, lon2):
-    """
-    GPS distance calculate using Haversine formula.
-    """
     try:
         lat1 = float(lat1)
         lon1 = float(lon1)
@@ -36,10 +44,8 @@ def calculate_distance_meters(lat1, lon1, lat2, lon2):
         lon2 = float(lon2)
 
         earth_radius = 6371000
-
         phi1 = math.radians(lat1)
         phi2 = math.radians(lat2)
-
         delta_phi = math.radians(lat2 - lat1)
         delta_lambda = math.radians(lon2 - lon1)
 
@@ -50,7 +56,6 @@ def calculate_distance_meters(lat1, lon1, lat2, lon2):
         )
 
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-
         return round(earth_radius * c, 2)
 
     except Exception:
@@ -75,10 +80,9 @@ def student_attendance(request):
     selected_date = request.GET.get('date')
     selected_class = request.GET.get('class_id')
 
-    if selected_date:
-        attendance_date = selected_date
-    else:
-        attendance_date = timezone.now().date().isoformat()
+    attendance_date = selected_date if selected_date else timezone.now().date().isoformat()
+    attendance_date_obj = parse_date_safe(attendance_date)
+    holiday_info = get_holiday_status(attendance_date_obj)
 
     classes = Class.objects.all().order_by('class_name')
 
@@ -104,6 +108,9 @@ def student_attendance(request):
     elif is_class_teacher and selected_class == allowed_class_id:
         can_mark_attendance = True
 
+    if holiday_info["is_holiday"] and not holiday_info["is_half_day"]:
+        can_mark_attendance = False
+
     students = Student.objects.select_related('class_assigned').filter(is_active=True)
 
     if selected_class:
@@ -111,7 +118,7 @@ def student_attendance(request):
 
     students = students.order_by('roll_no', 'student_name')
 
-    existing_records = StudentAttendance.objects.filter(date=attendance_date)
+    existing_records = StudentAttendance.objects.filter(date=attendance_date_obj)
 
     if selected_class:
         existing_records = existing_records.filter(student__class_assigned_id=selected_class)
@@ -119,14 +126,25 @@ def student_attendance(request):
     existing_status_map = {record.student_id: record.status for record in existing_records}
 
     for student in students:
-        student.current_status = existing_status_map.get(student.id, 'Not Marked')
+        if student.id in existing_status_map:
+            student.current_status = existing_status_map.get(student.id)
+        elif holiday_info["is_holiday"]:
+            student.current_status = holiday_info["status"]
+        else:
+            student.current_status = 'Not Marked'
 
     is_update = existing_records.exists()
 
     if request.method == 'POST':
         post_date = request.POST.get('attendance_date')
-        post_class_id = request.POST.get('class_id') or ''
+        post_date_obj = parse_date_safe(post_date)
+        post_holiday_info = get_holiday_status(post_date_obj)
 
+        if post_holiday_info["is_holiday"] and not post_holiday_info["is_half_day"]:
+            messages.warning(request, f"⚠️ {post_holiday_info['title']} আছে। Attendance mark করা যাবে না।")
+            return redirect(f'/attendance/students/?date={post_date}&class_id={request.POST.get("class_id") or ""}')
+
+        post_class_id = request.POST.get('class_id') or ''
         post_can_mark = False
 
         if request.user.is_superuser or request.user.is_staff:
@@ -144,20 +162,15 @@ def student_attendance(request):
             messages.error(request, "❌ Please select a class first.")
             return redirect('/attendance/students/')
 
-        students_to_save = Student.objects.filter(
-            is_active=True,
-            class_assigned_id=post_class_id
-        )
+        students_to_save = Student.objects.filter(is_active=True, class_assigned_id=post_class_id)
 
         for student in students_to_save:
             status = request.POST.get(f'status_{student.id}', 'Present')
 
             StudentAttendance.objects.update_or_create(
                 student=student,
-                date=post_date,
-                defaults={
-                    'status': status
-                }
+                date=post_date_obj,
+                defaults={'status': status}
             )
 
         messages.success(request, '✅ Student attendance updated successfully.')
@@ -172,6 +185,7 @@ def student_attendance(request):
         'can_mark_attendance': can_mark_attendance,
         'is_class_teacher': is_class_teacher,
         'allowed_class_id': allowed_class_id,
+        'holiday_info': holiday_info,
     }
 
     return render(request, 'attendance/student_attendance.html', context)
@@ -190,31 +204,40 @@ def teacher_attendance(request):
             return redirect('/teacher-dashboard/')
 
     selected_date = request.GET.get('date')
-
-    if selected_date:
-        attendance_date = selected_date
-    else:
-        attendance_date = timezone.now().date().isoformat()
+    attendance_date = selected_date if selected_date else timezone.now().date().isoformat()
+    attendance_date_obj = parse_date_safe(attendance_date)
+    holiday_info = get_holiday_status(attendance_date_obj)
 
     employees = Employee.objects.filter(is_active=True).order_by('name')
 
-    existing_records = TeacherAttendance.objects.filter(date=attendance_date)
+    existing_records = TeacherAttendance.objects.filter(date=attendance_date_obj)
     existing_status_map = {record.employee_id: record.status for record in existing_records}
 
     for employee in employees:
-        employee.current_status = existing_status_map.get(employee.id, 'Present')
+        if employee.id in existing_status_map:
+            employee.current_status = existing_status_map.get(employee.id)
+        elif holiday_info["is_holiday"]:
+            employee.current_status = holiday_info["status"]
+        else:
+            employee.current_status = 'Present'
 
     is_update = existing_records.exists()
 
     if request.method == 'POST':
         post_date = request.POST.get('attendance_date')
+        post_date_obj = parse_date_safe(post_date)
+        post_holiday_info = get_holiday_status(post_date_obj)
+
+        if post_holiday_info["is_holiday"] and not post_holiday_info["is_half_day"]:
+            messages.warning(request, f"⚠️ {post_holiday_info['title']} আছে। Teacher attendance mark করা যাবে না।")
+            return redirect(f'/attendance/teachers/?date={post_date}')
 
         for employee in employees:
             status = request.POST.get(f'status_{employee.id}', 'Present')
 
             TeacherAttendance.objects.update_or_create(
                 employee=employee,
-                date=post_date,
+                date=post_date_obj,
                 defaults={
                     'status': status,
                     'within_range': True,
@@ -229,6 +252,7 @@ def teacher_attendance(request):
         'employees': employees,
         'attendance_date': attendance_date,
         'is_update': is_update,
+        'holiday_info': holiday_info,
     }
 
     return render(request, 'attendance/teacher_attendance.html', context)
@@ -246,13 +270,16 @@ def teacher_mobile_attendance(request):
         return redirect('/teacher-dashboard/')
 
     today = timezone.now().date()
+    holiday_info = get_holiday_status(today)
 
-    today_attendance = TeacherAttendance.objects.filter(
-        employee=emp,
-        date=today
-    ).first()
+    today_attendance = TeacherAttendance.objects.filter(employee=emp, date=today).first()
 
     if request.method == 'POST':
+
+        if holiday_info["is_holiday"] and not holiday_info["is_half_day"]:
+            messages.warning(request, f"⚠️ Today is {holiday_info['title']}. Attendance not required.")
+            return redirect('teacher_mobile_attendance')
+
         latitude = request.POST.get('latitude')
         longitude = request.POST.get('longitude')
         address = request.POST.get('address', '')
@@ -270,12 +297,7 @@ def teacher_mobile_attendance(request):
             messages.error(request, "❌ Selfie is required for attendance.")
             return redirect('teacher_mobile_attendance')
 
-        distance = calculate_distance_meters(
-            latitude,
-            longitude,
-            SCHOOL_LATITUDE,
-            SCHOOL_LONGITUDE
-        )
+        distance = calculate_distance_meters(latitude, longitude, SCHOOL_LATITUDE, SCHOOL_LONGITUDE)
 
         if distance is None:
             messages.error(request, "❌ Invalid GPS location.")
@@ -299,10 +321,7 @@ def teacher_mobile_attendance(request):
                 remarks=f'Outside school radius. Distance: {distance} meters'
             )
 
-            messages.error(
-                request,
-                f"❌ You are outside school range. Distance: {distance} meters."
-            )
+            messages.error(request, f"❌ You are outside school range. Distance: {distance} meters.")
             return redirect('teacher_mobile_attendance')
 
         TeacherAttendance.objects.create(
@@ -320,16 +339,14 @@ def teacher_mobile_attendance(request):
             remarks='Marked from mobile with selfie and GPS'
         )
 
-        messages.success(
-            request,
-            f"✅ Attendance marked successfully. Distance: {distance} meters."
-        )
+        messages.success(request, f"✅ Attendance marked successfully. Distance: {distance} meters.")
         return redirect('teacher_mobile_attendance')
 
     context = {
         'employee': emp,
         'today': today,
         'today_attendance': today_attendance,
+        'holiday_info': holiday_info,
         'school_latitude': SCHOOL_LATITUDE,
         'school_longitude': SCHOOL_LONGITUDE,
         'school_radius_meters': SCHOOL_RADIUS_METERS,
@@ -344,14 +361,17 @@ def teacher_mobile_attendance(request):
 @login_required
 def student_daily_report(request):
     selected_date = request.GET.get('date') or timezone.now().date().isoformat()
+    selected_date_obj = parse_date_safe(selected_date)
     selected_class = request.GET.get('class_id')
+
+    holiday_info = get_holiday_status(selected_date_obj)
 
     classes = Class.objects.all().order_by('class_name')
 
     records = StudentAttendance.objects.select_related(
         'student',
         'student__class_assigned'
-    ).filter(date=selected_date).order_by(
+    ).filter(date=selected_date_obj).order_by(
         'student__class_assigned__class_name',
         'student__roll_no',
         'student__student_name'
@@ -365,6 +385,7 @@ def student_daily_report(request):
         'classes': classes,
         'selected_date': selected_date,
         'selected_class': selected_class,
+        'holiday_info': holiday_info,
     })
 
 
@@ -374,14 +395,18 @@ def student_daily_report(request):
 @login_required
 def teacher_daily_report(request):
     selected_date = request.GET.get('date') or timezone.now().date().isoformat()
+    selected_date_obj = parse_date_safe(selected_date)
+
+    holiday_info = get_holiday_status(selected_date_obj)
 
     records = TeacherAttendance.objects.select_related('employee').filter(
-        date=selected_date
+        date=selected_date_obj
     ).order_by('employee__name')
 
     return render(request, 'attendance/teacher_daily_report.html', {
         'records': records,
         'selected_date': selected_date,
+        'holiday_info': holiday_info,
     })
 
 
@@ -393,9 +418,7 @@ def student_percentage_report(request):
     selected_class = request.GET.get('class_id')
 
     classes = Class.objects.all().order_by('class_name')
-    students = Student.objects.select_related('class_assigned').filter(
-        is_active=True
-    ).order_by(
+    students = Student.objects.select_related('class_assigned').filter(is_active=True).order_by(
         'class_assigned__class_name',
         'roll_no',
         'student_name'
@@ -412,9 +435,7 @@ def student_percentage_report(request):
         late_days = StudentAttendance.objects.filter(student=student, status='Late').count()
         absent_days = StudentAttendance.objects.filter(student=student, status='Absent').count()
 
-        percentage = 0
-        if total_days > 0:
-            percentage = round((present_days / total_days) * 100, 2)
+        percentage = round((present_days / total_days) * 100, 2) if total_days > 0 else 0
 
         report_rows.append({
             'student': student,
@@ -488,27 +509,36 @@ def student_monthly_report(request):
         present = 0
         absent = 0
         late = 0
+        holiday_days = 0
+        working_days = 0
         day_statuses = []
 
         for day in date_headers:
-            status = attendance_map.get((student.id, day), '-')
+            status = attendance_map.get((student.id, day))
+            holiday_info = get_holiday_status(day)
 
             if status == 'Present':
                 present += 1
+                working_days += 1
                 short = 'P'
             elif status == 'Absent':
                 absent += 1
+                working_days += 1
                 short = 'A'
             elif status == 'Late':
                 late += 1
+                working_days += 1
                 short = 'L'
             else:
-                short = '-'
+                if holiday_info["is_holiday"]:
+                    holiday_days += 1
+                    short = 'HD' if holiday_info["is_half_day"] else 'H'
+                else:
+                    short = '-'
 
             day_statuses.append(short)
 
-        total_days = len(date_headers)
-        percentage = round((present / total_days) * 100, 2) if total_days > 0 else 0
+        percentage = round((present / working_days) * 100, 2) if working_days > 0 else 0
 
         report_rows.append({
             'student': student,
@@ -516,6 +546,8 @@ def student_monthly_report(request):
             'present': present,
             'absent': absent,
             'late': late,
+            'holiday_days': holiday_days,
+            'working_days': working_days,
             'percentage': percentage,
         })
 
@@ -568,10 +600,7 @@ def attendance_graph(request):
 
     for student in students[:10]:
         total = StudentAttendance.objects.filter(student=student).count()
-        present_count = StudentAttendance.objects.filter(
-            student=student,
-            status='Present'
-        ).count()
+        present_count = StudentAttendance.objects.filter(student=student, status='Present').count()
 
         student_data.append({
             'name': student.student_name,
@@ -601,23 +630,29 @@ def student_attendance_by_class(request, class_name):
     ).order_by('roll_no')
 
     today = timezone.now().date()
+    holiday_info = get_holiday_status(today)
 
     data = []
 
     for student in students:
-        attendance = StudentAttendance.objects.filter(
-            student=student,
-            date=today
-        ).first()
+        attendance = StudentAttendance.objects.filter(student=student, date=today).first()
+
+        if attendance:
+            status = attendance.status
+        elif holiday_info["is_holiday"]:
+            status = holiday_info["status"]
+        else:
+            status = 'Not Marked'
 
         data.append({
             'student': student,
-            'status': attendance.status if attendance else 'Not Marked'
+            'status': status
         })
 
     return render(request, 'attendance/student_attendance_by_class.html', {
         'data': data,
-        'class_name': class_name
+        'class_name': class_name,
+        'holiday_info': holiday_info,
     })
 
 
@@ -658,9 +693,7 @@ def attendance_register(request):
         date_headers.append(current)
         current += timedelta(days=1)
 
-    students = Student.objects.select_related('class_assigned').filter(
-        is_active=True
-    ).order_by(
+    students = Student.objects.select_related('class_assigned').filter(is_active=True).order_by(
         'roll_no',
         'student_name'
     )
@@ -686,9 +719,11 @@ def attendance_register(request):
         present = 0
         absent = 0
         late = 0
+        holiday_days = 0
 
         for day in date_headers:
-            status = attendance_map.get((student.id, day), '-')
+            status = attendance_map.get((student.id, day))
+            holiday_info = get_holiday_status(day)
 
             if status == 'Present':
                 short = 'P'
@@ -700,7 +735,11 @@ def attendance_register(request):
                 short = 'L'
                 late += 1
             else:
-                short = '-'
+                if holiday_info["is_holiday"]:
+                    short = 'HD' if holiday_info["is_half_day"] else 'H'
+                    holiday_days += 1
+                else:
+                    short = '-'
 
             day_statuses.append(short)
 
@@ -710,6 +749,7 @@ def attendance_register(request):
             'present': present,
             'absent': absent,
             'late': late,
+            'holiday_days': holiday_days,
         })
 
     context = {
@@ -787,3 +827,109 @@ def attendance_alert_reject(request, pk):
     messages.warning(request, '⚠️ Alert rejected.')
 
     return redirect('attendance_alert_list')
+
+
+# =========================
+# HOLIDAY MANAGEMENT
+# =========================
+@login_required
+def holiday_list(request):
+    holidays = Holiday.objects.all().order_by('-date')
+
+    return render(request, 'attendance/holiday_list.html', {
+        'holidays': holidays
+    })
+
+
+@login_required
+def holiday_add(request):
+    if request.method == 'POST':
+        form = HolidayForm(request.POST)
+
+        if form.is_valid():
+            title = form.cleaned_data['title']
+            start_date = form.cleaned_data['start_date']
+            end_date = form.cleaned_data.get('end_date') or start_date
+            holiday_type = form.cleaned_data['holiday_type']
+            is_half_day = form.cleaned_data['is_half_day']
+            note = form.cleaned_data['note']
+
+            if end_date < start_date:
+                messages.error(request, '❌ End Date cannot be before Start Date.')
+                return redirect('holiday_add')
+
+            current_date = start_date
+            created_count = 0
+
+            while current_date <= end_date:
+                Holiday.objects.update_or_create(
+                    date=current_date,
+                    defaults={
+                        'title': title,
+                        'holiday_type': holiday_type,
+                        'is_half_day': is_half_day,
+                        'note': note,
+                    }
+                )
+
+                created_count += 1
+                current_date += timedelta(days=1)
+
+            messages.success(request, f'✅ {created_count} holiday day(s) added successfully.')
+            return redirect('holiday_list')
+
+    else:
+        form = HolidayForm()
+
+    return render(request, 'attendance/holiday_form.html', {
+        'form': form,
+        'page_title': 'Add Holiday'
+    })
+
+
+@login_required
+def holiday_edit(request, pk):
+    holiday = get_object_or_404(Holiday, pk=pk)
+
+    if request.method == 'POST':
+        form = HolidayForm(request.POST)
+
+        if form.is_valid():
+            holiday.title = form.cleaned_data['title']
+            holiday.date = form.cleaned_data['start_date']
+            holiday.holiday_type = form.cleaned_data['holiday_type']
+            holiday.is_half_day = form.cleaned_data['is_half_day']
+            holiday.note = form.cleaned_data['note']
+            holiday.save()
+
+            messages.success(request, '✅ Holiday updated successfully.')
+            return redirect('holiday_list')
+
+    else:
+        form = HolidayForm(initial={
+            'title': holiday.title,
+            'start_date': holiday.date,
+            'end_date': holiday.date,
+            'holiday_type': holiday.holiday_type,
+            'is_half_day': holiday.is_half_day,
+            'note': holiday.note,
+        })
+
+    return render(request, 'attendance/holiday_form.html', {
+        'form': form,
+        'page_title': 'Edit Holiday'
+    })
+
+
+@login_required
+def holiday_delete(request, pk):
+    holiday = get_object_or_404(Holiday, pk=pk)
+
+    if request.method == 'POST':
+        holiday.delete()
+        messages.success(request, '🗑 Holiday deleted successfully.')
+        return redirect('holiday_list')
+
+    return render(request, 'attendance/holiday_confirm_delete.html', {
+        'holiday': holiday
+    })

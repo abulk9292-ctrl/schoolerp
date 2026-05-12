@@ -287,4 +287,12 @@ urlpatterns = [
         name="student_attendance_register_api"
     ),
 
+    path(
+        "qr-attendance/mark/",
+        views.qr_student_attendance_api,
+        name="qr_student_attendance_api"
+    ),
+
+    path("qr-attendance/mark/", views.qr_student_attendance_api, name="qr_student_attendance_api"),
+
 ]

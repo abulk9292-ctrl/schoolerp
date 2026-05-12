@@ -1,131 +1,434 @@
-{% extends 'base.html' %}
-{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>A4 ID Cards Print</title>
 
-<style>
-@page {
-    size: A4;
-    margin: 8mm;
-}
+    <style>
+        @page{
+            size:A4 landscape;
+            margin:4mm;
+        }
 
-.print-area {
-    width: 210mm;
-    min-height: 297mm;
-    margin: auto;
-    background: white;
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6mm;
-}
+        body{
+            margin:0;
+            padding:0;
+            background:white;
+            font-family:Arial, sans-serif;
+        }
 
-.id-card {
-    height: 52mm;
-    border: 1.5px dashed #333;
-    border-radius: 8px;
-    padding: 6px;
-    position: relative;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
-    background: #fff;
-}
+        .filter-box{
+            max-width:1100px;
+            margin:15px auto;
+            padding:15px;
+            background:#eef4ff;
+            border:1px solid #b9c9ef;
+            border-radius:10px;
+        }
 
-.school-title {
-    text-align: center;
-    font-size: 13px;
-    font-weight: 800;
-    color: #0c9b57;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 3px;
-}
+        .filter-row{
+            display:flex;
+            gap:10px;
+            align-items:center;
+            flex-wrap:wrap;
+        }
 
-.card-body-box {
-    display: flex;
-    gap: 8px;
-    margin-top: 6px;
-}
+        .filter-row select,
+        .filter-row button{
+            padding:8px 12px;
+            border-radius:6px;
+            border:1px solid #999;
+        }
 
-.student-photo {
-    width: 55px;
-    height: 65px;
-    object-fit: cover;
-    border: 1px solid #999;
-    border-radius: 5px;
-}
+        .filter-row button{
+            background:#002b75;
+            color:white;
+            cursor:pointer;
+            border:none;
+        }
 
-.info {
-    font-size: 11px;
-    line-height: 1.45;
-    flex: 1;
-}
+        .student-check-list{
+            margin-top:12px;
+            display:grid;
+            grid-template-columns:repeat(3, 1fr);
+            gap:8px;
+            max-height:260px;
+            overflow:auto;
+        }
 
-.cut-text {
-    position: absolute;
-    right: 6px;
-    bottom: 3px;
-    font-size: 8px;
-    color: #777;
-}
+        .student-check{
+            background:white;
+            padding:8px;
+            border-radius:6px;
+            border:1px solid #ddd;
+            font-size:13px;
+        }
 
-.print-btn {
-    margin-bottom: 15px;
-}
+        .print-btn{
+            text-align:center;
+            margin:10px;
+        }
 
-@media print {
-    .sidebar,
-    .topbar,
-    .print-btn,
-    .no-print {
-        display: none !important;
-    }
+        .print-btn button{
+            padding:10px 25px;
+            border:none;
+            background:#001c72;
+            color:white;
+            font-size:16px;
+            border-radius:8px;
+            cursor:pointer;
+        }
 
-    .content-area {
-        padding: 0 !important;
-    }
+        .a4-sheet{
+            width:287mm;
+            min-height:200mm;
+            margin:auto;
+            display:grid;
+            grid-template-columns:repeat(5, 52mm);
+            gap:8mm;
+            justify-content:center;
+            align-items:start;
+            page-break-after:always;
+        }
 
-    .print-area {
-        margin: 0;
-    }
-}
-</style>
+        .card-slot{
+            width:52mm;
+            height:84mm;
+            overflow:hidden;
+            position:relative;
+        }
 
-<div class="no-print print-btn text-center">
-    <button onclick="window.print()" class="btn btn-primary">
-        Print 10 ID Cards
-    </button>
+        .id-card{
+            width:380px;
+            height:610px;
+            position:relative;
+            background:url("{% static 'images/id_card_bg.png' %}") no-repeat center center;
+            background-size:100% 100%;
+            border-radius:30px;
+            overflow:hidden;
+            box-shadow:0 0 8px rgba(0,0,0,0.20);
+            transform:scale(0.515);
+            transform-origin:top left;
+        }
+
+        .student-photo{
+            position:absolute;
+            top:112px;
+            left:129px;
+            width:116px;
+            height:116px;
+            border-radius:50%;
+            overflow:hidden;
+            border:5px solid #20e600;
+            background:white;
+            z-index:10;
+        }
+
+        .student-photo img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+            object-position:center 8%;
+            
+            
+        }
+
+        .student-name{
+            position:absolute;
+            top:242px;
+            left:55px;
+            width:270px;
+            height:34px;
+            background:#002b75;
+            color:white !important;
+            font-size:20px;
+            font-weight:900;
+            text-align:center;
+            line-height:34px;
+            border-radius:7px;
+            text-transform:uppercase;
+            z-index:20;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+
+        .student-role{
+            position:absolute;
+            top:270px;
+            left:118px;
+            width:145px;
+            height:32px;
+            background:#0798d8;
+            color:white;
+            font-size:18px;
+            font-weight:bold;
+            text-align:center;
+            line-height:32px;
+            border-radius:0 0 10px 10px;
+            text-transform:uppercase;
+            z-index:19;
+        }
+
+        .details-box{
+            position:absolute;
+            top:315px;
+            left:32px;
+            width:312px;
+            color:#111;
+            font-size:14.5px;
+            font-weight:bold;
+            z-index:10;
+        }
+
+        .detail-row{
+            display:flex;
+            align-items:center;
+            border-bottom:1px solid #d7d7d7;
+            min-height:30px;
+        }
+
+        .detail-row.two{
+            gap:4px;
+        }
+
+        .mini-field{
+            display:flex;
+            align-items:center;
+            flex:1;
+            border-bottom:1px solid #d7d7d7;
+            min-height:22px;
+        }
+
+        .icon{
+            width:19px;
+            height:19px;
+            background:#002b75;
+            color:white;
+            border-radius:5px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:12px;
+            margin-right:10px;
+            flex-shrink:0;
+        }
+
+        .label{
+            width:48px;
+            white-space:nowrap;
+        }
+
+        .label.small{
+            width:48px;
+        }
+
+        .colon{
+            width:8px;
+        }
+
+        .value{
+            flex:1;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+
+        .qr-box{
+            position:absolute;
+            right:32px;
+            bottom:172px;
+            width:86px;
+            height:86px;
+            background:white;
+            border-radius:8px;
+            padding:4px;
+            border:1px solid #003399;
+            z-index:30;
+        }
+
+        .qr-box img{
+            width:100%;
+            height:100%;
+            display:block;
+        }
+
+        @media print{
+            .filter-box,
+            .print-btn{
+                display:none;
+            }
+
+            .id-card{
+                box-shadow:none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="filter-box">
+    <form method="get">
+
+        <div class="filter-row">
+            <label><b>Select Class:</b></label>
+
+            <select name="class" onchange="this.form.submit()">
+                <option value="all" {% if selected_class == "all" or not selected_class %}selected{% endif %}>
+                    All Class
+                </option>
+
+                {% for cls in class_list %}
+                    <option value="{{ cls.id }}" {% if selected_class == cls.id|stringformat:"s" %}selected{% endif %}>
+                        {{ cls }}
+                    </option>
+                {% endfor %}
+            </select>
+
+            <button type="button" onclick="selectAllStudents()">Select All</button>
+            <button type="button" onclick="unselectAllStudents()">Unselect All</button>
+            <button type="submit">Generate ID Cards</button>
+        </div>
+
+        <div class="student-check-list">
+            {% for st in all_students %}
+                <label class="student-check">
+                    <input type="checkbox" name="students" value="{{ st.id }}"
+                           {% if st.id|stringformat:"s" in selected_ids %}checked{% endif %}>
+                    {{ st.student_name }} — {{ st.class_assigned }} — Roll: {{ st.roll_no }}
+                </label>
+            {% empty %}
+                <p>No students found.</p>
+            {% endfor %}
+        </div>
+
+    </form>
 </div>
 
-<div class="print-area">
+{% if card_students %}
+<div class="print-btn">
+    <button onclick="window.print()">
+        Print A4 Landscape ID Cards
+    </button>
+</div>
+{% endif %}
 
-    {% for student in students %}
-    <div class="id-card">
-        <div class="school-title">AL RAHMAN MISSION</div>
+{% for item in card_students %}
 
-        <div class="card-body-box">
-            <div>
-                {% if student.photo %}
-                    <img src="{{ student.photo.url }}" class="student-photo">
+    {% if forloop.first or forloop.counter0|divisibleby:10 %}
+        <div class="a4-sheet">
+    {% endif %}
+
+    <div class="card-slot">
+        <div class="id-card">
+
+            <div class="student-photo">
+                {% if item.student.photo %}
+                    <img src="{{ item.student.photo.url }}">
                 {% else %}
-                    <div class="student-photo d-flex align-items-center justify-content-center">
-                        No Photo
-                    </div>
+                    <img src="{% static 'images/default-student.png' %}">
                 {% endif %}
             </div>
 
-            <div class="info">
-                <b>Name:</b> {{ student.student_name }}<br>
-                <b>ID:</b> {{ student.student_id }}<br>
-                <b>Reg:</b> {{ student.registration_no }}<br>
-                <b>Class:</b> {{ student.class_assigned }}<br>
-                <b>Roll:</b> {{ student.roll_no }}<br>
-                <b>Phone:</b> {{ student.phone }}
+            <div class="student-name">
+                {{ item.student_name }}
             </div>
+
+            <div class="student-role">
+                STUDENT
+            </div>
+
+            <div class="details-box">
+
+                <div class="detail-row two">
+                    <div class="mini-field">
+                        <div class="icon">🪪</div>
+                        <div class="label small">ID</div>
+                        <div class="colon">:</div>
+                        <div class="value">{{ item.student.student_id }}</div>
+                    </div>
+
+                    <div class="mini-field">
+                        <div class="icon">🔢</div>
+                        <div class="label small">Roll</div>
+                        <div class="colon">:</div>
+                        <div class="value">{{ item.student.roll_no }}</div>
+                    </div>
+                </div>
+
+                <div class="detail-row two">
+                    <div class="mini-field">
+                        <div class="icon">🎓</div>
+                        <div class="label small">Class</div>
+                        <div class="colon">:</div>
+                        <div class="value">{{ item.student.class_assigned }}</div>
+                    </div>
+                </div>
+
+                <div class="mini-field">
+                    <div class="icon">🎂</div>
+                    <div class="label small">DOB</div>
+                    <div class="colon">:</div>
+                    <div class="value">{{ item.student.date_of_birth|date:"d M Y" }}</div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="icon">📅</div>
+                    <div class="label">DOA</div>
+                    <div class="colon">:</div>
+                    <div class="value">{{ item.student.admission_date|date:"d M Y" }}</div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="icon">👨</div>
+                    <div class="label">Father</div>
+                    <div class="colon">:</div>
+                    <div class="value">{{ item.student.father_name }}</div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="icon">👩</div>
+                    <div class="label">Mother</div>
+                    <div class="colon">:</div>
+                    <div class="value">{{ item.student.mother_name }}</div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="icon">☎</div>
+                    <div class="label">Mobile</div>
+                    <div class="colon">:</div>
+                    <div class="value">{{ item.student.phone }}</div>
+                </div>
+
+            </div>
+
+            <div class="qr-box">
+                <img src="data:image/png;base64,{{ item.qr_code }}">
+            </div>
+
         </div>
-
-        <div class="cut-text">✂ Cut Here</div>
     </div>
-    {% empty %}
-    <p>No active students found.</p>
-    {% endfor %}
 
-</div>
+    {% if forloop.counter|divisibleby:10 or forloop.last %}
+        </div>
+    {% endif %}
 
-{% endblock %}
+{% endfor %}
+
+<script>
+function selectAllStudents(){
+    document.querySelectorAll('input[name="students"]').forEach(function(box){
+        box.checked = true;
+    });
+}
+
+function unselectAllStudents(){
+    document.querySelectorAll('input[name="students"]').forEach(function(box){
+        box.checked = false;
+    });
+}
+</script>
+
+</body>
+</html>

@@ -1,145 +1,240 @@
+```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parent Dashboard - AL RAHMAN MISSION</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        body { background:#f4f7fb; font-family:Arial, sans-serif; }
+        body {
+            background: #f4f7fb;
+            font-family: Arial, sans-serif;
+            overflow-x: hidden;
+        }
+
         .top {
-            background:linear-gradient(135deg,#003b8f,#0d6efd);
-            color:white;
-            padding:25px;
+            background: linear-gradient(135deg, #003b8f, #0d6efd);
+            color: white;
+            padding: 20px 15px;
         }
+
+        .top h2 {
+            font-size: 28px;
+        }
+
         .card-box {
-            background:white;
-            border-radius:18px;
-            padding:22px;
-            box-shadow:0 10px 28px rgba(0,0,0,.12);
-            height:100%;
+            background: white;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 10px 28px rgba(0,0,0,.12);
+            height: 100%;
+            width: 100%;
         }
+
         .profile-img {
-            width:110px;
-            height:110px;
-            object-fit:cover;
-            border-radius:50%;
-            border:4px solid white;
+            width: 110px;
+            height: 110px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid white;
         }
+
+        .profile-placeholder {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: #0d6efd;
+            color: white;
+            font-size: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: auto;
+        }
+
         .stat {
-            border-radius:16px;
-            padding:20px;
-            color:white;
-            text-align:center;
+            border-radius: 16px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            height: 100%;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .btn-mobile {
+            min-width: 130px;
+        }
+
+        @media (max-width: 768px) {
+            .top .container {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .top h2 {
+                font-size: 22px;
+            }
+
+            .card-box {
+                padding: 15px;
+            }
+
+            .profile-img,
+            .profile-placeholder {
+                width: 80px;
+                height: 80px;
+                font-size: 30px;
+            }
+
+            .student-info {
+                text-align: center;
+                margin-top: 15px;
+            }
+
+            .stat {
+                padding: 15px;
+            }
+
+            .btn-mobile {
+                width: 100%;
+            }
+
+            table {
+                font-size: 13px;
+            }
         }
     </style>
 </head>
 
 <body>
 
+<!-- TOP HEADER -->
 <div class="top">
     <div class="container d-flex justify-content-between align-items-center">
         <div>
             <h2 class="fw-bold mb-0">👨‍👩‍👦 Parent Dashboard</h2>
             <p class="mb-0">AL RAHMAN MISSION</p>
         </div>
-        <a href="{% url 'parent_logout' %}" class="btn btn-light fw-bold">Logout</a>
+
+        <a href="{% url 'parent_logout' %}" class="btn btn-light fw-bold btn-mobile">
+            Logout
+        </a>
     </div>
 </div>
 
 <div class="container mt-4">
 
+    <!-- STUDENT PROFILE -->
     <div class="card-box mb-4">
         <div class="row align-items-center">
-            <div class="col-md-2 text-center">
+
+            <div class="col-12 col-md-2 text-center">
                 {% if student.photo %}
-                    <img src="{{ student.photo.url }}" class="profile-img">
+                    <img src="{{ student.photo.url }}" class="profile-img" alt="Student Photo">
                 {% else %}
-                    <div class="profile-img bg-primary text-white d-flex align-items-center justify-content-center mx-auto">
-                        👤
+                    <div class="profile-placeholder">
+                        {{ student.student_name|first }}
                     </div>
                 {% endif %}
             </div>
 
-            <div class="col-md-10">
+            <div class="col-12 col-md-10 student-info">
                 <h3 class="fw-bold">{{ student.student_name }}</h3>
                 <p class="mb-1"><strong>Student ID:</strong> {{ student.student_id }}</p>
                 <p class="mb-1"><strong>Registration No:</strong> {{ student.registration_no }}</p>
                 <p class="mb-1"><strong>Class:</strong> {{ student.class_assigned }}</p>
                 <p class="mb-0"><strong>Parent Phone:</strong> {{ parent.phone|default:student.phone|default:"-" }}</p>
             </div>
+
         </div>
     </div>
 
+    <!-- STATS -->
     <div class="row g-4 mb-4">
-        <div class="col-md-3">
+
+        <div class="col-6 col-md-3">
             <div class="stat bg-primary">
                 <h3>{{ attendance_percentage|default:0 }}%</h3>
                 <p class="mb-0">Attendance</p>
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="stat bg-success">
                 <h3>{{ attendance_present|default:0 }}</h3>
                 <p class="mb-0">Present</p>
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="stat bg-danger">
                 <h3>{{ attendance_absent|default:0 }}</h3>
                 <p class="mb-0">Absent</p>
             </div>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="stat bg-warning text-dark">
                 <h3>₹ {{ total_paid|default:0 }}</h3>
                 <p class="mb-0">Fees Paid</p>
             </div>
         </div>
+
     </div>
 
+    <!-- MAIN CONTENT -->
     <div class="row g-4">
 
-        <div class="col-md-6">
+        <!-- ATTENDANCE -->
+        <div class="col-12 col-lg-6">
             <div class="card-box">
                 <h4 class="fw-bold text-primary">📅 Attendance</h4>
 
-                <table class="table table-bordered table-sm mt-3">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for a in recent_attendance %}
-                        <tr>
-                            <td>{{ a.date }}</td>
-                            <td>
-                                {% if a.status == "Present" %}
-                                    <span class="badge bg-success">Present</span>
-                                {% elif a.status == "Absent" %}
-                                    <span class="badge bg-danger">Absent</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">{{ a.status }}</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="2" class="text-center text-muted">No attendance found</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm mt-3">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for a in recent_attendance %}
+                            <tr>
+                                <td>{{ a.date }}</td>
+                                <td>
+                                    {% if a.status == "Present" %}
+                                        <span class="badge bg-success">Present</span>
+                                    {% elif a.status == "Absent" %}
+                                        <span class="badge bg-danger">Absent</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ a.status }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted">
+                                    No attendance found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </div>
 
-        <div class="col-md-6">
+        <!-- FEES -->
+        <div class="col-12 col-lg-6">
             <div class="card-box">
                 <h4 class="fw-bold text-primary">💰 Fees Summary</h4>
 
@@ -155,39 +250,50 @@
                 </table>
 
                 <h6 class="fw-bold mt-3">Recent Payments</h6>
-                <table class="table table-bordered table-sm">
-                    <tbody>
-                        {% for f in fee_records %}
-                        <tr>
-                            <td>{{ f }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td class="text-center text-muted">No fee record found</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <tbody>
+                            {% for f in fee_records %}
+                            <tr>
+                                <td>{{ f }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td class="text-center text-muted">
+                                    No fee record found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
         </div>
 
-        <div class="col-md-12">
+        <!-- RESULTS -->
+        <div class="col-12">
             <div class="card-box">
                 <h4 class="fw-bold text-primary">📄 Result / Exam Records</h4>
 
-                <table class="table table-bordered table-sm mt-3">
-                    <tbody>
-                        {% for r in exam_records %}
-                        <tr>
-                            <td>{{ r }}</td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td class="text-center text-muted">No result found</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm mt-3">
+                        <tbody>
+                            {% for r in exam_records %}
+                            <tr>
+                                <td>{{ r }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td class="text-center text-muted">
+                                    No result found
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
 
             </div>
         </div>
@@ -198,3 +304,4 @@
 
 </body>
 </html>
+```

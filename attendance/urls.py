@@ -109,4 +109,9 @@ urlpatterns = [
         name='attendance_alert_reject'
     ),
 
+    path('holidays/', views.holiday_list, name='holiday_list'),
+    path('holidays/add/', views.holiday_add, name='holiday_add'),
+    path('holidays/edit/<int:pk>/', views.holiday_edit, name='holiday_edit'),
+    path('holidays/delete/<int:pk>/', views.holiday_delete, name='holiday_delete'),
+
 ]

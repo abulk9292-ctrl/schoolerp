@@ -1,13 +1,30 @@
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Sum, Q
-from django.core.paginator import Paginator
-from django.contrib.auth.hashers import check_password, make_password
+import base64
+import random
+from io import BytesIO
 
-from .models import Student, StudentOTP
-from .forms import StudentForm
-from academics.models import Class
+import pandas as pd
+import qrcode
+
+from django.contrib import messages
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import check_password, make_password
+from django.core.paginator import Paginator
+from django.db.models import Sum, Q
+from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.utils import timezone
+
+from .forms import StudentForm, StudentImportForm
+from .models import Student, StudentOTP, Parent
+from academics.models import Class, AcademicSession
+
+
+def clean_excel_value(value, default=''):
+    if pd.notna(value):
+        return value
+    return default
 
 
 @login_required
@@ -73,7 +90,6 @@ def student_detail(request, pk):
 
     try:
         from attendance.models import StudentAttendance
-
         attendance_total = StudentAttendance.objects.filter(student=student).count()
         attendance_present = StudentAttendance.objects.filter(student=student, status='Present').count()
         attendance_absent = StudentAttendance.objects.filter(student=student, status='Absent').count()
@@ -90,7 +106,6 @@ def student_detail(request, pk):
 
     try:
         from fees.models import Fee, FeeStructure
-
         fee_records = Fee.objects.filter(student=student).order_by('-id')
         total_paid = fee_records.aggregate(total=Sum('amount_paid'))['total'] or 0
 
@@ -127,17 +142,14 @@ def student_detail(request, pk):
         'student': student,
         'siblings': siblings,
         'classes': classes,
-
         'attendance_total': attendance_total,
         'attendance_present': attendance_present,
         'attendance_absent': attendance_absent,
         'attendance_percentage': attendance_percentage,
-
         'monthly_fee': monthly_fee,
         'total_paid': total_paid,
         'total_due': total_due,
         'fee_records': fee_records,
-
         'exam_records': exam_records,
         'complaints': complaints,
     })
@@ -179,7 +191,6 @@ def student_delete(request, pk):
 @login_required
 def student_discontinue(request, pk):
     student = get_object_or_404(Student, pk=pk)
-
     student.is_active = False
     student.save(update_fields=['is_active'])
 
@@ -190,7 +201,6 @@ def student_discontinue(request, pk):
 @login_required
 def student_readmit(request, pk):
     student = get_object_or_404(Student, pk=pk)
-
     student.is_active = True
     student.save(update_fields=['is_active'])
 
@@ -221,10 +231,7 @@ def student_promote(request, pk):
     student.class_assigned = classes[current_index + 1]
     student.save(update_fields=['class_assigned'])
 
-    messages.success(
-        request,
-        f'{student.student_name} promoted from {old_class} to {student.class_assigned}.'
-    )
+    messages.success(request, f'{student.student_name} promoted from {old_class} to {student.class_assigned}.')
     return redirect('student_detail', pk=student.pk)
 
 
@@ -251,10 +258,7 @@ def student_demote(request, pk):
     student.class_assigned = classes[current_index - 1]
     student.save(update_fields=['class_assigned'])
 
-    messages.success(
-        request,
-        f'{student.student_name} de-promoted from {old_class} to {student.class_assigned}.'
-    )
+    messages.success(request, f'{student.student_name} de-promoted from {old_class} to {student.class_assigned}.')
     return redirect('student_detail', pk=student.pk)
 
 
@@ -298,28 +302,16 @@ def bulk_promotion(request):
         from_class = get_object_or_404(Class, id=from_class_id)
         to_class = get_object_or_404(Class, id=to_class_id)
 
-        # 🔥 ONLY ACTIVE STUDENTS
-        students = Student.objects.filter(
-            class_assigned=from_class,
-            is_active=True
-        )
-
+        students = Student.objects.filter(class_assigned=from_class, is_active=True)
         count = students.count()
-
         students.update(class_assigned=to_class)
 
-        messages.success(
-            request,
-            f'{count} students promoted from {from_class} to {to_class}.'
-        )
-
+        messages.success(request, f'{count} students promoted from {from_class} to {to_class}.')
         return redirect('student_list')
 
     return render(request, 'students/bulk_promotion.html', {
         'classes': classes
     })
-import pandas as pd
-from django.http import HttpResponse
 
 
 @login_required
@@ -343,69 +335,98 @@ def export_students_excel(request):
 
     response = HttpResponse(content_type='application/ms-excel')
     response['Content-Disposition'] = 'attachment; filename="students.xlsx"'
-
     df.to_excel(response, index=False)
 
     return response
 
-from django.urls import reverse
-import qrcode
-from io import BytesIO
-import base64
 
+# =========================================
+# SINGLE ID CARD
+# =========================================
 
 @login_required
 def student_id_card(request, pk):
     student = get_object_or_404(Student, pk=pk)
 
-    # 🔥 QR will open attendance page directly
-    qr_data = request.build_absolute_uri(
-        reverse('student_qr_profile', args=[student.pk])
+    qr_url = request.build_absolute_uri(
+        reverse('student_qr_attendance', args=[student.pk])
     )
 
-    qr = qrcode.make(qr_data)
+    qr_img = qrcode.make(qr_url)
     buffer = BytesIO()
-    qr.save(buffer, format="PNG")
+    qr_img.save(buffer, format="PNG")
+    qr_code = base64.b64encode(buffer.getvalue()).decode()
 
-    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+    student_name = student.student_name or "STUDENT NAME"
 
     return render(request, 'students/id_card.html', {
         'student': student,
-        'qr_code': qr_base64
+        'student_name': student_name,
+        'qr_code': qr_code,
+        'qr_url': qr_url,
     })
 
-import qrcode
-from io import BytesIO
-import base64
 
-
-@login_required
-def student_id_card(request, pk):
-    student = get_object_or_404(Student, pk=pk)
-
-    qr_data = f"{student.student_id} | {student.student_name} | {student.class_assigned}"
-
-    qr = qrcode.make(qr_data)
-    buffer = BytesIO()
-    qr.save(buffer, format="PNG")
-
-    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
-
-    return render(request, 'students/id_card.html', {
-        'student': student,
-        'qr_code': qr_base64
-    })
+# =========================================
+# BULK PRINT ID CARD
+# =========================================
 
 @login_required
 def student_id_cards_print(request):
-    students = Student.objects.select_related('class_assigned').filter(is_active=True).order_by('id')[:10]
+    selected_class = request.GET.get("class")
+    selected_ids = request.GET.getlist("students")
 
-    return render(request, 'students/id_cards_print.html', {
-        'students': students
+    all_students = Student.objects.select_related("class_assigned").all().order_by(
+        "class_assigned",
+        "roll_no",
+        "student_name"
+    )
+
+    if selected_class and selected_class != "all":
+        all_students = all_students.filter(class_assigned_id=selected_class)
+
+    class_list = Class.objects.all().order_by("id")
+
+    card_students = []
+
+    if selected_ids:
+        students = Student.objects.select_related("class_assigned").filter(
+            id__in=selected_ids
+        ).order_by(
+            "class_assigned",
+            "roll_no",
+            "student_name"
+        )
+
+        for student in students:
+            qr_url = request.build_absolute_uri(
+                reverse("student_qr_attendance", args=[student.pk])
+            )
+
+            qr_img = qrcode.make(qr_url)
+            buffer = BytesIO()
+            qr_img.save(buffer, format="PNG")
+            qr_code = base64.b64encode(buffer.getvalue()).decode()
+
+            card_students.append({
+                "student": student,
+                "student_name": student.student_name or "NO NAME",
+                "qr_code": qr_code,
+                "qr_url": qr_url,
+            })
+
+    return render(request, "students/id_cards_print.html", {
+        "all_students": all_students,
+        "class_list": class_list,
+        "selected_class": selected_class,
+        "selected_ids": selected_ids,
+        "card_students": card_students,
     })
 
-from django.utils import timezone
 
+# =========================================
+# QR PROFILE + ATTENDANCE
+# =========================================
 
 @login_required
 def student_qr_profile(request, pk):
@@ -413,12 +434,12 @@ def student_qr_profile(request, pk):
     today = timezone.localdate()
 
     if request.method == 'POST':
-        status = request.POST.get('status')
+        status = request.POST.get('status') or 'Present'
 
         try:
             from attendance.models import StudentAttendance
 
-            attendance, created = StudentAttendance.objects.update_or_create(
+            StudentAttendance.objects.update_or_create(
                 student=student,
                 date=today,
                 defaults={
@@ -436,14 +457,40 @@ def student_qr_profile(request, pk):
         'student': student,
         'today': today
     })
-# ==============================
-# 🔥 UPGRADED STUDENT EXCEL IMPORT SYSTEM
-# ==============================
 
-from .forms import StudentImportForm
-from academics.models import AcademicSession
-import pandas as pd
 
+def student_qr_attendance(request, pk):
+    student = get_object_or_404(Student, pk=pk)
+    today = timezone.localdate()
+
+    try:
+        from attendance.models import StudentAttendance
+
+        attendance, created = StudentAttendance.objects.get_or_create(
+            student=student,
+            date=today,
+            defaults={
+                'status': 'Present'
+            }
+        )
+
+        if not created:
+            attendance.status = "Present"
+            attendance.save()
+
+        messages.success(request, f"{student.student_name} attendance marked.")
+    except Exception as e:
+        messages.error(request, f"Attendance error: {e}")
+
+    return render(request, 'students/student_attendance.html', {
+        'student': student,
+        'date': today,
+    })
+
+
+# ==============================
+# STUDENT EXCEL IMPORT SYSTEM
+# ==============================
 
 @login_required
 def student_import(request):
@@ -455,7 +502,7 @@ def student_import(request):
         form = StudentImportForm(request.POST, request.FILES)
 
         if form.is_valid():
-            excel_file = request.FILES['excel_file']
+            excel_file = request.FILES.get('excel_file')
 
             try:
                 df = pd.read_excel(excel_file)
@@ -465,10 +512,11 @@ def student_import(request):
                     row_no = index + 2
 
                     student_name = str(row.get('student_name', '')).strip()
-                    phone = str(row.get('phone', '')).strip()
                     admission_no = str(row.get('admission_no', '')).strip()
 
                     if not student_name:
+                        failed_count += 1
+                        errors.append(f"Row {row_no}: Student name is required.")
                         continue
 
                     if admission_no and Student.objects.filter(admission_no=admission_no).exists():
@@ -481,10 +529,15 @@ def student_import(request):
                     class_name = row.get('class_name')
 
                     if pd.notna(class_id):
-                        class_obj = Class.objects.filter(id=class_id).first()
+                        try:
+                            class_obj = Class.objects.filter(id=int(class_id)).first()
+                        except Exception:
+                            class_obj = None
 
                     if not class_obj and pd.notna(class_name):
-                        class_obj = Class.objects.filter(class_name__iexact=str(class_name).strip()).first()
+                        class_obj = Class.objects.filter(
+                            class_name__iexact=str(class_name).strip()
+                        ).first()
 
                     if not class_obj:
                         failed_count += 1
@@ -494,21 +547,21 @@ def student_import(request):
                     Student.objects.create(
                         student_name=student_name,
                         admission_no=admission_no,
-                        admission_date=row.get('admission_date') if pd.notna(row.get('admission_date')) else None,
+                        admission_date=clean_excel_value(row.get('admission_date'), None),
                         current_session=active_session,
                         class_assigned=class_obj,
-                        roll_no=row.get('roll_no') if pd.notna(row.get('roll_no')) else None,
-                        father_name=row.get('father_name') if pd.notna(row.get('father_name')) else '',
-                        mother_name=row.get('mother_name') if pd.notna(row.get('mother_name')) else '',
-                        guardian_name=row.get('guardian_name') if pd.notna(row.get('guardian_name')) else '',
-                        phone=phone,
-                        gender=row.get('gender') if pd.notna(row.get('gender')) else '',
-                        date_of_birth=row.get('date_of_birth') if pd.notna(row.get('date_of_birth')) else None,
-                        aadhaar_number=row.get('aadhaar_number') if pd.notna(row.get('aadhaar_number')) else '',
-                        transport_required=True if str(row.get('transport_required')).lower() in ['true', 'yes', '1'] else False,
-                        transport_details=row.get('transport_details') if pd.notna(row.get('transport_details')) else '',
-                        previous_school=row.get('previous_school') if pd.notna(row.get('previous_school')) else '',
-                        address=row.get('address') if pd.notna(row.get('address')) else '',
+                        roll_no=clean_excel_value(row.get('roll_no'), None),
+                        father_name=clean_excel_value(row.get('father_name'), ''),
+                        mother_name=clean_excel_value(row.get('mother_name'), ''),
+                        guardian_name=clean_excel_value(row.get('guardian_name'), ''),
+                        phone=str(clean_excel_value(row.get('phone'), '')).strip(),
+                        gender=clean_excel_value(row.get('gender'), ''),
+                        date_of_birth=clean_excel_value(row.get('date_of_birth'), None),
+                        aadhaar_number=str(clean_excel_value(row.get('aadhaar_number'), '')).strip(),
+                        transport_required=str(row.get('transport_required', '')).lower() in ['true', 'yes', '1'],
+                        transport_details=clean_excel_value(row.get('transport_details'), ''),
+                        previous_school=clean_excel_value(row.get('previous_school'), ''),
+                        address=clean_excel_value(row.get('address'), ''),
                         is_active=True,
                     )
 
@@ -556,162 +609,6 @@ def download_student_demo(request):
 
     response = HttpResponse(content_type='application/ms-excel')
     response['Content-Disposition'] = 'attachment; filename="student_import_demo.xlsx"'
-
-    df.to_excel(response, index=False)
-
-    return response
-
-# ==============================
-# 🔥 UPGRADED STUDENT EXCEL IMPORT SYSTEM
-# ==============================
-
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-
-import pandas as pd
-
-from .models import Student
-from .forms import StudentImportForm
-from academics.models import Class, AcademicSession
-
-
-def clean_excel_value(value, default=''):
-    if pd.notna(value):
-        return value
-    return default
-
-
-@login_required
-def student_import(request):
-    errors = []
-    success_count = 0
-    failed_count = 0
-
-    if request.method == 'POST':
-        form = StudentImportForm(request.POST, request.FILES)
-
-        if form.is_valid():
-            excel_file = request.FILES.get('excel_file')
-
-            try:
-                df = pd.read_excel(excel_file)
-                active_session = AcademicSession.objects.filter(is_active=True).first()
-
-                for index, row in df.iterrows():
-                    row_no = index + 2
-
-                    student_name = str(row.get('student_name', '')).strip()
-                    admission_no = str(row.get('admission_no', '')).strip()
-
-                    if not student_name:
-                        failed_count += 1
-                        errors.append(f"Row {row_no}: Student name is required.")
-                        continue
-
-                    if admission_no and Student.objects.filter(admission_no=admission_no).exists():
-                        failed_count += 1
-                        errors.append(f"Row {row_no}: Admission No already exists.")
-                        continue
-
-                    class_obj = None
-
-                    class_id = row.get('class_id')
-                    class_name = row.get('class_name')
-
-                    if pd.notna(class_id):
-                        try:
-                            class_obj = Class.objects.filter(id=int(class_id)).first()
-                        except Exception:
-                            class_obj = None
-
-                    if not class_obj and pd.notna(class_name):
-                        class_obj = Class.objects.filter(
-                            class_name__iexact=str(class_name).strip()
-                        ).first()
-
-                    if not class_obj:
-                        failed_count += 1
-                        errors.append(f"Row {row_no}: Class not found.")
-                        continue
-
-                    Student.objects.create(
-                        # ✅ student_id / registration_no দিচ্ছি না
-                        # ✅ তাই model.save() auto-generate করবে
-
-                        student_name=student_name,
-                        admission_no=admission_no,
-                        admission_date=clean_excel_value(row.get('admission_date'), None),
-                        current_session=active_session,
-                        class_assigned=class_obj,
-                        roll_no=clean_excel_value(row.get('roll_no'), None),
-
-                        father_name=clean_excel_value(row.get('father_name'), ''),
-                        mother_name=clean_excel_value(row.get('mother_name'), ''),
-                        guardian_name=clean_excel_value(row.get('guardian_name'), ''),
-                        phone=str(clean_excel_value(row.get('phone'), '')).strip(),
-
-                        gender=clean_excel_value(row.get('gender'), ''),
-                        date_of_birth=clean_excel_value(row.get('date_of_birth'), None),
-                        aadhaar_number=str(clean_excel_value(row.get('aadhaar_number'), '')).strip(),
-
-                        transport_required=str(row.get('transport_required', '')).lower() in ['true', 'yes', '1'],
-                        transport_details=clean_excel_value(row.get('transport_details'), ''),
-                        previous_school=clean_excel_value(row.get('previous_school'), ''),
-                        address=clean_excel_value(row.get('address'), ''),
-
-                        is_active=True,
-                    )
-
-                    success_count += 1
-
-                messages.success(
-                    request,
-                    f"{success_count} students imported successfully. {failed_count} failed."
-                )
-
-            except Exception as e:
-                messages.error(request, f"Import Error: {e}")
-
-    else:
-        form = StudentImportForm()
-
-    return render(request, 'students/student_import.html', {
-        'form': form,
-        'errors': errors,
-        'success_count': success_count,
-        'failed_count': failed_count,
-    })
-
-
-@login_required
-def download_student_demo(request):
-    data = [{
-        'student_name': 'Rahim',
-        'admission_no': 'ADM001',
-        'admission_date': '2024-01-10',
-        'class_id': 1,
-        'class_name': 'Class I',
-        'roll_no': 1,
-        'father_name': 'Karim',
-        'mother_name': 'Salma',
-        'guardian_name': 'Karim',
-        'phone': '9999999999',
-        'gender': 'Male',
-        'date_of_birth': '2010-05-01',
-        'aadhaar_number': '123456789012',
-        'transport_required': 'Yes',
-        'transport_details': 'Van',
-        'previous_school': 'ABC School',
-        'address': 'Village XYZ'
-    }]
-
-    df = pd.DataFrame(data)
-
-    response = HttpResponse(content_type='application/ms-excel')
-    response['Content-Disposition'] = 'attachment; filename="student_import_demo.xlsx"'
-
     df.to_excel(response, index=False)
 
     return response
@@ -796,29 +693,23 @@ def student_import_confirm(request):
                 continue
 
             Student.objects.create(
-                # ✅ student_id / registration_no ফাঁকা থাকলে auto-generate হবে
-
                 student_name=student_name,
                 admission_no=admission_no,
                 admission_date=clean_excel_value(row.get('admission_date'), None),
                 current_session=active_session,
                 class_assigned=class_obj,
                 roll_no=clean_excel_value(row.get('roll_no'), None),
-
                 father_name=clean_excel_value(row.get('father_name'), ''),
                 mother_name=clean_excel_value(row.get('mother_name'), ''),
                 guardian_name=clean_excel_value(row.get('guardian_name'), ''),
                 phone=str(clean_excel_value(row.get('phone'), '')).strip(),
-
                 gender=clean_excel_value(row.get('gender'), ''),
                 date_of_birth=clean_excel_value(row.get('date_of_birth'), None),
                 aadhaar_number=str(clean_excel_value(row.get('aadhaar_number'), '')).strip(),
-
                 transport_required=str(row.get('transport_required', '')).lower() in ['true', 'yes', '1'],
                 transport_details=clean_excel_value(row.get('transport_details'), ''),
                 previous_school=clean_excel_value(row.get('previous_school'), ''),
                 address=clean_excel_value(row.get('address'), ''),
-
                 is_active=True,
             )
 
@@ -839,12 +730,10 @@ def student_import_confirm(request):
         'form': StudentImportForm()
     })
 
-# ==============================
-# 🔥 STUDENT LOGIN PANEL (NEW)
-# ==============================
 
-from django.contrib.auth import logout
-
+# ==============================
+# STUDENT LOGIN PANEL
+# ==============================
 
 def student_login(request):
     if request.method == 'POST':
@@ -857,20 +746,16 @@ def student_login(request):
                 login_enabled=True
             )
 
-            # ✅ SECURE PASSWORD CHECK
             if check_password(password, student.login_password):
-
-                # 🔥 OLD PASSWORD AUTO-CONVERT TO HASH
                 if not student.login_password.startswith('pbkdf2_'):
                     student.login_password = make_password(password)
                     student.save(update_fields=['login_password'])
 
                 request.session['student_id'] = student.id
-
                 messages.success(request, f"Welcome {student.student_name}")
                 return redirect('student_dashboard')
-            else:
-                messages.error(request, "Invalid login credentials")
+
+            messages.error(request, "Invalid login credentials")
 
         except Student.DoesNotExist:
             messages.error(request, "Invalid login credentials")
@@ -936,25 +821,21 @@ def student_dashboard(request):
 
     return render(request, 'students/student_dashboard.html', {
         'student': student,
-
         'attendance_total': attendance_total,
         'attendance_present': attendance_present,
         'attendance_absent': attendance_absent,
         'attendance_percentage': attendance_percentage,
         'recent_attendance': recent_attendance,
-
         'total_paid': total_paid,
         'total_due': total_due,
         'fee_records': fee_records,
-
         'exam_records': exam_records,
     })
 
-# =========================
-# 🔥 PARENT LOGIN SYSTEM
-# =========================
 
-from .models import Parent
+# =========================
+# PARENT LOGIN SYSTEM
+# =========================
 
 def parent_login(request):
     if request.method == 'POST':
@@ -962,22 +843,17 @@ def parent_login(request):
         password = request.POST.get('password')
 
         try:
-            parent = Parent.objects.get(
-                username=username,
-                is_active=True
-            )
+            parent = Parent.objects.get(username=username, is_active=True)
 
             if check_password(password, parent.password):
-
-                # 🔥 AUTO HASH UPGRADE
                 if not parent.password.startswith('pbkdf2_'):
                     parent.password = make_password(password)
                     parent.save(update_fields=['password'])
 
                 request.session['parent_id'] = parent.id
                 return redirect('parent_dashboard')
-            else:
-                messages.error(request, "Invalid login")
+
+            messages.error(request, "Invalid login")
 
         except Parent.DoesNotExist:
             messages.error(request, "Invalid login")
@@ -1020,7 +896,6 @@ def parent_dashboard(request):
 
     try:
         from fees.models import Fee
-
         fee_records = Fee.objects.filter(student=student).order_by('-id')[:10]
         total_paid = Fee.objects.filter(student=student).aggregate(total=Sum('amount_paid'))['total'] or 0
     except Exception:
@@ -1041,29 +916,26 @@ def parent_dashboard(request):
     return render(request, 'students/parent_dashboard.html', {
         'parent': parent,
         'student': student,
-
         'attendance_total': attendance_total,
         'attendance_present': attendance_present,
         'attendance_absent': attendance_absent,
         'attendance_percentage': attendance_percentage,
         'recent_attendance': recent_attendance,
-
         'total_paid': total_paid,
         'total_due': total_due,
         'fee_records': fee_records,
-
         'exam_records': exam_records,
     })
+
 
 def parent_logout(request):
     request.session.flush()
     return redirect('parent_login')
 
-import random
-from django.utils import timezone
-from datetime import timedelta
-from .models import StudentOTP
 
+# =========================
+# PASSWORD RESET
+# =========================
 
 def student_forgot_password(request):
     if request.method == 'POST':
@@ -1071,20 +943,14 @@ def student_forgot_password(request):
 
         try:
             student = Student.objects.get(student_id=student_id)
-
             otp = str(random.randint(100000, 999999))
 
-            StudentOTP.objects.create(
-                student=student,
-                otp=otp
-            )
+            StudentOTP.objects.create(student=student, otp=otp)
 
-            # 🔥 Demo OTP (console)
             print("OTP:", otp)
-
             request.session['reset_student'] = student.id
 
-            messages.success(request, f"OTP sent (demo: check terminal)")
+            messages.success(request, "OTP sent. Check terminal demo OTP.")
             return redirect('student_verify_otp')
 
         except Student.DoesNotExist:
@@ -1102,18 +968,15 @@ def student_verify_otp(request):
     if request.method == 'POST':
         otp_input = request.POST.get('otp')
 
-        try:
-            otp_obj = StudentOTP.objects.filter(student_id=student_id).last()
+        otp_obj = StudentOTP.objects.filter(student_id=student_id).last()
 
-            if otp_obj and otp_obj.otp == otp_input:
-                return redirect('student_reset_password')
-            else:
-                messages.error(request, "Invalid OTP")
+        if otp_obj and otp_obj.otp == otp_input:
+            return redirect('student_reset_password')
 
-        except:
-            messages.error(request, "Error")
+        messages.error(request, "Invalid OTP")
 
     return render(request, 'students/verify_otp.html')
+
 
 def student_reset_password(request):
     student_id = request.session.get('reset_student')
@@ -1130,7 +993,6 @@ def student_reset_password(request):
             messages.error(request, "Please enter new password.")
             return redirect('student_reset_password')
 
-        # ✅ HASH PASSWORD
         student.login_password = make_password(new_password)
         student.save(update_fields=['login_password'])
 
@@ -1141,10 +1003,46 @@ def student_reset_password(request):
 
     return render(request, 'students/reset_password.html')
 
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.hashers import check_password, make_password
-from .models import Parent
 
+def student_change_password(request):
+    student_id = request.session.get('student_id')
+
+    if not student_id:
+        return redirect('student_login')
+
+    student = get_object_or_404(Student, id=student_id)
+
+    if request.method == 'POST':
+        old_password = request.POST.get('old_password')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        if not check_password(old_password, student.login_password):
+            messages.error(request, "Old password is incorrect.")
+            return redirect('student_change_password')
+
+        if new_password != confirm_password:
+            messages.error(request, "New password and confirm password do not match.")
+            return redirect('student_change_password')
+
+        if len(new_password) < 6:
+            messages.error(request, "Password must be at least 6 characters.")
+            return redirect('student_change_password')
+
+        student.login_password = make_password(new_password)
+        student.save(update_fields=['login_password'])
+
+        messages.success(request, "Password changed successfully.")
+        return redirect('student_dashboard')
+
+    return render(request, 'students/student_change_password.html', {
+        'student': student
+    })
+
+
+# =========================
+# COMBINED LOGIN
+# =========================
 
 def combined_login(request):
     if request.method == 'POST':
@@ -1152,55 +1050,46 @@ def combined_login(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # 🎓 STUDENT LOGIN
         if login_type == 'student':
             try:
                 student = Student.objects.get(login_username=username, login_enabled=True)
 
                 if check_password(password, student.login_password):
-
-                    if not student.login_password.startswith('pbkdf2_'):
-                        student.login_password = make_password(password)
-                        student.save(update_fields=['login_password'])
-
                     request.session['student_id'] = student.id
                     messages.success(request, f"Welcome {student.student_name}")
                     return redirect('student_dashboard')
 
                 messages.error(request, "Invalid student login")
+
             except Student.DoesNotExist:
                 messages.error(request, "Invalid student login")
 
-        # 👨‍👩‍👦 PARENT LOGIN
         elif login_type == 'parent':
             try:
                 parent = Parent.objects.get(username=username, is_active=True)
 
                 if check_password(password, parent.password) or password == parent.password:
-                    if not parent.password.startswith('pbkdf2_'):
-                        parent.password = make_password(password)
-                        parent.save(update_fields=['password'])
-
                     request.session['parent_id'] = parent.id
                     messages.success(request, "Welcome Parent")
                     return redirect('parent_dashboard')
 
                 messages.error(request, "Invalid parent login")
+
             except Parent.DoesNotExist:
                 messages.error(request, "Invalid parent login")
 
-        # 👨‍🏫 STAFF LOGIN
         elif login_type == 'staff':
-            user = authenticate(request, username=username, password=password)
+            from teachers.models import Employee
 
-            if user is not None and user.is_staff and not user.is_superuser:
-                login(request, user)
-                messages.success(request, "Welcome Staff")
-                return redirect('dashboard')
+            employee = Employee.objects.filter(employee_id=username, is_active=True).first()
+
+            if employee and password == str(employee.phone):
+                request.session['employee_id'] = employee.id
+                messages.success(request, f"Welcome {employee.name}")
+                return redirect('teacher_dashboard')
 
             messages.error(request, "Invalid staff login")
 
-        # 🔐 ADMIN LOGIN
         elif login_type == 'admin':
             user = authenticate(request, username=username, password=password)
 
@@ -1216,8 +1105,9 @@ def combined_login(request):
 
     return render(request, 'students/combined_login.html')
 
+
 # ==============================
-# 🔥 PUBLIC RESULT CHECK
+# PUBLIC RESULT CHECK
 # ==============================
 
 def public_result_check(request):
@@ -1256,43 +1146,10 @@ def public_result_check(request):
         'searched': searched,
     })
 
-def student_change_password(request):
-    student_id = request.session.get('student_id')
 
-    if not student_id:
-        return redirect('student_login')
-
-    student = get_object_or_404(Student, id=student_id)
-
-    if request.method == 'POST':
-        old_password = request.POST.get('old_password')
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-
-        if not check_password(old_password, student.login_password):
-            messages.error(request, "Old password is incorrect.")
-            return redirect('student_change_password')
-
-        if new_password != confirm_password:
-            messages.error(request, "New password and confirm password do not match.")
-            return redirect('student_change_password')
-
-        if len(new_password) < 6:
-            messages.error(request, "Password must be at least 6 characters.")
-            return redirect('student_change_password')
-
-        student.login_password = make_password(new_password)
-        student.save(update_fields=['login_password'])
-
-        messages.success(request, "Password changed successfully.")
-        return redirect('student_dashboard')
-
-    return render(request, 'students/student_change_password.html', {
-        'student': student
-    })
-
-
-from django.contrib.auth.hashers import make_password
+# ==============================
+# BULK PASSWORD PRINT
+# ==============================
 
 @login_required
 def bulk_student_password_print(request):

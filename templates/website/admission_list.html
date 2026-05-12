@@ -127,9 +127,9 @@
                             </a>
 
                             {% if a.status == "Pending" %}
-                            <a href="{% url 'admission_approve' a.id %}"
-                               onclick="return confirm('Approve this admission and create student?')"
-                               class="btn btn-sm btn-success">
+                            <a href="{% url 'admission_approve' admission.id %}"
+                               class="btn btn-success btn-sm"
+                               onclick="return confirm('Approve this admission?')">
                                ✅ Approve
                             </a>
                             {% else %}

@@ -3,6 +3,19 @@
 
 <h2 class="mb-3">Teacher Attendance</h2>
 
+{% if holiday_info.is_holiday %}
+<div class="alert {% if holiday_info.is_half_day %}alert-warning{% else %}alert-danger{% endif %} shadow-sm mb-3">
+    <h5 class="mb-1">📅 {{ holiday_info.title }}</h5>
+    <strong>Status:</strong> {{ holiday_info.status }}
+
+    {% if not holiday_info.is_half_day %}
+        <br>Today is Full Holiday. Teacher attendance marking is disabled.
+    {% else %}
+        <br>Today is Half Day. Teacher attendance can be marked.
+    {% endif %}
+</div>
+{% endif %}
+
 <div class="card card-box mb-4">
     <div class="card-body">
         <form method="get" class="row g-3">
@@ -36,10 +49,12 @@
                             <th>Status</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         {% for e in employees %}
                         <tr>
                             <td>{{ forloop.counter }}</td>
+
                             <td>
                                 {% if e.photo %}
                                     <img src="{{ e.photo.url }}" width="45" height="45" style="object-fit: cover; border-radius: 6px;">
@@ -47,16 +62,26 @@
                                     No Photo
                                 {% endif %}
                             </td>
+
                             <td>{{ e.employee_id }}</td>
                             <td>{{ e.name }}</td>
                             <td>{{ e.designation }}</td>
+
                             <td>
-                                <select name="status_{{ e.id }}" class="form-select">
-                                    <option value="Present" {% if e.current_status == 'Present' %}selected{% endif %}>Present</option>
-                                    <option value="Absent" {% if e.current_status == 'Absent' %}selected{% endif %}>Absent</option>
-                                </select>
+                                {% if holiday_info.is_holiday and not holiday_info.is_half_day %}
+                                    <span class="badge bg-danger">
+                                        {{ holiday_info.status }}
+                                    </span>
+                                {% else %}
+                                    <select name="status_{{ e.id }}" class="form-select">
+                                        <option value="Present" {% if e.current_status == 'Present' %}selected{% endif %}>Present</option>
+                                        <option value="Absent" {% if e.current_status == 'Absent' %}selected{% endif %}>Absent</option>
+                                        <option value="Late" {% if e.current_status == 'Late' %}selected{% endif %}>Late</option>
+                                    </select>
+                                {% endif %}
                             </td>
                         </tr>
+
                         {% empty %}
                         <tr>
                             <td colspan="6" class="text-center">No employees found.</td>
@@ -66,9 +91,15 @@
                 </table>
             </div>
 
-            <button type="submit" class="btn btn-success">
-                {% if is_update %}Update Attendance{% else %}Save Attendance{% endif %}
-            </button>
+            {% if holiday_info.is_holiday and not holiday_info.is_half_day %}
+                <button type="button" class="btn btn-secondary" disabled>
+                    Attendance Disabled on Holiday
+                </button>
+            {% else %}
+                <button type="submit" class="btn btn-success">
+                    {% if is_update %}Update Attendance{% else %}Save Attendance{% endif %}
+                </button>
+            {% endif %}
         </form>
     </div>
 </div>

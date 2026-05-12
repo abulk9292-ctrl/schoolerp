@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">{{ page_title }}</h4>
+        </div>
+
+        <div class="card-body">
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label">Holiday Title</label>
+                    {{ form.title }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Start Date</label>
+                        {{ form.start_date }}
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">End Date</label>
+                        {{ form.end_date }}
+                        <small class="text-muted">Single day হলে End Date খালি রাখতে পারো।</small>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Holiday Type</label>
+                    {{ form.holiday_type }}
+                </div>
+
+                <div class="form-check mb-3">
+                    {{ form.is_half_day }}
+                    <label class="form-check-label">
+                        Half Day Holiday
+                    </label>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Note</label>
+                    {{ form.note }}
+                </div>
+
+                <button type="submit" class="btn btn-success">
+                    💾 Save Holiday
+                </button>
+
+                <a href="{% url 'holiday_list' %}" class="btn btn-secondary">
+                    Back
+                </a>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

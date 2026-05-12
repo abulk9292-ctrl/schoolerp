@@ -2,8 +2,29 @@ from django import forms
 from .models import Admission, ContactMessage
 
 
-# 🔥 Admission Form (same as before)
+# 🔥 Admission Form
 class AdmissionForm(forms.ModelForm):
+
+    CLASS_CHOICES = [
+        ('Nursery', 'Nursery'),
+        ('KG', 'KG'),
+        ('I', 'Class I'),
+        ('II', 'Class II'),
+        ('III', 'Class III'),
+        ('IV', 'Class IV'),
+        ('V', 'Class V'),
+        ('VI', 'Class VI'),
+        ('VII', 'Class VII'),
+        ('VIII', 'Class VIII'),
+        ('IX', 'Class IX'),
+        ('X', 'Class X'),
+    ]
+
+    student_class = forms.ChoiceField(
+        choices=CLASS_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+
     class Meta:
         model = Admission
         fields = [
@@ -27,16 +48,23 @@ class AdmissionForm(forms.ModelForm):
             'student_name': forms.TextInput(attrs={'class': 'form-control'}),
             'father_name': forms.TextInput(attrs={'class': 'form-control'}),
             'mother_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'date_of_birth': forms.DateInput(
+                attrs={'class': 'form-control', 'type': 'date'}
+            ),
             'gender': forms.Select(attrs={'class': 'form-select'}),
-            'student_class': forms.TextInput(attrs={'class': 'form-control'}),
             'aadhaar_no': forms.TextInput(attrs={'class': 'form-control'}),
             'mobile': forms.TextInput(attrs={'class': 'form-control'}),
             'guardian_mobile': forms.TextInput(attrs={'class': 'form-control'}),
-            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            'address': forms.Textarea(
+                attrs={'class': 'form-control', 'rows': 2}
+            ),
             'previous_school': forms.TextInput(attrs={'class': 'form-control'}),
-            'transport_required': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'hostel_required': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'transport_required': forms.CheckboxInput(
+                attrs={'class': 'form-check-input'}
+            ),
+            'hostel_required': forms.CheckboxInput(
+                attrs={'class': 'form-check-input'}
+            ),
             'student_photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
 
@@ -66,7 +94,7 @@ class AdmissionForm(forms.ModelForm):
         return cleaned_data
 
 
-# 🔥 NEW: Contact Form
+# 🔥 Contact Form
 class ContactMessageForm(forms.ModelForm):
     class Meta:
         model = ContactMessage
@@ -77,8 +105,10 @@ class ContactMessageForm(forms.ModelForm):
             'mobile': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
             'subject': forms.TextInput(attrs={'class': 'form-control'}),
-            'message': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 4
-            }),
+            'message': forms.Textarea(
+                attrs={
+                    'class': 'form-control',
+                    'rows': 4
+                }
+            ),
         }

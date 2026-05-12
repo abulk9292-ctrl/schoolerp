@@ -2,10 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
 
-
 from .forms import AdmissionForm, ContactMessageForm
-from .models import DownloadFile
-from .models import Gallery
 from .models import (
     Admission,
     ContactMessage,
@@ -15,6 +12,7 @@ from .models import (
     SchoolEvent,
     Infrastructure,
     WhyChoose,
+    DownloadFile,
 )
 
 from students.models import Student
@@ -60,6 +58,8 @@ def website_admission(request):
             return redirect('admission_print', pk=form.existing_admission.pk)
 
         messages.error(request, "Form submission failed. Please check the details.")
+        print(form.errors)
+
     else:
         form = AdmissionForm()
 
@@ -77,19 +77,26 @@ def admission_approve(request, pk):
     admission = get_object_or_404(Admission, pk=pk)
 
     if admission.status == 'Approved' and admission.student_id:
-        messages.warning(request, "This admission is already approved.")
+        existing_student = Student.objects.filter(student_id=admission.student_id).first()
+
+        if existing_student:
+            messages.warning(request, "This admission is already approved and student already exists.")
+            return redirect('admission_list')
+
+    class_name = (admission.student_class or "").strip()
+
+    if not class_name:
+        messages.error(request, "Class name missing. Please correct the admission first.")
         return redirect('admission_list')
 
-    class_obj = Class.objects.filter(
-        class_name__iexact=admission.student_class.strip()
-    ).first()
-
-    if not class_obj:
-        messages.error(request, f"Class '{admission.student_class}' not found. Please create this class first in Academics.")
-        return redirect('admission_list')
+    # ✅ Class না থাকলে auto create হবে
+    class_obj, created = Class.objects.get_or_create(
+        class_name=class_name
+    )
 
     session = AcademicSession.objects.filter(is_active=True).first()
 
+    # ✅ Student create হবে
     student = Student.objects.create(
         student_name=admission.student_name,
         admission_no=admission.admission_no,
@@ -105,7 +112,7 @@ def admission_approve(request, pk):
         transport_required=admission.transport_required,
         previous_school=admission.previous_school,
         address=admission.address,
-        photo=admission.student_photo,
+        photo=admission.student_photo if admission.student_photo else None,
         is_active=True,
     )
 
@@ -114,7 +121,11 @@ def admission_approve(request, pk):
     admission.registration_no = student.registration_no
     admission.save()
 
-    messages.success(request, f"Admission approved. Student created: {student.student_id}")
+    messages.success(
+        request,
+        f"Admission approved. Student created: {student.student_name} ({student.student_id})"
+    )
+
     return redirect('admission_list')
 
 
@@ -126,8 +137,10 @@ def website_contact(request):
             form.save()
             messages.success(request, "Your message has been submitted successfully!")
             return redirect('website_contact')
-        else:
-            messages.error(request, "Message submission failed. Please check the form.")
+
+        messages.error(request, "Message submission failed. Please check the form.")
+        print(form.errors)
+
     else:
         form = ContactMessageForm()
 
@@ -164,9 +177,6 @@ def contact_delete(request, pk):
     messages.success(request, "Message deleted successfully.")
     return redirect('contact_message_list')
 
-from django.shortcuts import render
-from .models import Gallery
-
 
 def gallery_page(request):
     galleries = Gallery.objects.filter(is_active=True).order_by('order', '-id')
@@ -174,16 +184,16 @@ def gallery_page(request):
         'galleries': galleries
     })
 
+
 def download_list(request):
     downloads = DownloadFile.objects.filter(is_active=True).order_by('order', '-created_at')
-
     return render(request, 'website/download_list.html', {
         'downloads': downloads
     })
 
+
 def gallery_list(request):
     galleries = Gallery.objects.filter(is_active=True).order_by('order', '-id')
-
     return render(request, 'website/gallery_list.html', {
         'galleries': galleries
     })

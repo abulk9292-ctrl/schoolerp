@@ -1,288 +1,297 @@
-{% extends 'base.html' %}
-{% block content %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>ID Card</title>
 
-<style>
-@page { size: 54mm 85.6mm; margin: 0; }
+    <style>
+        body{
+            margin:0;
+            padding:20px;
+            background:#d9d9d9;
+            font-family:Arial, sans-serif;
+        }
 
-.sidebar,.topbar{display:none!important;}
-.flex-grow-1{width:100%!important;}
+        .print-btn{text-align:center;margin-bottom:20px;}
+        .print-btn button{
+            padding:10px 25px;
+            border:none;
+            background:#001c72;
+            color:white;
+            font-size:16px;
+            border-radius:8px;
+            cursor:pointer;
+        }
 
-.content-area{
-    padding:0!important;
-    margin:0!important;
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:#e9eef5;
-}
+        .id-card{
+            width:380px;
+            height:610px;
+            margin:auto;
+            position:relative;
+            background:url("{% static 'images/id_card_bg.png' %}") no-repeat center center;
+            background-size:100% 100%;
+            border-radius:30px;
+            overflow:hidden;
+            box-shadow:0 0 20px rgba(0,0,0,0.25);
+        }
 
-.print-btn{
-    position:fixed;
-    top:10px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:999;
-}
+        .student-photo{
+            position:absolute;
+            top:112px;
+            left:129px;
+            width:116px;
+            height:116px;
+            border-radius:50%;
+            overflow:hidden;
+            border:5px solid #20e600;
+            background:white;
+            z-index:10;
+        }
 
-.id-wrap{
-    width:54mm;
-    height:85.6mm;
-    background:#fff;
-    border-radius:4mm;
-    overflow:hidden;
-    position:relative;
-    font-family:Arial, sans-serif;
-    box-shadow:0 10px 25px rgba(0,0,0,.28);
-}
+        .student-photo img{
+            width:100%;
+            height:100%;
+            object-fit:cover;
+        }
 
-/* TOP CURVE */
-.top-blue{
-    height:20mm;
-    background:#062b63;
-    position:relative;
-    border-bottom-left-radius:50% 28%;
-    border-bottom-right-radius:50% 28%;
-}
+        .student-name{
+            position:absolute;
+            top:242px;
+            left:55px;
+            width:270px;
+            height:34px;
+            background:#002b75;
+            color:white !important;
+            font-size:20px;
+            font-weight:900;
+            text-align:center;
+            line-height:34px;
+            border-radius:7px;
+            text-transform:uppercase;
+            z-index:20;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
 
-.logo{
-    position:absolute;
-    top:2mm;
-    left:50%;
-    transform:translateX(-50%);
-    width:14mm;
-    height:14mm;
-    border-radius:50%;
-    background:#fff;
-    padding:1mm;
-    border:.6mm solid #d9a51c;
-}
+        .student-role{
+            position:absolute;
+            top:270px;
+            left:118px;
+            width:145px;
+            height:32px;
+            background:#0798d8;
+            color:white;
+            font-size:18px;
+            font-weight:bold;
+            text-align:center;
+            line-height:32px;
+            border-radius:0 0 10px 10px;
+            text-transform:uppercase;
+            z-index:19;
+        }
 
-.logo img{
-    width:100%;
-    height:100%;
-    object-fit:contain;
-}
+        .details-box{
+            position:absolute;
+            top:315px;
+            left:32px;
+            width:312px;
+            color:#111;
+            font-size:14.5px;
+            font-weight:bold;
+            z-index:10;
+        }
 
-/* SCHOOL */
-.school-name{
-    text-align:center;
-    margin-top:1.5mm;
-    font-size:14px;
-    font-weight:900;
-    color:#062b63;
-    line-height:1;
-}
+        .detail-row{
+            display:flex;
+            align-items:center;
+            border-bottom:1px solid #d7d7d7;
+            min-height:30px;
+        }
 
-.tagline{
-    text-align:center;
-    margin-top:.8mm;
-    font-size:5.8px;
-    font-weight:700;
-    color:#062b63;
-}
+        .detail-row.two{
+            gap:4px;
+        }
 
-/* PHOTO */
-.photo-box{
-    width:19mm;
-    height:19mm;
-    margin:2mm auto .8mm auto;
-    border-radius:50%;
-    border:1.3mm solid #0b4b91;
-    padding:.6mm;
-    background:#fff;
-    overflow:hidden;
-}
+        .mini-field{
+            display:flex;
+            align-items:center;
+            flex:1;
+            border-bottom:1px solid #d7d7d7;
+            min-height:22px;
+        }
 
-.photo-box img{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    border-radius:50%;
-}
+        .icon{
+            width:19px;
+            height:19px;
+            background:#002b75;
+            color:white;
+            border-radius:5px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:12px;
+            margin-right:10px;
+            flex-shrink:0;
+        }
 
-/* NAME */
-.name-strip{
-    width:37mm;
-    margin:0 auto;
-    background:#062b63;
-    color:#fff;
-    text-align:center;
-    font-size:8.5px;
-    font-weight:900;
-    padding:1mm;
-    border-radius:1.3mm;
-    text-transform:uppercase;
-    line-height:1;
-}
+        .label{
+            width:48px;
+            white-space:nowrap;
+        }
 
-.role{
-    width:17mm;
-    margin:0 auto;
-    background:#0b8fd3;
-    color:#fff;
-    text-align:center;
-    font-size:6px;
-    font-weight:800;
-    padding:.45mm;
-    border-radius:0 0 1.5mm 1.5mm;
-}
+        .label.small{
+            width:48px;
+        }
 
-/* INFO */
-.info{
-    width:42mm;
-    margin:1.6mm auto 0 auto;
-    font-size:6.2px;
-    font-weight:700;
-    color:#111;
-}
+        .colon{
+            width:8px;
+        }
 
-.same-line{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:1.5mm;
-    border-bottom:.25mm solid #ccc;
-    padding:.45mm 0;
-}
+        .value{
+            flex:1;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
 
-.info-row{
-    display:grid;
-    grid-template-columns:12mm 2mm 1fr;
-    align-items:center;
-    border-bottom:.25mm solid #ccc;
-    padding:.45mm 0;
-}
+        .qr-box{
+            position:absolute;
+            right:32px;
+            bottom:172px;
+            width:86px;
+            height:86px;
+            background:white;
+            border-radius:8px;
+            padding:4px;
+            border:1px solid #003399;
+            z-index:30;
+        }
 
-.label{
-    color:#062b63;
-    font-weight:900;
-}
+        .qr-box img{
+            width:100%;
+            height:100%;
+            display:block;
+        }
 
-/* BARCODE + QR */
-.bottom{
-    width:42mm;
-    margin:1.5mm auto 0 auto;
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-end;
-}
+        @media print{
+            body{background:white;padding:0;}
+            .print-btn{display:none;}
+            .id-card{box-shadow:none;}
+        }
+    </style>
+</head>
 
-.barcode{
-    width:26mm;
-    height:7mm;
-    background:repeating-linear-gradient(
-        90deg,
-        #000 0,
-        #000 .35mm,
-        #fff .35mm,
-        #fff .75mm,
-        #000 .75mm,
-        #000 1mm,
-        #fff 1mm,
-        #fff 1.6mm
-    );
-}
-
-.qr img{
-    width:12mm;
-    height:12mm;
-    border:.5mm solid #0b4b91;
-    border-radius:1mm;
-    padding:.4mm;
-    background:#fff;
-}
-
-/* BOTTOM CURVE */
-.footer{
-    position:absolute;
-    left:0;
-    right:0;
-    bottom:0;
-    background:#062b63;
-    color:#fff;
-    text-align:center;
-    font-size:5.6px;
-    line-height:1.25;
-    padding:3mm 2mm 2mm 2mm;
-    border-top-left-radius:50% 25%;
-    border-top-right-radius:50% 25%;
-}
-
-@media print{
-    body{margin:0!important;background:#fff!important;}
-    .print-btn{display:none!important;}
-    .content-area{display:block!important;background:#fff!important;}
-    .id-wrap{box-shadow:none!important;margin:0!important;}
-}
-</style>
+<body>
 
 <div class="print-btn">
-    <button onclick="window.print()" class="btn btn-primary">Print ID Card</button>
+    <button onclick="window.print()">Print ID Card</button>
 </div>
 
-<div class="id-wrap">
+<div class="id-card">
 
-    <div class="top-blue">
-        <div class="logo">
-            <img src="/static/images/logo.png">
-        </div>
-    </div>
-
-    <div class="school-name">AL RAHMAN MISSION</div>
-    <div class="tagline">Discipline | English | Excellence</div>
-
-    <div class="photo-box">
+    <div class="student-photo">
         {% if student.photo %}
             <img src="{{ student.photo.url }}">
         {% else %}
-            <img src="/static/images/logo.png">
+            <img src="{% static 'images/default-student.png' %}">
         {% endif %}
     </div>
 
-    <div class="name-strip">{{ student.student_name }}</div>
-    <div class="role">STUDENT</div>
-
-    <div class="info">
-        <div class="same-line">
-            <div><span class="label">ID:</span> {{ student.student_id }}</div>
-            <div><span class="label">Roll:</span> {{ student.roll_no }}</div>
-        </div>
-
-        <div class="info-row">
-            <span class="label">Class</span><span>:</span><span>{{ student.class_assigned }}</span>
-        </div>
-
-        <div class="info-row">
-            <span class="label">DOB</span><span>:</span><span>{{ student.date_of_birth|date:"d M Y" }}</span>
-        </div>
-
-        <div class="info-row">
-            <span class="label">DOA</span><span>:</span><span>{{ student.admission_date|date:"d M Y" }}</span>
-        </div>
-
-        <div class="info-row">
-            <span class="label">Father</span><span>:</span><span>{{ student.father_name }}</span>
-        </div>
-
-        <div class="info-row">
-            <span class="label">Phone</span><span>:</span><span>{{ student.phone }}</span>
-        </div>
+    <div class="student-name">
+        {% if student_name %}
+            {{ student_name }}
+        {% elif student.name %}
+            {{ student.name }}
+        {% elif student.student_name %}
+            {{ student.student_name }}
+        {% elif student.full_name %}
+            {{ student.full_name }}
+        {% else %}
+            NO NAME
+        {% endif %}
     </div>
 
-    <div class="bottom">
-        <div class="barcode"></div>
+    <div class="student-role">STUDENT</div>
 
-        <div class="qr">
+    <div class="details-box">
+
+        <div class="detail-row two">
+
+            <div class="mini-field">
+                <div class="icon">🪪</div>
+                <div class="label small">ID</div>
+                <div class="colon">:</div>
+                <div class="value">{{ student.student_id }}</div>
+            </div>
+
+            <div class="mini-field">
+                <div class="icon">🔢</div>
+                <div class="label small">Roll</div>
+                <div class="colon">:</div>
+                <div class="value">{{ student.roll_no }}</div>
+            </div>
+
+        </div>
+
+        <div class="detail-row two">
+
+            <div class="mini-field">
+                <div class="icon">🎓</div>
+                <div class="label small">Class</div>
+                <div class="colon">:</div>
+                <div class="value">{{ student.class_assigned }}</div>
+            </div>
+        </div>
+
+        <div class="mini-field">
+            <div class="icon">🎂</div>
+            <div class="label small">DOB</div>
+            <div class="colon">:</div>
+            <div class="value">{{ student.date_of_birth|date:"d M Y" }}</div>
+        </div>
+
+        
+
+        <div class="detail-row">
+            <div class="icon">📅</div>
+            <div class="label">DOA</div>
+            <div class="colon">:</div>
+            <div class="value">{{ student.admission_date|date:"d M Y" }}</div>
+        </div>
+
+        <div class="detail-row">
+            <div class="icon">👨</div>
+            <div class="label">Father</div>
+            <div class="colon">:</div>
+            <div class="value">{{ student.father_name }}</div>
+        </div>
+
+        <div class="detail-row">
+            <div class="icon">👩</div>
+            <div class="label">Mother</div>
+            <div class="colon">:</div>
+            <div class="value">{{ student.mother_name }}</div>
+        </div>
+
+        <div class="detail-row">
+            <div class="icon">☎</div>
+            <div class="label">Mobile</div>
+            <div class="colon">:</div>
+            <div class="value">{{ student.phone }}</div>
+        </div>
+
+    </div>
+
+    <div class="qr-box">
+        {% if qr_code %}
             <img src="data:image/png;base64,{{ qr_code }}">
-        </div>
-    </div>
-
-    <div class="footer">
-        Mission More, Sapatbari, PO Amalia<br>
-        Uttar Dinajpur, West Bengal<br>
-        +91 9091215171
+        {% else %}
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ qr_url|urlencode }}">
+        {% endif %}
     </div>
 
 </div>
 
-{% endblock %}
+</body>
+</html>

@@ -1204,3 +1204,76 @@ def bulk_marks_entry_api(request):
         "saved_count": saved_count,
         "skipped_count": skipped_count,
     })
+
+    # =========================================================
+# QR ATTENDANCE API
+# =========================================================
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def qr_student_attendance_api(request):
+
+    qr_data = request.data.get("qr_data")
+
+    if not qr_data:
+        return Response({
+            "status": "error",
+            "message": "QR data required"
+        }, status=400)
+
+    try:
+
+        student_id = str(qr_data).rstrip("/").split("/")[-1]
+
+        student = Student.objects.get(
+            id=student_id,
+            is_active=True
+        )
+
+    except Student.DoesNotExist:
+        return Response({
+            "status": "error",
+            "message": "Student not found"
+        }, status=404)
+
+    except Exception:
+        return Response({
+            "status": "error",
+            "message": "Invalid QR"
+        }, status=400)
+
+    today = timezone.now().date()
+
+    attendance, created = StudentAttendance.objects.update_or_create(
+
+        student=student,
+        date=today,
+
+        defaults={
+            "status": "Present",
+            "remarks": "QR Mobile Attendance"
+        }
+    )
+
+    return Response({
+
+        "status": "success",
+
+        "message": f"{student.student_name} attendance marked",
+
+        "already_marked": not created,
+
+        "student": {
+            "id": student.id,
+            "student_id": student.student_id,
+            "name": student.student_name,
+            "class": get_student_class_name(student),
+            "roll_no": student.roll_no,
+        },
+
+        "attendance": {
+            "date": str(today),
+            "status": attendance.status,
+        }
+
+    })
