@@ -10,7 +10,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    'alrahman-erp.onrender.com',
+    "schoolerp-hk4n.onrender.com",
     'alrahmanmission.in',
     'www.alrahmanmission.in',
 ]
