@@ -13,34 +13,35 @@
             <form method="GET" action="{% url 'report_card_bulk_print' %}">
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">
-                        Select Exam
-                    </label>
-
+                    <label class="form-label fw-bold">Select Exam</label>
                     <select name="exam" class="form-select" required>
                         <option value="">Choose Exam</option>
-
                         {% for e in exams %}
                             <option value="{{ e.id }}">
-                                {{ e.name }}
+                                {{ e.name }} ({{ e.academic_session }})
                             </option>
                         {% endfor %}
                     </select>
                 </div>
 
                 <div class="mb-4">
-                    <label class="form-label fw-bold">
-                        Select Class
-                    </label>
-
+                    <label class="form-label fw-bold">Select Class</label>
                     <select name="class" class="form-select" required>
                         <option value="">Choose Class</option>
-
                         {% for c in classes %}
-                            <option value="{{ c }}">
-                                {{ c }}
-                            </option>
+                            <option value="{{ c }}">{{ c }}</option>
                         {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">Select Section</label>
+                    <select name="section" class="form-select">
+                        <option value="">All Sections</option>
+                        <option value="A">A</option>
+                        <option value="B">B</option>
+                        <option value="C">C</option>
+                        <option value="D">D</option>
                     </select>
                 </div>
 

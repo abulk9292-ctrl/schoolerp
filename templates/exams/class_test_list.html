@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">Class Test List</h2>
+            <p class="text-muted mb-0">
+                All Class Tests Information
+            </p>
+        </div>
+
+        <a href="{% url 'add_class_test' %}"
+           class="btn btn-primary rounded-pill px-4">
+
+            + Add Class Test
+
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-lg rounded-4">
+
+        <div class="card-header bg-dark text-white py-3 rounded-top-4 d-flex justify-content-between align-items-center">
+
+            <h5 class="mb-0">
+                All Class Tests
+            </h5>
+
+            <span class="badge bg-light text-dark px-3 py-2">
+                Total: {{ tests|length }}
+            </span>
+
+        </div>
+
+        <div class="card-body table-responsive">
+
+            <table class="table table-bordered table-hover align-middle">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>#</th>
+                        <th>Test Name</th>
+                        <th>Subject</th>
+                        <th>Class</th>
+                        <th>Section</th>
+                        <th>Exam Date</th>
+                        <th>Total Marks</th>
+                        <th width="220">Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for t in tests %}
+
+                    <tr>
+
+                        <td>
+                            {{ forloop.counter }}
+                        </td>
+
+                        <td>
+
+                            <a href="{% url 'class_test_dashboard' %}?test={{ t.id }}"
+                               class="fw-bold text-decoration-none">
+
+                                {{ t.test_name }}
+
+                            </a>
+
+                        </td>
+
+                        <td>
+                            {{ t.subject }}
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-info text-dark px-3 py-2">
+                                {{ t.class_name }}
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-secondary px-3 py-2">
+                                {{ t.section }}
+                            </span>
+
+                        </td>
+
+                        <td>
+                            {{ t.exam_date }}
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-success px-3 py-2">
+                                {{ t.total_marks }}
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <a href="{% url 'add_class_test_result' %}?class_test={{ t.id }}"
+                               class="btn btn-success btn-sm rounded-pill">
+
+                                Result Entry
+
+                            </a>
+
+                            <a href="{% url 'class_test_dashboard' %}?test={{ t.id }}"
+                               class="btn btn-info btn-sm rounded-pill text-white">
+
+                                View
+
+                            </a>
+
+                            <a href="{% url 'edit_class_test' t.id %}"
+                               class="btn btn-warning btn-sm rounded-pill">
+
+                                Edit
+
+                            </a>
+
+                            <a href="{% url 'delete_class_test' t.id %}"
+                               class="btn btn-danger btn-sm rounded-pill">
+
+                                Delete
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="8"
+                            class="text-center text-muted py-5">
+
+                            No Class Test Found
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

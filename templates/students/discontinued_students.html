@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid mt-3">
+
+    <div class="card shadow border-0">
+
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0">
+                🚫 Discontinued Students
+            </h4>
+        </div>
+
+        <div class="card-body">
+
+            <form method="get" class="row g-2 mb-3">
+
+                <div class="col-md-5">
+                    <input
+                        type="text"
+                        name="q"
+                        value="{{ search_query }}"
+                        class="form-control"
+                        placeholder="Search Name / Student ID / Father / Mobile">
+                </div>
+
+                <div class="col-md-3">
+                    <select name="class" class="form-select">
+
+                        <option value="">
+                            All Classes
+                        </option>
+
+                        {% for cls in classes %}
+                            <option value="{{ cls.id }}"
+                            {% if selected_class == cls.id|stringformat:"s" %}
+                                selected
+                            {% endif %}
+                            >
+                                {{ cls }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100">
+                        🔍 Search
+                    </button>
+                </div>
+
+                <div class="col-md-2">
+                    <a href="{% url 'discontinued_students' %}"
+                       class="btn btn-secondary w-100">
+                        Reset
+                    </a>
+                </div>
+
+            </form>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead class="table-dark">
+
+                    <tr>
+                        <th>#</th>
+                        <th>Student ID</th>
+                        <th>Reg No</th>
+                        <th>Name</th>
+                        <th>Father</th>
+                        <th>Class</th>
+                        <th>Roll</th>
+                        <th>Mobile</th>
+                        <th width="180">Action</th>
+                    </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                    {% for student in students %}
+
+                        <tr>
+
+                            <td>{{ forloop.counter }}</td>
+
+                            <td>{{ student.student_id }}</td>
+
+                            <td>{{ student.registration_no }}</td>
+
+                            <td>
+                                <strong>
+                                    {{ student.student_name }}
+                                </strong>
+                            </td>
+
+                            <td>{{ student.father_name }}</td>
+
+                            <td>{{ student.class_assigned }}</td>
+
+                            <td>{{ student.roll_no }}</td>
+
+                            <td>{{ student.phone }}</td>
+
+                            <td>
+
+                                <a href="{% url 'student_detail' student.id %}"
+                                   class="btn btn-info btn-sm">
+                                    View
+                                </a>
+
+                                <a href="{% url 'student_readmit' student.id %}"
+                                   class="btn btn-success btn-sm"
+                                   onclick="return confirm('Readmit this student?')">
+                                    Readmit
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    {% empty %}
+
+                        <tr>
+                            <td colspan="9" class="text-center text-danger">
+                                No Discontinued Students Found
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% if students.has_other_pages %}
+
+            <nav>
+
+                <ul class="pagination justify-content-center">
+
+                    {% if students.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ students.previous_page_number }}">
+                                Previous
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for i in students.paginator.page_range %}
+                        <li class="page-item {% if students.number == i %}active{% endif %}">
+                            <a class="page-link"
+                               href="?page={{ i }}">
+                                {{ i }}
+                            </a>
+                        </li>
+                    {% endfor %}
+
+                    {% if students.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                               href="?page={{ students.next_page_number }}">
+                                Next
+                            </a>
+                        </li>
+                    {% endif %}
+
+                </ul>
+
+            </nav>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

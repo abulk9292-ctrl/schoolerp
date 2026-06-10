@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-header bg-primary text-white rounded-top-4">
+        <h4 class="mb-0">{{ page_title }}</h4>
+    </div>
+
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            {{ form.as_p }}
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">
+                    ✅ Save Routine
+                </button>
+
+                <a href="{% url 'exam_routine' %}" class="btn btn-secondary">
+                    ⬅ Back
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

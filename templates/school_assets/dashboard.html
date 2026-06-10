@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+.asset-hero{background:linear-gradient(135deg,#0f766e,#2563eb,#7c3aed);color:#fff;border-radius:22px;padding:18px;box-shadow:0 12px 30px rgba(15,23,42,.16)}
+.asset-card{border:0;border-radius:18px;box-shadow:0 8px 22px rgba(15,23,42,.08)}
+.asset-click{display:block;text-decoration:none;color:inherit;transition:.15s}.asset-click:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(15,23,42,.16)!important}
+.asset-icon{width:44px;height:44px;border-radius:15px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#06b6d4,#2563eb);color:white;font-size:21px}
+.asset-value{font-size:28px;font-weight:900;color:#0f172a}
+.asset-label{font-size:13px;font-weight:900;color:#64748b}
+.category-mini-card{display:block;text-decoration:none;background:#fff;border-radius:18px;padding:16px;box-shadow:0 8px 22px rgba(15,23,42,.08);border:1px solid rgba(15,23,42,.06);transition:.15s}
+.category-mini-card:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(15,23,42,.14)}
+.category-mini-title{font-size:14px;font-weight:900;color:#334155}
+.category-mini-value{font-size:28px;font-weight:900;color:#0f172a}
+.category-mini-icon{width:38px;height:38px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#06b6d4,#2563eb);color:white;font-size:18px}
+</style>
+
+<div class="asset-hero mb-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h4 class="fw-bold mb-1">🏫 School Assets / Room Monitor</h4>
+            <div>Bench, Chair, Board, Duster, Marker, Room, Fan, Bulb, Toilet, Table সব এক জায়গায় monitor করুন।</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            {% if can_manage_assets %}
+            <a href="{% url 'asset_item_add' %}" class="btn btn-light">➕ Add Asset</a>
+            <a href="{% url 'asset_room_add' %}" class="btn btn-warning">➕ Add Room</a>
+            <a href="{% url 'asset_category_list' %}" class="btn btn-info">🏷 Categories</a>
+            <a href="{% url 'asset_seed_default_categories' %}" class="btn btn-dark">⚡ Add Default Categories</a>
+            {% endif %}
+            <a href="{% url 'asset_print_report' %}" class="btn btn-success">🖨 Print Report</a>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-xl-2 col-md-3 col-6">
+        <a href="{% url 'asset_room_list' %}" class="card asset-card asset-click">
+            <div class="card-body"><div class="asset-icon">🏫</div><div class="asset-value">{{ total_rooms }}</div><div class="asset-label">Total Rooms</div></div>
+        </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-6">
+        <a href="{% url 'asset_room_list' %}?active=1" class="card asset-card asset-click">
+            <div class="card-body"><div class="asset-icon">✅</div><div class="asset-value">{{ active_rooms }}</div><div class="asset-label">Active Rooms</div></div>
+        </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-6">
+        <a href="{% url 'asset_item_list' %}" class="card asset-card asset-click">
+            <div class="card-body"><div class="asset-icon">📦</div><div class="asset-value">{{ total_items }}</div><div class="asset-label">Total Items</div></div>
+        </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-6">
+        <a href="{% url 'asset_category_list' %}" class="card asset-card asset-click">
+            <div class="card-body"><div class="asset-icon">🧾</div><div class="asset-value">{{ total_categories }}</div><div class="asset-label">Categories</div></div>
+        </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-6">
+        <a href="{% url 'asset_maintenance_list' %}?status=PENDING" class="card asset-card asset-click">
+            <div class="card-body"><div class="asset-icon">🛠</div><div class="asset-value">{{ repair_needed_count }}</div><div class="asset-label">Repair Needed</div></div>
+        </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-6">
+        <a href="{% url 'asset_maintenance_list' %}?status=UNDER_REPAIR" class="card asset-card asset-click">
+            <div class="card-body"><div class="asset-icon">⏳</div><div class="asset-value">{{ under_repair_count }}</div><div class="asset-label">Under Repair</div></div>
+        </a>
+    </div>
+    <div class="col-xl-2 col-md-3 col-6">
+        <a href="{% url 'asset_maintenance_list' %}?status=COMPLETED" class="card asset-card asset-click">
+            <div class="card-body"><div class="asset-icon">✔</div><div class="asset-value">{{ completed_repair_count }}</div><div class="asset-label">Completed Repairs</div></div>
+        </a>
+    </div>
+</div>
+
+<div class="card asset-card mb-3">
+    <div class="card-header bg-white fw-bold d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span>📊 Category Wise Stock - Click Any Card</span>
+        <a href="{% url 'asset_category_list' %}" class="btn btn-sm btn-outline-primary">Manage Categories</a>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            {% for c in category_cards %}
+            <div class="col-xl-2 col-lg-3 col-md-4 col-6">
+                <a href="{{ c.url }}" class="category-mini-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="category-mini-icon">
+                            {% if c.name == "Bench" %}🪑
+                            {% elif c.name == "Chair" %}💺
+                            {% elif c.name == "Board" %}🧑‍🏫
+                            {% elif c.name == "Duster" %}🧽
+                            {% elif c.name == "Marker" %}🖊
+                            {% elif c.name == "Fan" %}🌀
+                            {% elif c.name == "Bulb" %}💡
+                            {% elif c.name == "Toilet" %}🚻
+                            {% elif c.name == "Table" %}🪵
+                            {% elif c.name == "Room" %}🏫
+                            {% else %}📦
+                            {% endif %}
+                        </div>
+                        <span class="badge bg-primary">View</span>
+                    </div>
+                    <div class="category-mini-value">{{ c.total }}</div>
+                    <div class="category-mini-title">{{ c.name }}</div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-7">
+        <div class="card asset-card">
+            <div class="card-header bg-white fw-bold">📋 Category Wise List</div>
+            <div class="card-body table-responsive">
+                <table class="table table-sm table-bordered align-middle">
+                    <thead class="table-light"><tr><th>Category</th><th class="text-end">Total Quantity</th><th>Action</th></tr></thead>
+                    <tbody>
+                    {% for c in category_summary %}
+                    <tr>
+                        <td>{{ c.name }}</td>
+                        <td class="text-end fw-bold">{{ c.total|default:0 }}</td>
+                        <td><a href="{{ c.url }}" class="btn btn-sm btn-primary">View Items</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted">No asset found.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card asset-card">
+            <div class="card-header bg-white fw-bold">🏫 Room Wise Quick View</div>
+            <div class="card-body table-responsive">
+                <table class="table table-sm table-bordered align-middle">
+                    <thead class="table-light"><tr><th>Room</th><th>Total Items</th><th>Action</th></tr></thead>
+                    <tbody>
+                    {% for r in room_summary %}
+                    <tr>
+                        <td>{{ r.room_no }} - {{ r.room_name|default:"" }}</td>
+                        <td class="fw-bold">{{ r.asset_count|default:0 }}</td>
+                        <td><a href="{% url 'asset_room_details' r.id %}" class="btn btn-sm btn-primary">View</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center text-muted">No room found.</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card asset-card mt-3">
+    <div class="card-header bg-white fw-bold d-flex justify-content-between">
+        <span>🛠 Recent Maintenance</span>
+        <a href="{% url 'asset_maintenance_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="card-body table-responsive">
+        <table class="table table-sm table-bordered align-middle">
+            <thead class="table-light">
+                <tr><th>Date</th><th>Asset</th><th>Room</th><th>Issue</th><th>Priority</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+            {% for m in recent_maintenance %}
+            <tr>
+                <td>{{ m.reported_date }}</td>
+                <td>{{ m.asset.item_name }}</td>
+                <td>{{ m.asset.room.room_no|default:"-" }}</td>
+                <td>{{ m.issue_title }}</td>
+                <td>{{ m.get_priority_display }}</td>
+                <td>{{ m.get_status_display }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="6" class="text-center text-muted">No maintenance record.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

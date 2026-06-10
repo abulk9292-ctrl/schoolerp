@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+        <h4 class="fw-bold mb-1">🧾 Asset Categories</h4>
+        <div class="text-muted small">Bench, Chair, Board, Duster, Marker, Room, Fan, Bulb, Toilet, Table, Other</div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap">
+        {% if can_manage_assets %}
+            <a href="{% url 'asset_seed_default_categories' %}" class="btn btn-success">⚡ Add Default Categories</a>
+            <a href="{% url 'asset_category_add' %}" class="btn btn-primary">➕ Add Category</a>
+        {% endif %}
+        <a href="{% url 'asset_dashboard' %}" class="btn btn-secondary">Dashboard</a>
+    </div>
+</div>
+<div class="table-responsive">
+<table class="table table-bordered align-middle">
+    <thead class="table-light"><tr><th>Name</th><th>Icon</th><th>Item Types</th><th>Total Qty</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for c in categories %}
+    <tr>
+        <td class="fw-bold">{{ c.name }}</td>
+        <td>{{ c.icon|default:"-" }}</td>
+        <td>{{ c.item_count|default:0 }}</td>
+        <td>{{ c.total_quantity|default:0 }}</td>
+        <td>
+            {% if can_manage_assets %}
+            <a href="{% url 'asset_category_edit' c.id %}" class="btn btn-sm btn-warning">Edit</a>
+            <a href="{% url 'asset_category_delete' c.id %}" class="btn btn-sm btn-danger">Delete</a>
+            {% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5" class="text-center text-muted">No category found.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

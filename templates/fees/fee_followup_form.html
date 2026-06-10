@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">{{ page_title }}</h2>
+    <a href="{% url 'fee_followup_list' %}" class="btn btn-secondary">Back</a>
+</div>
+
+<div class="card card-box">
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="alert alert-danger">
+                {{ form.errors }}
+            </div>
+            {% endif %}
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Student</label>
+                    {{ form.student }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Academic Session</label>
+                    {{ form.session }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Promise Date</label>
+                    {{ form.promise_date }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Parent / Guardian Name</label>
+                    {{ form.parent_name }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Mobile</label>
+                    {{ form.mobile }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Follow-up Type</label>
+                    {{ form.followup_type }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Due Amount</label>
+                    {{ form.due_amount }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Promise Amount</label>
+                    {{ form.promise_amount }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Priority</label>
+                    {{ form.priority }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Status</label>
+                    {{ form.status }}
+                </div>
+
+                <div class="col-md-8">
+                    <label class="form-label">Next Action</label>
+                    {{ form.next_action }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Parent Promise / Remark</label>
+                    {{ form.remark }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Result Note After Call / Visit</label>
+                    {{ form.result_note }}
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">Save Follow-up</button>
+                <a href="{% url 'fee_followup_list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('.student-select').select2({
+        placeholder: "Search Student...",
+        allowClear: true,
+        width: '100%'
+    });
+});
+</script>
+
+{% endblock %}

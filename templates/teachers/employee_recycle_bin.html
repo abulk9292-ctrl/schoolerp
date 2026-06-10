@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold text-danger mb-1">
+                🗑 Employee Recycle Bin
+            </h2>
+
+            <small class="text-muted">
+                Deleted Employees Records
+            </small>
+        </div>
+
+        <div>
+            <a href="{% url 'employee_list' %}"
+               class="btn btn-primary">
+
+                ← Back To Employee List
+
+            </a>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-danger text-white">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-6">
+                    <h5 class="mb-0">
+                        Deleted Employee Records
+                    </h5>
+                </div>
+
+                <div class="col-md-6 text-end">
+
+                    <span class="badge bg-light text-dark">
+                        Total Deleted :
+                        {{ employees.count }}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card-body">
+
+            {% if employees %}
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle">
+
+                    <thead class="table-dark">
+
+                        <tr>
+
+                            <th>#</th>
+                            <th>Employee ID</th>
+                            <th>Photo</th>
+                            <th>Name</th>
+                            <th>Designation</th>
+                            <th>Phone</th>
+                            <th>Joining Date</th>
+                            <th>Salary</th>
+                            <th>Deleted By</th>
+                            <th>Deleted Date</th>
+                            <th width="220">Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for employee in employees %}
+
+                        <tr>
+
+                            <td>
+                                {{ forloop.counter }}
+                            </td>
+
+                            <td>
+                                <strong>
+                                    {{ employee.employee_id }}
+                                </strong>
+                            </td>
+
+                            <td>
+
+                                {% if employee.photo %}
+
+                                    <img src="{{ employee.photo.url }}"
+                                         width="45"
+                                         height="45"
+                                         class="rounded-circle">
+
+                                {% else %}
+
+                                    <span class="badge bg-secondary">
+                                        No Photo
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                {{ employee.name }}
+                            </td>
+
+                            <td>
+                                {{ employee.designation }}
+                            </td>
+
+                            <td>
+                                {{ employee.phone }}
+                            </td>
+
+                            <td>
+                                {{ employee.joining_date }}
+                            </td>
+
+                            <td>
+                                ₹ {{ employee.salary }}
+                            </td>
+
+                            <td>
+
+                                {% if employee.deleted_by %}
+                                    {{ employee.deleted_by.username }}
+                                {% else %}
+                                    -
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if employee.deleted_at %}
+                                    {{ employee.deleted_at|date:"d M Y" }}
+                                    <br>
+                                    <small>
+                                        {{ employee.deleted_at|time:"h:i A" }}
+                                    </small>
+                                {% else %}
+                                    -
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if request.user.is_superuser %}
+
+                                <a href="{% url 'employee_restore' employee.id %}"
+                                   class="btn btn-success btn-sm">
+
+                                    ♻ Restore
+
+                                </a>
+
+                                <form method="post"
+                                      action="{% url 'employee_permanent_delete' employee.id %}"
+                                      style="display:inline;">
+
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                            class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Are you sure? Employee will be permanently deleted forever.')">
+
+                                        ❌ Delete
+
+                                    </button>
+
+                                </form>
+
+                                {% else %}
+
+                                <span class="badge bg-warning text-dark">
+                                    Super Admin Only
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="text-center py-5">
+
+                <h3 class="text-success">
+                    🎉 Recycle Bin Empty
+                </h3>
+
+                <p class="text-muted">
+                    No deleted employee records found.
+                </p>
+
+                <a href="{% url 'employee_list' %}"
+                   class="btn btn-primary">
+
+                    Go To Employee List
+
+                </a>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="fw-bold mb-3">🧾 POS Billing</h4>
+<form method="post" id="posForm">
+{% csrf_token %}
+<div class="card mb-3"><div class="card-header fw-bold">Customer</div><div class="card-body"><div class="row g-3">{% for field in form %}<div class="col-md-4"><label class="form-label fw-bold">{{ field.label }}</label>{{ field }}</div>{% endfor %}</div></div></div>
+<div class="card"><div class="card-header fw-bold d-flex justify-content-between"><span>Items</span><button type="button" class="btn btn-sm btn-primary" onclick="addRow()">Add Row</button></div><div class="card-body table-responsive"><table class="table table-bordered" id="itemsTable"><thead><tr><th>Product</th><th>Qty</th><th>Action</th></tr></thead><tbody></tbody></table><button class="btn btn-success">Complete Sale</button> <a href="{% url 'store_sale_list' %}" class="btn btn-secondary">Sales</a></div></div>
+</form>
+<script>
+const productOptions = `{% for p in products %}<option value="{{ p.id }}">{{ p.name }} - ₹{{ p.selling_price }} | Stock {{ p.stock_quantity }}</option>{% endfor %}`;
+function addRow(){
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td><select name="product_id" class="form-select"><option value="">Select Product</option>${productOptions}</select></td><td><input type="number" name="quantity" value="1" min="1" class="form-control"></td><td><button type="button" onclick="this.closest('tr').remove()" class="btn btn-danger btn-sm">Remove</button></td>`;
+    document.querySelector("#itemsTable tbody").appendChild(tr);
+}
+addRow();
+</script>
+{% endblock %}

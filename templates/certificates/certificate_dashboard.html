@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+.cert-hero{
+    background:linear-gradient(135deg,#0f172a,#1d4ed8,#0891b2);
+    color:white;
+    padding:30px;
+    border-radius:22px;
+    margin-bottom:25px;
+    box-shadow:0 12px 30px rgba(0,0,0,.12);
+}
+.cert-card{
+    border:0;
+    border-radius:20px;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+    transition:.25s;
+}
+.cert-card:hover{
+    transform:translateY(-4px);
+}
+.icon-box{
+    width:55px;
+    height:55px;
+    border-radius:18px;
+    background:#eff6ff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:26px;
+}
+</style>
+
+<div class="container-fluid">
+
+    <div class="cert-hero d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1">Certificate Module</h2>
+            <p class="mb-0">TC, Character, Bonafide, Study, Fee Clearance and Custom Certificates</p>
+        </div>
+
+        <div>
+            <a href="{% url 'certificate_create' %}" class="btn btn-light fw-bold rounded-pill px-4">
+                + Create Certificate
+            </a>
+            <a href="{% url 'certificate_list' %}" class="btn btn-warning fw-bold rounded-pill px-4">
+                Certificate List
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-md-4">
+            <div class="card cert-card">
+                <div class="card-body">
+                    <div class="icon-box mb-3">📄</div>
+                    <h5 class="fw-bold">Transfer Certificate</h5>
+                    <p class="text-muted">Generate student TC with auto serial number.</p>
+                    <a href="{% url 'certificate_create' %}" class="btn btn-primary btn-sm rounded-pill px-4">Create</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card cert-card">
+                <div class="card-body">
+                    <div class="icon-box mb-3">⭐</div>
+                    <h5 class="fw-bold">Character Certificate</h5>
+                    <p class="text-muted">Generate conduct and character certificate.</p>
+                    <a href="{% url 'certificate_create' %}" class="btn btn-success btn-sm rounded-pill px-4">Create</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card cert-card">
+                <div class="card-body">
+                    <div class="icon-box mb-3">🎓</div>
+                    <h5 class="fw-bold">Bonafide Certificate</h5>
+                    <p class="text-muted">Generate bonafide student certificate.</p>
+                    <a href="{% url 'certificate_create' %}" class="btn btn-info btn-sm rounded-pill px-4">Create</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card cert-card">
+                <div class="card-body">
+                    <div class="icon-box mb-3">📘</div>
+                    <h5 class="fw-bold">Study Certificate</h5>
+                    <p class="text-muted">Generate study certificate for official use.</p>
+                    <a href="{% url 'certificate_create' %}" class="btn btn-dark btn-sm rounded-pill px-4">Create</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card cert-card">
+                <div class="card-body">
+                    <div class="icon-box mb-3">💰</div>
+                    <h5 class="fw-bold">Fee Clearance</h5>
+                    <p class="text-muted">Generate fee clearance certificate.</p>
+                    <a href="{% url 'certificate_create' %}" class="btn btn-warning btn-sm rounded-pill px-4">Create</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card cert-card">
+                <div class="card-body">
+                    <div class="icon-box mb-3">✍️</div>
+                    <h5 class="fw-bold">Custom Certificate</h5>
+                    <p class="text-muted">Write and print custom certificate body.</p>
+                    <a href="{% url 'certificate_create' %}" class="btn btn-danger btn-sm rounded-pill px-4">Create</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<h4 class="fw-bold mb-3">A4 Print Options</h4>
+<div class="card">
+    <div class="card-body">
+        <form method="get" action="{% url 'timetable_print' %}" target="_blank">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Print Type</label>
+                    <select name="type" class="form-select">
+                        <option value="all_weekly">Weekly All Class</option>
+                        <option value="weekly_class">Weekly Class Wise</option>
+                        <option value="day_all">Day Wise All Class</option>
+                        <option value="day_class">Day Wise Class</option>
+                        <option value="teacher">Teacher Wise</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Day</label>
+                    <select name="day" class="form-select">
+                        <option value="">Select Day</option>
+                        {% for k,v in days %}<option value="{{ k }}">{{ v }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Class</label>
+                    <select name="class" class="form-select">
+                        <option value="">Select Class</option>
+                        {% for c in classes %}<option value="{{ c.id }}">{{ c }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Section</label>
+                    <input type="text" name="section" class="form-control" placeholder="A / B / Girls">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Teacher</label>
+                    <select name="teacher" class="form-select">
+                        <option value="">Select Teacher</option>
+                        {% for t in teachers %}<option value="{{ t.id }}">{{ t }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button class="btn btn-success w-100">🖨 Open A4 Print</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

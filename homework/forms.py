@@ -1,5 +1,6 @@
 from django import forms
-from .models import Homework
+
+from .models import Homework, HomeworkSubmission
 
 
 CLASS_CHOICES = [
@@ -42,9 +43,58 @@ class HomeworkForm(forms.ModelForm):
         widgets = {
             "title": forms.TextInput(attrs={"class": "form-control"}),
             "subject": forms.TextInput(attrs={"class": "form-control"}),
-            "description": forms.Textarea(attrs={"class": "form-control", "rows": 5}),
+            "description": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 5
+            }),
             "given_by": forms.Select(attrs={"class": "form-control"}),
-            "due_date": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "due_date": forms.DateInput(attrs={
+                "class": "form-control",
+                "type": "date"
+            }),
             "attachment": forms.FileInput(attrs={"class": "form-control"}),
             "status": forms.Select(attrs={"class": "form-control"}),
+        }
+
+
+class HomeworkSubmissionForm(forms.ModelForm):
+    class Meta:
+        model = HomeworkSubmission
+        fields = [
+            "answer_text",
+            "submitted_file",
+        ]
+
+        widgets = {
+            "answer_text": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 5,
+                "placeholder": "Write your homework answer here..."
+            }),
+            "submitted_file": forms.FileInput(attrs={
+                "class": "form-control"
+            }),
+        }
+
+
+class HomeworkReviewForm(forms.ModelForm):
+    class Meta:
+        model = HomeworkSubmission
+        fields = [
+            "status",
+            "marks",
+            "teacher_remarks",
+        ]
+
+        widgets = {
+            "status": forms.Select(attrs={"class": "form-control"}),
+            "marks": forms.NumberInput(attrs={
+                "class": "form-control",
+                "step": "0.01"
+            }),
+            "teacher_remarks": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 4,
+                "placeholder": "Write teacher review..."
+            }),
         }

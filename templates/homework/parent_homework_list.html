@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.parent-hw{background:linear-gradient(135deg,#eef2ff,#f8fafc);min-height:100vh;padding:22px;border-radius:18px}
+.parent-hero{background:linear-gradient(135deg,#0f172a,#0ea5e9,#22c55e);color:white;border-radius:28px;padding:24px;box-shadow:0 18px 45px rgba(14,165,233,.25)}
+.parent-card{background:white;border-radius:24px;box-shadow:0 12px 30px rgba(15,23,42,.08);border:1px solid #e5e7eb;overflow:hidden}
+.parent-table th{background:#0f172a!important;color:white!important;font-size:12px;text-transform:uppercase}
+.parent-table td{vertical-align:middle}
+.badge-pill{border-radius:999px;padding:7px 12px;font-weight:800}
+</style>
+
+<div class="parent-hw">
+    <div class="parent-hero mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2 class="fw-bold mb-1">👨‍👩‍👧 Homework Tracking</h2>
+                <div>Student: {{ student.student_name }} · {{ student.class_assigned }}</div>
+            </div>
+            <a href="{% url 'parent_dashboard' %}" class="btn btn-light fw-bold rounded-pill">🏠 Parent Dashboard</a>
+        </div>
+    </div>
+
+    <div class="parent-card">
+        <div class="table-responsive">
+            <table class="table table-hover parent-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Homework</th>
+                        <th>Subject</th>
+                        <th>Due Date</th>
+                        <th>Given By</th>
+                        <th>Status</th>
+                        <th>Attachment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in homeworks %}
+                    <tr>
+                        <td><b>{{ h.title }}</b><br><small>{{ h.description|truncatechars:70 }}</small></td>
+                        <td>{{ h.subject }}</td>
+                        <td>{{ h.due_date|default:"-" }}</td>
+                        <td>{{ h.given_by|default:"-" }}</td>
+                        <td>
+                            {% if h.id in submitted_map %}
+                                <span class="badge bg-success badge-pill">Submitted</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark badge-pill">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if h.attachment %}
+                                <a href="{{ h.attachment.url }}" target="_blank" class="btn btn-info btn-sm fw-bold rounded-pill">View</a>
+                            {% else %}-{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center text-muted fw-bold py-5">No homework found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

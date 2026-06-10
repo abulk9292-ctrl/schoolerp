@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .page-wrap{padding:18px}
+    .glass-card{background:#fff;border-radius:18px;box-shadow:0 12px 35px rgba(15,23,42,.08);border:1px solid rgba(15,23,42,.08)}
+    .stat-card{border-radius:18px;padding:18px;background:linear-gradient(135deg,#0f172a,#2563eb);color:white;box-shadow:0 12px 30px rgba(37,99,235,.22)}
+    .btn-soft{border-radius:12px;font-weight:700}
+    .table thead th{background:#f8fafc;font-size:13px;text-transform:uppercase}
+    .badge-soft{border-radius:30px;padding:7px 12px;font-weight:700}
+</style>
+
+<div class="page-wrap">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="fw-bold mb-0">🎥 Live Classes</h3>
+            <small class="text-muted">AL RAHMAN MISSION online live class management</small>
+        </div>
+        <a href="{% url 'live_classes:live_class_add' %}" class="btn btn-primary btn-soft">+ Add Live Class</a>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-3"><div class="stat-card"><h6>Total</h6><h2>{{ total_live_classes }}</h2></div></div>
+        <div class="col-md-3"><div class="stat-card"><h6>Upcoming</h6><h2>{{ upcoming_count }}</h2></div></div>
+        <div class="col-md-3"><div class="stat-card"><h6>Running</h6><h2>{{ running_count }}</h2></div></div>
+        <div class="col-md-3"><div class="stat-card"><h6>Completed</h6><h2>{{ completed_count }}</h2></div></div>
+    </div>
+
+    <div class="glass-card p-3">
+        <form method="get" class="row g-2 mb-3">
+            <div class="col-md-4"><input type="text" name="q" class="form-control" placeholder="Search live class"></div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="UPCOMING">Upcoming</option>
+                    <option value="RUNNING">Running</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="CANCELLED">Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-2"><button class="btn btn-dark w-100 btn-soft">Filter</button></div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Class</th>
+                        <th>Section</th>
+                        <th>Subject</th>
+                        <th>Teacher</th>
+                        <th>Start</th>
+                        <th>Status</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for item in live_classes %}
+                    <tr>
+                        <td class="fw-bold">{{ item.title }}</td>
+                        <td>{{ item.class_assigned }}</td>
+                        <td>{{ item.section|default:"-" }}</td>
+                        <td>{{ item.subject|default:"-" }}</td>
+                        <td>{{ item.teacher|default:"-" }}</td>
+                        <td>{{ item.start_time|date:"d M Y, h:i A" }}</td>
+                        <td><span class="badge bg-primary badge-soft">{{ item.status }}</span></td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-success" href="{% url 'live_classes:live_class_join' item.id %}" target="_blank">Join</a>
+                            <a class="btn btn-sm btn-warning" href="{% url 'live_classes:live_class_edit' item.id %}">Edit</a>
+                            <a class="btn btn-sm btn-danger" href="{% url 'live_classes:live_class_delete' item.id %}">Delete</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="8" class="text-center text-muted py-4">No live class found.</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

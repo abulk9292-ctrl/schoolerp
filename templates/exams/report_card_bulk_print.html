@@ -3,7 +3,10 @@
 {% block content %}
 
 <style>
-    @page { size: A4; margin: 0; }
+    @page {
+        size: A4;
+        margin: 0;
+    }
 
     * {
         box-sizing: border-box;
@@ -11,7 +14,9 @@
         print-color-adjust: exact !important;
     }
 
-    body { background: #e5e7eb; }
+    body {
+        background: #e5e7eb;
+    }
 
     .print-btn-area {
         margin-bottom: 12px;
@@ -25,10 +30,10 @@
 
     .report-card {
         width: 200mm;
-        min-height: 287mm;
+        height: 287mm;
         background: white;
         margin: 0 auto 14px auto;
-        padding: 6mm;
+        padding: 4mm;
         border: 3px solid #111;
         position: relative;
         font-family: Arial, sans-serif;
@@ -44,8 +49,8 @@
         top: 49%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 430px;
-        height: 430px;
+        width: 400px;
+        height: 400px;
         object-fit: contain;
         opacity: 0.10;
         z-index: 0;
@@ -67,20 +72,20 @@
 
     .header-img {
         width: 100%;
-        max-height: 112px;
+        max-height: 102px;
         object-fit: contain;
         display: block;
     }
 
     .report-title {
-        font-size: 21px;
+        font-size: 19px;
         font-weight: 900;
         text-align: center;
         background: #f2f7ff;
         border: 1px solid #999;
-        padding: 3px;
+        padding: 2px;
         color: #111;
-        margin-top: 3px;
+        margin-top: 2px;
     }
 
     .student-info-grid {
@@ -88,17 +93,17 @@
         grid-template-columns: 1fr 198px 100px;
         gap: 8px;
         align-items: start;
-        margin-top: 6px;
+        margin-top: 4px;
     }
 
     .info-table { width: 100%; }
 
     .info-table td {
         padding: 1px 4px;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 600;
         vertical-align: top;
-        line-height: 1.20;
+        line-height: 1.10;
     }
 
     .info-table td:first-child {
@@ -129,7 +134,7 @@
     .clean-label {
         background: #28f060;
         color: red;
-        font-size: 12px;
+        font-size: 13px;
         width: 72px;
         white-space: nowrap;
     }
@@ -151,8 +156,8 @@
     }
 
     .student-photo {
-        width: 92px;
-        height: 112px;
+        width: 88px;
+        height: 104px;
         border: 2px solid #222;
         object-fit: cover;
         background: #fff;
@@ -181,15 +186,15 @@
     .small-table th,
     .small-table td {
         border: 1px solid #777;
-        padding: 2px 3px;
+        padding: 1px 2px;
         text-align: center;
         font-weight: 600;
-        line-height: 1.20;
+        line-height: 1.10;
     }
 
     .marks-title {
         background: #31f05b !important;
-        font-size: 15px;
+        font-size: 13px;
         color: #111;
     }
 
@@ -211,26 +216,96 @@
         font-weight: 900;
     }
 
+    .ai-report-box {
+        margin-top: 10px;
+        border: 1px solid #777;
+        background: rgba(255,255,255,0.92);
+        padding: 3px;
+        font-size: 10px;
+    }
+
+    .ai-title {
+        background: #dbeafe !important;
+        color: #111;
+        font-weight: 900;
+        text-align: center;
+        border: 1px solid #777;
+        padding: 2px;
+        margin-bottom: 3px;
+    }
+
+    .ai-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 3px;
+        margin-bottom: 3px;
+    }
+
+    .ai-mini-card {
+        border: 1px solid #777;
+        background: #f8fafc;
+        padding: 2px;
+        text-align: center;
+        font-weight: 900;
+        min-height: 28px;
+    }
+
+    .ai-mini-label {
+        font-size: 8px;
+        color: #334155;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    .ai-mini-value {
+        font-size: 10px;
+        color: #111;
+        font-weight: 900;
+    }
+
+    .health-meter {
+        width: 100%;
+        height: 8px;
+        border: 1px solid #111;
+        background: #fff;
+        margin-top: 2px;
+    }
+
+    .health-fill {
+        height: 100%;
+        background: #22c55e !important;
+    }
+
+    .ai-remark-line {
+        border: 1px solid #777;
+        padding: 2px 4px;
+        margin-top: 2px;
+        background: #fff7ed;
+        font-weight: 700;
+        line-height: 1.05;
+        font-size: 9px;
+    }
+
     .bottom-section {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 28px;
-        margin-top: 10px;
+        gap: 12px;
+        margin-top: 4px;
     }
 
     .signature-area {
         display: grid;
-        grid-template-columns: 115px 1fr 1fr;
+        grid-template-columns: 90px 1fr 1fr;
         align-items: end;
-        margin-top: 48px;
+        margin-top: 14px;
         text-align: center;
         font-weight: bold;
-        font-size: 13px;
+        font-size: 11px;
     }
 
     .qr-box {
-        width: 96px;
-        height: 96px;
+        width: 92px;
+        height: 92px;
         border: 2px solid #111;
         background: white;
         display: flex;
@@ -247,22 +322,23 @@
     }
 
     .signature-line {
-        min-height: 48px;
+        min-height: 36px;
         display: flex;
         align-items: flex-end;
         justify-content: center;
     }
 
     .principal-sign-img {
-        width: 135px;
-        height: 55px;
+        width: 110px;
+        height: 42px;
         object-fit: contain;
         display: block;
         margin: 0 auto;
     }
 
     @media print {
-        html, body {
+        html,
+        body {
             width: 210mm !important;
             margin: 0 !important;
             padding: 0 !important;
@@ -272,9 +348,7 @@
         body * { visibility: hidden !important; }
 
         .bulk-wrapper,
-        .bulk-wrapper * {
-            visibility: visible !important;
-        }
+        .bulk-wrapper * { visibility: visible !important; }
 
         .bulk-wrapper {
             position: absolute !important;
@@ -290,9 +364,9 @@
             left: 5mm !important;
             top: 5mm !important;
             width: 200mm !important;
-            min-height: 287mm !important;
+            height: 287mm !important;
             margin: 0 0 10mm 0 !important;
-            padding: 6mm !important;
+            padding: 4mm !important;
             border: 3px solid #111 !important;
             box-shadow: none !important;
             overflow: hidden !important;
@@ -300,9 +374,7 @@
             page-break-inside: avoid !important;
         }
 
-        .report-card:last-child {
-            page-break-after: auto !important;
-        }
+        .report-card:last-child { page-break-after: auto !important; }
 
         .no-print,
         .btn,
@@ -328,13 +400,11 @@
 
         .header-img {
             width: 100% !important;
-            max-height: 112px !important;
+            max-height: 102px !important;
             object-fit: contain !important;
         }
 
-        .watermark-logo {
-            opacity: 0.10 !important;
-        }
+        .watermark-logo { opacity: 0.10 !important; }
     }
 </style>
 
@@ -369,12 +439,7 @@
             {% endif %}
 
             <div class="report-title">
-                Report Card - Academic Session :
-                {% if card.academic_session %}
-                    {{ card.academic_session }}
-                {% else %}
-                    2025-26
-                {% endif %}
+                Report Card - Academic Session : {{ card.academic_session|default:"2025-26" }}
             </div>
         </div>
 
@@ -383,7 +448,7 @@
                 <table class="info-table">
                     <tr>
                         <td>Name</td>
-                        <td>: {{ card.student.student_name|default:"-" }}</td>
+                        <td>: {{ card.student.student_name|default:card.student }}</td>
                     </tr>
                     <tr>
                         <td>Father's</td>
@@ -399,7 +464,7 @@
                     </tr>
                     <tr>
                         <td>Class</td>
-                        <td>: {{ card.student.class_assigned|default:"-" }}</td>
+                        <td>: {{ card.student.class_assigned|default:card.student.class_assigned|default:"-" }} &nbsp;&nbsp; Section : {{ card.student.section|default:"-" }}</td>
                     </tr>
                     <tr>
                         <td>Birth Date</td>
@@ -497,24 +562,89 @@
             <div>
                 <table class="small-table">
                     <tr>
-                        <th colspan="2" class="pink-head">Co-Scholastic Areas</th>
+                        <th colspan="2" class="pink-head">Behaviour & Skills</th>
                     </tr>
-                    <tr><td>Self Answering</td><td class="green-cell">A</td></tr>
-                    <tr><td>Problem Solving</td><td class="green-cell">A</td></tr>
-                    <tr><td>Decision Making</td><td class="green-cell">A</td></tr>
-                    <tr><td>Effective Communication</td><td class="green-cell">A</td></tr>
+
+                    <tr>
+                        <td>Discipline</td>
+                        <td class="green-cell">{{ card.latest_skill.discipline|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Punctuality</td>
+                        <td class="green-cell">{{ card.latest_skill.punctuality|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Cleanliness</td>
+                        <td class="green-cell">{{ card.latest_skill.cleanliness|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Communication</td>
+                        <td class="green-cell">{{ card.latest_skill.communication|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Leadership</td>
+                        <td class="green-cell">{{ card.latest_skill.leadership|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Positive / Negative</td>
+                        <td class="green-cell">+{{ card.positive_behaviour_count|default:0 }} / -{{ card.negative_behaviour_count|default:0 }}</td>
+                    </tr>
+                    <tr>
+                        <td>Teacher Remark</td>
+                        <td class="green-cell">{{ card.latest_skill.teacher_remarks|truncatechars:28|default:"-" }}</td>
+                    </tr>
                 </table>
 
-                <table class="small-table" style="margin-top:7px;">
-                    <tr>
-                        <th colspan="2" class="pink-head">Exam Result</th>
-                    </tr>
-                    <tr><td>Percentage</td><td class="green-cell">{{ card.percentage|default:0 }}%</td></tr>
-                    <tr><td>Attendance</td><td class="green-cell">{{ card.attendance_percentage|default:0 }}%</td></tr>
-                    <tr><td>Grade</td><td class="green-cell">{{ card.final_grade|default:"-" }}</td></tr>
-                    <tr><td>Result</td><td class="green-cell">{{ card.result_status|default:"-" }}</td></tr>
-                    <tr><td>Class Rank</td><td>{{ card.class_rank|default:"-" }}</td></tr>
-                </table>
+                <div class="ai-report-box">
+                    <div class="ai-title">AI Academic Analysis</div>
+
+                    <div class="ai-grid">
+                        <div class="ai-mini-card">
+                            <div class="ai-mini-label">Health Index</div>
+                            <div class="ai-mini-value">{{ card.student_health_index|default:0 }}/100</div>
+                            <div class="health-meter">
+                                <div class="health-fill"
+                                     style="width:{{ card.student_health_index|default_if_none:'0' }}%;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="ai-mini-card">
+                            <div class="ai-mini-label">AI Risk</div>
+                            <div class="ai-mini-value">{{ card.ai_risk_level|default:"Low Risk" }}</div>
+                        </div>
+
+                        <div class="ai-mini-card">
+                            <div class="ai-mini-label">Badge</div>
+                            <div class="ai-mini-value">{{ card.performance_badge|default:"Average" }}</div>
+                        </div>
+                    </div>
+
+                    <div class="ai-grid">
+                        <div class="ai-mini-card">
+                            <div class="ai-mini-label">Pass Chance</div>
+                            <div class="ai-mini-value">{{ card.pass_probability|default:0 }}%</div>
+                        </div>
+
+                        <div class="ai-mini-card">
+                            <div class="ai-mini-label">Fail Risk</div>
+                            <div class="ai-mini-value">{{ card.fail_probability|default:0 }}%</div>
+                        </div>
+
+                        <div class="ai-mini-card">
+                            <div class="ai-mini-label">Behaviour</div>
+                            <div class="ai-mini-value">{{ card.behaviour_score|default:100 }}/100</div>
+                        </div>
+                    </div>
+
+                    <div class="ai-remark-line">
+                        <b>AI Remark:</b> {{ card.ai_remark|default:"Overall performance is stable." }}
+                    </div>
+
+                    <div class="ai-remark-line">
+                        <b>AI Recommendation:</b> {{ card.ai_recommendation|default:"Maintain regular study and attendance." }}
+                    </div>
+                </div>
             </div>
 
             <div>
@@ -532,10 +662,54 @@
                     <tr><td>24% - 34%</td><td>C</td></tr>
                     <tr><td>Below 24%</td><td>D</td></tr>
                 </table>
+
+                <table class="small-table" style="margin-top:4px;">
+                    <tr>
+                        <th colspan="2" class="pink-head">Exam Result</th>
+                    </tr>
+                    <tr>
+                        <td>Percentage</td>
+                        <td class="green-cell">{{ card.percentage|default:0 }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Attendance</td>
+                        <td class="green-cell">{{ card.attendance_percentage|default:0 }}%</td>
+                    </tr>
+                    <tr>
+                        <td>Grade</td>
+                        <td class="green-cell">{{ card.final_grade|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>GPA</td>
+                        <td class="green-cell">{{ card.gpa|default:"0.00" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Result</td>
+                        <td class="green-cell">{{ card.result_status|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Class Rank</td>
+                        <td>{{ card.class_rank|default:"-" }}</td>
+                    </tr>
+                    <tr>
+                        <td>AI Risk</td>
+                        <td class="green-cell">{{ card.ai_risk_level|default:"Low Risk" }}</td>
+                    </tr>
+                    <tr>
+                        <td>Health Index</td>
+                        <td class="green-cell">{{ card.student_health_index|default:0 }}/100</td>
+                    </tr>
+                    <tr>
+                        <td>Pass Chance</td>
+                        <td class="green-cell">{{ card.pass_probability|default:0 }}%</td>
+                    </tr>
+                </table>
             </div>
         </div>
 
         <div class="signature-area">
+
+            <!-- QR -->
             <div>
                 <div class="qr-box">
                     {% if card.qr_code %}
@@ -549,21 +723,49 @@
                 </div>
             </div>
 
+            <!-- CLASS TEACHER -->
             <div>
-                <div class="signature-line">___________________</div>
+                <div class="signature-line">
+                    ___________________
+                </div>
                 (Class Teacher)
             </div>
 
-            <div>
-                <div class="signature-line">
+            <!-- PRINCIPAL -->
+            <div style="position:relative;">
+
+                <!-- CLEAR ROUND SEAL -->
+                <img src="{% static 'images/round_seal.png' %}"
+                     style="
+                        position:absolute;
+                        width:105px;
+                        height:105px;
+                        object-fit:contain;
+                        left:-92px;
+                        top:-34px;
+                        opacity:.82;
+                        filter:
+                            contrast(165%)
+                            saturate(165%)
+                            brightness(1.02);
+                        z-index:1;
+                     "
+                     onerror="this.style.display='none';">
+
+                <!-- SIGN -->
+                <div class="signature-line"
+                     style="position:relative;z-index:2;">
+
                     <img src="{% if principal_sign %}{{ principal_sign }}{% else %}{% static 'images/principal_sign.png' %}{% endif %}"
                          class="principal-sign-img"
                          onerror="this.style.display='none'; this.parentElement.innerHTML='___________________';">
                 </div>
-                (Principal)
+
+                <div style="position:relative;z-index:2;">
+                    (Principal)
+                </div>
             </div>
         </div>
-
     </div>
 </div>
 

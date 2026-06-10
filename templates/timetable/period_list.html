@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3"><h4 class="fw-bold">Periods</h4><a href="{% url 'period_add' %}" class="btn btn-primary">Add Period</a></div>
+<div class="table-responsive"><table class="table table-bordered"><tr><th>Order</th><th>Name</th><th>Time</th><th>Break</th><th>Action</th></tr>{% for p in periods %}<tr><td>{{ p.order }}</td><td>{{ p.name }}</td><td>{{ p.start_time }} - {{ p.end_time }}</td><td>{{ p.is_break|yesno:"Yes,No" }}</td><td><a href="{% url 'period_edit' p.id %}" class="btn btn-sm btn-warning">Edit</a> <a href="{% url 'period_delete' p.id %}" class="btn btn-sm btn-danger">Delete</a></td></tr>{% empty %}<tr><td colspan="5" class="text-center">No period.</td></tr>{% endfor %}</table></div>
+{% endblock %}

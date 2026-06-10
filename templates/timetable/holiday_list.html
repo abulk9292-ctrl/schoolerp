@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3">
+    <h4 class="fw-bold">Holiday / Off Day</h4>
+    <a href="{% url 'timetable_holiday_add' %}" class="btn btn-primary">Add Holiday</a>
+</div>
+<div class="table-responsive">
+<table class="table table-bordered">
+    <tr><th>Day</th><th>Title</th><th>Status</th><th>Remarks</th><th>Action</th></tr>
+    {% for h in holidays %}
+    <tr>
+        <td>{{ h.get_day_display }}</td>
+        <td>{{ h.title }}</td>
+        <td>{% if h.is_holiday %}<span class="badge bg-danger">Holiday</span>{% else %}<span class="badge bg-success">Working</span>{% endif %}</td>
+        <td>{{ h.remarks|default:"-" }}</td>
+        <td><a href="{% url 'timetable_holiday_edit' h.id %}" class="btn btn-sm btn-warning">Edit</a> <a href="{% url 'timetable_holiday_delete' h.id %}" class="btn btn-sm btn-danger">Delete</a></td>
+    </tr>
+    {% empty %}<tr><td colspan="5" class="text-center">No holiday added.</td></tr>{% endfor %}
+</table>
+</div>
+{% endblock %}

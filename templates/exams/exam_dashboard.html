@@ -35,6 +35,27 @@
         font-weight: 700;
         margin-bottom: 12px;
     }
+
+    .table-card {
+        border: none;
+        border-radius: 18px;
+        box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+        background: #fff;
+        overflow: hidden;
+    }
+
+    .action-btn {
+        border-radius: 10px;
+        font-weight: 700;
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .badge-status {
+        padding: 7px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
 </style>
 
 <h3 class="fw-bold mb-4">🎓 Exams Dashboard</h3>
@@ -74,107 +95,180 @@
 
     <div class="row">
 
-        <!-- LEFT -->
         <div class="col-md-4">
 
-            <a href="{% url 'exam_add' %}"
-               class="btn btn-success option-btn">
-
+            <a href="{% url 'exam_add' %}" class="btn btn-success option-btn">
                 ➕ Exam Setup
-
             </a>
 
-            <a href="{% url 'exam_routine' %}"
-               class="btn btn-primary option-btn">
-
+            <a href="{% url 'exam_routine' %}" class="btn btn-primary option-btn">
                 📅 Exam Routine
-
             </a>
 
-            <a href="{% url 'result_add' %}"
-               class="btn btn-warning option-btn">
-
+            <a href="{% url 'result_add' %}" class="btn btn-warning option-btn">
                 ✍️ Add Marks
-
             </a>
 
-            <a href="{% url 'bulk_result_entry' %}"
-               class="btn btn-info option-btn">
-
+            <a href="{% url 'bulk_result_entry' %}" class="btn btn-info option-btn">
                 🧾 Bulk Marks Entry
-
             </a>
 
         </div>
 
-        <!-- MIDDLE -->
         <div class="col-md-4">
 
-            <a href="{% url 'result_list' %}"
-               class="btn btn-secondary option-btn">
-
+            <a href="{% url 'result_list' %}" class="btn btn-secondary option-btn">
                 📋 Result List
-
             </a>
 
-            <a href="{% url 'report_card_bulk_select' %}"
-                class="btn btn-outline-primary option-btn">
-
+            <a href="{% url 'report_card_bulk_select' %}" class="btn btn-outline-primary option-btn">
                 🖨 Report Card Bulk Print
-
             </a>
 
-            <a href="{% url 'report_card_select' %}"
-               class="btn btn-dark option-btn">
-
+            <a href="{% url 'report_card_select' %}" class="btn btn-dark option-btn">
                 📄 Single Report Card
-
             </a>
 
-
-            <a href="{% url 'topper_result' %}"
-               class="btn btn-outline-success option-btn">
-
+            <a href="{% url 'topper_result' %}" class="btn btn-outline-success option-btn">
                 🏆 Top 10 / Topper
-
             </a>
 
         </div>
 
-        <!-- RIGHT -->
         <div class="col-md-4">
 
-            <a href="{% url 'admit_card_select' %}"
-               class="btn btn-outline-primary option-btn">
-
+            <a href="{% url 'admit_card_select' %}" class="btn btn-outline-primary option-btn">
                 🎫 Admit Card
-
             </a>
 
-            <a href="{% url 'desk_slip_select' %}"
-               class="btn btn-outline-danger option-btn">
-
+            <a href="{% url 'desk_slip_select' %}" class="btn btn-outline-danger option-btn">
                 🪑 Desk Slip
-
             </a>
 
-            <a href="{% url 'blank_marks_sheet_select' %}"
-               class="btn btn-outline-warning option-btn">
-
+            <a href="{% url 'blank_marks_sheet_select' %}" class="btn btn-outline-warning option-btn">
                 📝 Blank Marks Sheet
-
             </a>
 
-            <button type="button"
-                    class="btn btn-outline-info option-btn"
-                    disabled>
-
-                📊 Exam Reports — Coming Next
-
-            </button>
+            <a href="{% url 'merit_list' %}" class="btn btn-outline-info option-btn">
+                📊 Merit List / Exam Reports
+            </a>
 
         </div>
 
+    </div>
+</div>
+
+<div class="table-card mt-4">
+    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0">🧾 Exam Setup List</h5>
+        <a href="{% url 'exam_add' %}" class="btn btn-success btn-sm action-btn">➕ Add Exam</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Exam Name</th>
+                    <th>Session</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for exam in exams %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="fw-bold">{{ exam.name }}</td>
+                    <td>{{ exam.academic_session }}</td>
+                    <td>{{ exam.start_date|date:"d M Y" }}</td>
+                    <td>{{ exam.end_date|date:"d M Y" }}</td>
+                    <td>
+                        {% if exam.is_active %}
+                            <span class="badge bg-success badge-status">Active</span>
+                        {% else %}
+                            <span class="badge bg-secondary badge-status">Inactive</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-end">
+                        <a href="{% url 'exam_edit' exam.id %}" class="btn btn-warning btn-sm action-btn">
+                            ✏️ Edit
+                        </a>
+
+                        <a href="{% url 'exam_delete' exam.id %}"
+                           onclick="return confirm('Are you sure you want to delete this exam?')"
+                           class="btn btn-danger btn-sm action-btn">
+                            🗑 Delete
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">
+                        No exam setup found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="table-card mt-4">
+    <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+        <h5 class="fw-bold mb-0">📅 Exam Routine List</h5>
+        <a href="{% url 'exam_routine' %}" class="btn btn-primary btn-sm action-btn">➕ Add Routine</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Exam</th>
+                    <th>Class</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Total Marks</th>
+                    <th class="text-end">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for routine in routines %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td class="fw-bold">{{ routine.exam.name }}</td>
+                    <td>{{ routine.school_class }}</td>
+                    <td>{{ routine.subject }}</td>
+                    <td>{{ routine.date|date:"d M Y" }}</td>
+                    <td>{{ routine.start_time }} - {{ routine.end_time }}</td>
+                    <td>{{ routine.total_marks }}</td>
+                    <td class="text-end">
+                        <a href="{% url 'exam_routine_edit' routine.id %}" class="btn btn-warning btn-sm action-btn">
+                            ✏️ Edit
+                        </a>
+
+                        <a href="{% url 'exam_routine_delete' routine.id %}"
+                           onclick="return confirm('Are you sure you want to delete this routine?')"
+                           class="btn btn-danger btn-sm action-btn">
+                            🗑 Delete
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">
+                        No exam routine found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 

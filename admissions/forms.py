@@ -11,8 +11,22 @@ class AdmissionForm(forms.ModelForm):
         ("Other", "Other"),
     ]
 
+    SECTION_CHOICES = [
+        ("", "Select Section"),
+        ("A", "A"),
+        ("B", "B"),
+        ("C", "C"),
+        ("D", "D"),
+    ]
+
     gender = forms.ChoiceField(
         choices=GENDER_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={"class": "form-select"})
+    )
+
+    section = forms.ChoiceField(
+        choices=SECTION_CHOICES,
         required=False,
         widget=forms.Select(attrs={"class": "form-select"})
     )
@@ -27,6 +41,7 @@ class AdmissionForm(forms.ModelForm):
             "date_of_birth",
             "gender",
             "student_class",
+            "section",
             "aadhaar_no",
             "mobile",
             "guardian_mobile",
@@ -47,7 +62,11 @@ class AdmissionForm(forms.ModelForm):
                 "type": "date"
             }),
 
-            "student_class": forms.TextInput(attrs={"class": "form-control"}),
+            "student_class": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Class VI"
+            }),
+
             "aadhaar_no": forms.TextInput(attrs={"class": "form-control"}),
             "mobile": forms.TextInput(attrs={"class": "form-control"}),
             "guardian_mobile": forms.TextInput(attrs={"class": "form-control"}),

@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.badge-overdue{background:#dc3545}
+.badge-today{background:#0d6efd}
+.summary-card{border:0;border-radius:16px;box-shadow:0 6px 16px rgba(0,0,0,.10)}
+@media print{.no-print{display:none!important}.card{box-shadow:none!important}}
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-3 no-print">
+    <div>
+        <h2 class="mb-0">Fee Follow-up / Promise List</h2>
+        <small class="text-muted">Parent promised payment date, call reminder and home visit list</small>
+    </div>
+    <div>
+        <a href="{% url 'fee_followup_dashboard' %}" class="btn btn-primary">Dashboard</a>
+        <a href="{% url 'fee_followup_add' %}" class="btn btn-success">+ Add Promise</a>
+        <a href="{% url 'fee_followup_print' %}?status={{ selected_status }}&date_filter={{ date_filter }}" class="btn btn-dark">Print</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-2"><div class="card summary-card p-3 text-center"><h6>Total</h6><h3>{{ summary.total }}</h3></div></div>
+    <div class="col-md-2"><div class="card summary-card p-3 text-center"><h6>Pending</h6><h3>{{ summary.pending }}</h3></div></div>
+    <div class="col-md-2"><div class="card summary-card p-3 text-center"><h6>Today</h6><h3>{{ summary.today }}</h3></div></div>
+    <div class="col-md-2"><div class="card summary-card p-3 text-center"><h6>Overdue</h6><h3>{{ summary.overdue }}</h3></div></div>
+    <div class="col-md-4"><div class="card summary-card p-3 text-center"><h6>Promised Amount</h6><h3>₹{{ summary.promise_amount }}</h3></div></div>
+</div>
+
+<div class="card card-box mb-3 no-print">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-2">
+                <label class="form-label">Date</label>
+                <select name="date_filter" class="form-select">
+                    <option value="">All</option>
+                    <option value="today" {% if date_filter == 'today' %}selected{% endif %}>Today</option>
+                    <option value="overdue" {% if date_filter == 'overdue' %}selected{% endif %}>Overdue</option>
+                    <option value="upcoming" {% if date_filter == 'upcoming' %}selected{% endif %}>Upcoming</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    {% for value,label in status_choices %}
+                    <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Type</label>
+                <select name="type" class="form-select">
+                    <option value="">All Type</option>
+                    {% for value,label in type_choices %}
+                    <option value="{{ value }}" {% if selected_type == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Class</label>
+                <select name="class_id" class="form-select">
+                    <option value="">All Classes</option>
+                    {% for c in classes %}
+                    <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>{{ c.class_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Section</label>
+                <select name="section" class="form-select">
+                    <option value="">All</option>
+                    <option value="A" {% if selected_section == "A" %}selected{% endif %}>A</option>
+                    <option value="B" {% if selected_section == "B" %}selected{% endif %}>B</option>
+                    <option value="C" {% if selected_section == "C" %}selected{% endif %}>C</option>
+                    <option value="D" {% if selected_section == "D" %}selected{% endif %}>D</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Search</label>
+                <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Name / ID / Mobile">
+            </div>
+
+            <div class="col-md-12">
+                <button class="btn btn-primary">Filter</button>
+                <a href="{% url 'fee_followup_list' %}" class="btn btn-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="table-responsive">
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>#</th>
+            <th>Promise Date</th>
+            <th>Student</th>
+            <th>Parent / Mobile</th>
+            <th>Class</th>
+            <th>Due</th>
+            <th>Promise</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th>Next Action / Remark</th>
+            <th class="no-print" width="230">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in followups %}
+        <tr {% if item.is_overdue %}class="table-danger"{% elif item.is_today %}class="table-info"{% endif %}>
+            <td>{{ forloop.counter }}</td>
+            <td>
+                {{ item.promise_date }}
+                {% if item.is_overdue %}<br><span class="badge badge-overdue">Overdue</span>{% endif %}
+                {% if item.is_today %}<br><span class="badge badge-today">Today</span>{% endif %}
+            </td>
+            <td>
+                <b>{{ item.student.student_name }}</b><br>
+                <small>{{ item.student.student_id }}</small>
+            </td>
+            <td>{{ item.parent_name|default:"-" }}<br><b>{{ item.mobile|default:"-" }}</b></td>
+            <td>{{ item.student.class_assigned }} / {{ item.student.section|default:"-" }}</td>
+            <td>₹{{ item.due_amount }}</td>
+            <td><b>₹{{ item.promise_amount }}</b></td>
+            <td>{{ item.get_followup_type_display }}<br><small>{{ item.get_priority_display }}</small></td>
+            <td><span class="badge bg-secondary">{{ item.get_status_display }}</span></td>
+            <td>{{ item.next_action|default:"-" }}<br><small>{{ item.remark|default:"" }}</small></td>
+            <td class="no-print">
+                <a href="{% url 'fee_followup_edit' item.id %}" class="btn btn-sm btn-warning">Edit</a>
+                <a href="{% url 'fee_followup_mark_status' item.id 'CALLED' %}" class="btn btn-sm btn-primary">Called</a>
+                <a href="{% url 'fee_followup_mark_status' item.id 'VISITED' %}" class="btn btn-sm btn-info">Visited</a>
+                <a href="{% url 'fee_followup_mark_status' item.id 'PAID' %}" class="btn btn-sm btn-success">Paid</a>
+                <a href="{% url 'fee_followup_delete' item.id %}" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="11" class="text-center">No follow-up found.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+{% endblock %}

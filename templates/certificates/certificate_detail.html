@@ -1,0 +1,398 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>{{ certificate.certificate_no }}</title>
+
+<style>
+@page{size:A4 portrait;margin:0}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+
+body{
+    margin:0;
+    background:#dbe2ea;
+    font-family:"Times New Roman",serif;
+    color:#061a44;
+}
+
+.no-print{
+    background:#0f172a;
+    text-align:center;
+    padding:10px;
+}
+.no-print button,.no-print a{
+    background:linear-gradient(135deg,#1d4ed8,#0891b2);
+    color:#fff;
+    border:0;
+    padding:10px 26px;
+    border-radius:30px;
+    text-decoration:none;
+    font-weight:900;
+    margin:0 6px;
+}
+
+.sheet{
+    width:210mm;
+    min-height:297mm;
+    margin:auto;
+    background:white;
+    padding:7mm;
+}
+
+.cert{
+    width:100%;
+    height:283mm;
+    position:relative;
+    overflow:hidden;
+    padding:8mm 10mm 37mm;
+    background:
+        radial-gradient(circle at top,#fff7d6 0%,#fffdf5 35%,#ffffff 75%),
+        #fff;
+    border:6px double #b8860b;
+    outline:3px solid #06245c;
+    outline-offset:-11px;
+}
+
+.cert:before{
+    content:"";
+    position:absolute;
+    inset:5mm;
+    border:2px solid #d6a542;
+    border-radius:4px;
+    pointer-events:none;
+}
+
+.corner{
+    position:absolute;
+    width:40mm;
+    height:50mm;
+    border-color:#06245c;
+    z-index:3;
+}
+.tl{top:8mm;left:8mm;border-top:5px solid;border-left:5px solid}
+.tr{top:8mm;right:8mm;border-top:5px solid;border-right:5px solid}
+.bl{bottom:8mm;left:8mm;border-bottom:5px solid;border-left:5px solid}
+.br{bottom:8mm;right:8mm;border-bottom:5px solid;border-right:5px solid}
+
+.bottom-wave{
+    position:absolute;
+    left:0;right:0;bottom:0;
+    height:32mm;
+    background:linear-gradient(135deg,#061a44 0%,#06245c 65%,#d6a542 66%,#f8d778 74%,#061a44 75%);
+    clip-path:polygon(0 30%,42% 58%,100% 28%,100% 100%,0 100%);
+    z-index:1;
+}
+
+.watermark{
+    position:absolute;
+    top:52%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    width:135mm;
+    opacity:.085;
+    z-index:0;
+}
+
+.content{position:relative;z-index:4}
+
+.header{
+    text-align:center;
+    border-bottom:3px double #d6a542;
+    padding-bottom:3mm;
+}
+.logo{
+    width:25mm;
+    height:25mm;
+    object-fit:contain;
+}
+.school-name{
+    font-size:48px;
+    font-weight:900;
+    letter-spacing:1.2px;
+    color:#061a44;
+    line-height:1;
+}
+.medium{
+    font-size:17px;
+    font-weight:900;
+    color:#9a6510;
+    margin-top:2mm;
+}
+.school-info{
+    font-size:15px;
+    font-weight:700;
+    line-height:1.35;
+}
+
+.top-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    margin-top:3mm;
+    font-size:15px;
+    font-weight:900;
+}
+.date{text-align:right}
+
+.photo-title-row{
+    display:grid;
+    grid-template-columns:34mm 1fr 34mm;
+    gap:5mm;
+    align-items:center;
+    margin-top:5mm;
+}
+.photo{
+    width:31mm;
+    height:38mm;
+    object-fit:cover;
+    border:4px solid #d6a542;
+    padding:1mm;
+    background:#fff;
+}
+
+.title-area{text-align:center}
+.orn{
+    font-size:22px;
+    color:#b8860b;
+    font-weight:900;
+}
+.cert-title{
+    display:inline-block;
+    background:linear-gradient(135deg,#061a44,#123b7a);
+    color:white;
+    border:4px solid #d6a542;
+    padding:4mm 16mm;
+    font-size:28px;
+    font-weight:900;
+    text-transform:uppercase;
+    letter-spacing:1px;
+    box-shadow:0 4px 12px rgba(0,0,0,.18);
+}
+
+.body-text{
+    margin-top:4mm;
+    font-size:16px;
+    line-height:1.55;
+    text-align:justify;
+}
+.body-text b{
+    color:#061a44;
+    border-bottom:1.5px dotted #061a44;
+    padding:0 5px;
+}
+
+.details{
+    margin-top:3mm;
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+    background:rgba(255,255,255,.95);
+}
+.details td{
+    border:1.4px solid #d6a542;
+    padding:5px 9px;
+}
+.details td:first-child{
+    width:30%;
+    font-weight:900;
+    background:#f7ead0;
+    color:#061a44;
+}
+
+.footer{
+    position:absolute;
+    left:16mm;
+    right:16mm;
+    bottom:22mm;
+    z-index:5;
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    gap:9mm;
+    align-items:end;
+}
+
+.sign-box{
+    text-align:center;
+    font-size:11px;
+    font-weight:900;
+    color:#061a44;
+}
+.sign-img{
+    height:17mm;
+    max-width:45mm;
+    object-fit:contain;
+    display:block;
+    margin:0 auto 2mm;
+}
+.seal-img{
+    width:28mm;
+    height:28mm;
+    object-fit:contain;
+    display:block;
+    margin:0 auto 1mm;
+}
+.line{
+    border-top:2px solid #061a44;
+    padding-top:2mm;
+}
+
+.bottom-text{
+    position:absolute;
+    left:14mm;
+    right:14mm;
+    bottom:5mm;
+    z-index:6;
+    color:white;
+    font-size:14px;
+    font-weight:900;
+    display:flex;
+    justify-content:space-between;
+}
+
+@media print{
+    .no-print{display:none}
+    body{background:white}
+    .sheet{margin:0;padding:7mm}
+}
+</style>
+</head>
+
+<body>
+
+<div class="no-print">
+    <button onclick="window.print()">🖨 Print Certificate</button>
+    <a href="{% url 'certificate_list' %}">← Back</a>
+</div>
+
+<div class="sheet">
+<div class="cert">
+
+<div class="corner tl"></div>
+<div class="corner tr"></div>
+<div class="corner bl"></div>
+<div class="corner br"></div>
+<div class="bottom-wave"></div>
+
+<img src="{% static 'images/logo.png' %}" class="watermark">
+
+<div class="content">
+
+    <div class="header">
+        <img src="{% static 'images/logo.png' %}" class="logo">
+        <div class="school-name">AL RAHMAN MISSION</div>
+        <div class="medium">❧ BANGLA + ENGLISH MEDIUM ❧</div>
+        <div class="school-info">
+            Mission More ,Chakulia,U/Dinajpur, WB,733208<br>
+            alrahmanmission@gmail.com<br>
+            Contact: 9091215171
+        </div>
+    </div>
+
+    <div class="top-row">
+        <div>Certificate No. : {{ certificate.certificate_no }}</div>
+        <div class="date">Date : {{ certificate.issue_date|date:"d-m-Y" }}</div>
+    </div>
+
+    <div class="photo-title-row">
+        <div>
+            {% if certificate.student.photo %}
+                <img src="{{ certificate.student.photo.url }}" class="photo">
+            {% else %}
+                <img src="{% static 'images/logo.png' %}" class="photo">
+            {% endif %}
+        </div>
+
+        <div class="title-area">
+            <div class="orn">❦ ❦ ❦</div>
+            <div class="cert-title">{{ certificate.get_certificate_type_display }}</div>
+            <div class="orn">❦ ❦ ❦</div>
+        </div>
+
+        <div></div>
+    </div>
+
+    <div class="body-text">
+        {% if certificate.certificate_type == "TC" %}
+        This is to certify that <b>{{ certificate.student.student_name }}</b>,
+        son/daughter of <b>{{ certificate.student.father_name }}</b>,
+        was a student of this institution studying in
+        <b>{{ certificate.student.class_assigned }}</b>
+        {% if certificate.student.section %} Section <b>{{ certificate.student.section }}</b>{% endif %}
+        during the session <b>{{ certificate.session|default:"---" }}</b>.
+        His/Her conduct was <b>{{ certificate.conduct }}</b>.
+        This Transfer Certificate is issued on request.
+
+        {% elif certificate.certificate_type == "CHARACTER" %}
+        This is to certify that <b>{{ certificate.student.student_name }}</b>,
+        son/daughter of <b>{{ certificate.student.father_name }}</b>,
+        is/was a student of this school. His/Her character and conduct were found to be
+        <b>{{ certificate.conduct }}</b>.
+
+        {% elif certificate.certificate_type == "BONAFIDE" %}
+        This is to certify that <b>{{ certificate.student.student_name }}</b>,
+        son/daughter of <b>{{ certificate.student.father_name }}</b>,
+        is a bonafide student of <b>AL RAHMAN MISSION</b>,
+        studying in class <b>{{ certificate.student.class_assigned }}</b>.
+
+        {% elif certificate.certificate_type == "STUDY" %}
+        This is to certify that <b>{{ certificate.student.student_name }}</b>,
+        son/daughter of <b>{{ certificate.student.father_name }}</b>,
+        is studying in <b>{{ certificate.student.class_assigned }}</b>
+        at <b>AL RAHMAN MISSION</b>.
+
+        {% elif certificate.certificate_type == "FEE_CLEARANCE" %}
+        This is to certify that <b>{{ certificate.student.student_name }}</b>,
+        studying in <b>{{ certificate.student.class_assigned }}</b>,
+        has cleared all school dues/fees up to the date of issue.
+
+        {% else %}
+        {{ certificate.custom_body|linebreaks }}
+        {% endif %}
+    </div>
+
+    <table class="details">
+        <tr><td>Student ID</td><td>{{ certificate.student.student_id }}</td></tr>
+        <tr><td>Student Name</td><td>{{ certificate.student.student_name }}</td></tr>
+        <tr><td>Father’s Name</td><td>{{ certificate.student.father_name }}</td></tr>
+        <tr><td>Class</td><td>{{ certificate.student.class_assigned }}</td></tr>
+        <tr><td>Section</td><td>{{ certificate.student.section|default:"---" }}</td></tr>
+        <tr><td>Session</td><td>{{ certificate.session|default:"---" }}</td></tr>
+        <tr><td>Date of Birth</td><td>{{ certificate.student.date_of_birth|date:"d-m-Y"|default:"---" }}</td></tr>
+        <tr><td>Reason / Purpose</td><td>{{ certificate.reason|default:"---" }}</td></tr>
+        <tr><td>Remarks</td><td>{{ certificate.remarks|default:"---" }}</td></tr>
+    </table>
+
+</div>
+
+<div class="footer">
+
+    <div class="sign-box">
+        <img src="{% static 'images/headmaster_seal.png' %}" class="sign-img">
+        <div class="line">Prepared By</div>
+    </div>
+
+    <div class="sign-box">
+        <img src="{% static 'images/round_seal.png' %}" class="seal-img">
+        <div>School Seal</div>
+    </div>
+
+    <div class="sign-box">
+        <img src="{% static 'images/principal_sign.png' %}" class="sign-img">
+        <div class="line">
+            Principal / Head Teacher<br>
+            AL RAHMAN MISSION
+        </div>
+    </div>
+
+</div>
+
+<div class="bottom-text">
+    <span>★ Discipline ★ Education ★ Success</span>
+    <span>Education is the key to success</span>
+</div>
+
+</div>
+</div>
+
+</body>
+</html>

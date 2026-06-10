@@ -14,10 +14,34 @@ urlpatterns = [
     # =========================================
     path('add/', views.exam_add, name='exam_add'),
 
+    path(
+        'edit/<int:pk>/',
+        views.exam_edit,
+        name='exam_edit'
+    ),
+
+    path(
+        'delete/<int:pk>/',
+        views.exam_delete,
+        name='exam_delete'
+    ),
+
     # =========================================
     # EXAM ROUTINE
     # =========================================
     path('routine/', views.exam_routine, name='exam_routine'),
+
+    path(
+        'routine/edit/<int:pk>/',
+        views.exam_routine_edit,
+        name='exam_routine_edit'
+    ),
+
+    path(
+        'routine/delete/<int:pk>/',
+        views.exam_routine_delete,
+        name='exam_routine_delete'
+    ),
 
     # =========================================
     # MARKS ENTRY
@@ -57,6 +81,12 @@ urlpatterns = [
     # =========================================
     path('topper/', views.topper_result, name='topper_result'),
 
+    path(
+        'merit-list/',
+        views.merit_list,
+        name='merit_list'
+    ),
+
     # =========================================
     # ADMIT CARD
     # =========================================
@@ -94,21 +124,75 @@ urlpatterns = [
         name='blank_marks_sheet_print'
     ),
 
-
-    path(
-        'merit-list/',
-        views.merit_list,
-        name='merit_list'
-    ),
-
-# =====================================
-# PREMIUM ONLINE RESULT PORTAL
-# =====================================
-
+    # =====================================
+    # PREMIUM ONLINE RESULT PORTAL
+    # =====================================
     path(
         'online-result-portal/',
         views.online_result_portal,
         name='online_result_portal'
     ),
 
+    path(
+        "routine/select-print/",
+        views.exam_routine_select_print,
+        name="exam_routine_select_print"
+    ),
+
+    # =====================================
+    # CLASS TESTS
+    # =====================================
+    path(
+        'class-tests/',
+        views.class_test_dashboard,
+        name='class_test_dashboard'
+    ),
+
+    path(
+        'class-tests/list/',
+        views.class_test_list,
+        name='class_test_list'
+    ),
+
+    path(
+        'class-tests/add/',
+        views.add_class_test,
+        name='add_class_test'
+    ),
+
+    path(
+        "class-tests/edit/<int:pk>/",
+        views.edit_class_test,
+        name="edit_class_test"
+    ),
+
+    path(
+        "class-tests/delete/<int:pk>/",
+        views.delete_class_test,
+        name="delete_class_test"
+    ),
+
+    path(
+        'class-tests/results/',
+        views.class_test_result_list,
+        name='class_test_result_list'
+    ),
+
+    path(
+        'class-tests/results/add/',
+        views.add_class_test_result,
+        name='add_class_test_result'
+    ),
+
+    path(
+        "class-test-result/edit/<int:pk>/",
+        views.edit_class_test_result,
+        name="edit_class_test_result"
+    ),
+
+    path(
+        "class-test-result/delete/<int:pk>/",
+        views.delete_class_test_result,
+        name="delete_class_test_result"
+    ),
 ]

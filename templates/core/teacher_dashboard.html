@@ -1,83 +1,16 @@
 {% extends 'base.html' %}
-
 {% block content %}
 
 <style>
-    .td-head {
-        background: linear-gradient(135deg, #0c9b57, #0b7cff);
-        color: white;
-        padding: 22px;
-        border-radius: 24px;
-        box-shadow: 0 16px 35px rgba(11,124,255,.22);
-        margin-bottom: 22px;
-    }
-
-    .td-card {
-        border: none;
-        border-radius: 22px;
-        padding: 20px;
-        background: #ffffff;
-        box-shadow: 0 14px 32px rgba(0,0,0,.08);
-        height: 100%;
-    }
-
-    .td-icon {
-        width: 52px;
-        height: 52px;
-        border-radius: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        margin-bottom: 12px;
-        background: #e0f2fe;
-        color: #075985;
-    }
-
-    .td-value {
-        font-size: 28px;
-        font-weight: 900;
-        color: #0f172a;
-    }
-
-    .td-label {
-        color: #64748b;
-        font-weight: 800;
-    }
-
-    .profile-box {
-        background: linear-gradient(135deg, #ecfdf5, #eff6ff);
-        border-radius: 24px;
-        padding: 22px;
-        border: 1px solid #dbeafe;
-        box-shadow: 0 12px 28px rgba(0,0,0,.06);
-    }
-
-    .teacher-photo {
-        width: 92px;
-        height: 92px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 5px solid white;
-        box-shadow: 0 12px 28px rgba(0,0,0,.18);
-    }
-
-    .quick-link {
-        display: block;
-        padding: 14px 16px;
-        border-radius: 16px;
-        background: #f8fafc;
-        text-decoration: none;
-        color: #0f172a;
-        font-weight: 900;
-        margin-bottom: 10px;
-        border: 1px solid #e5e7eb;
-    }
-
-    .quick-link:hover {
-        background: #e0f2fe;
-        color: #075985;
-    }
+.td-head{background:linear-gradient(135deg,#0c9b57,#0b7cff);color:white;padding:22px;border-radius:24px;box-shadow:0 16px 35px rgba(11,124,255,.22);margin-bottom:22px}
+.td-card{border:none;border-radius:22px;padding:20px;background:#fff;box-shadow:0 14px 32px rgba(0,0,0,.08);height:100%}
+.td-icon{width:52px;height:52px;border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;background:#e0f2fe;color:#075985}
+.td-value{font-size:28px;font-weight:900;color:#0f172a}
+.td-label{color:#64748b;font-weight:800}
+.profile-box{background:linear-gradient(135deg,#ecfdf5,#eff6ff);border-radius:24px;padding:22px;border:1px solid #dbeafe;box-shadow:0 12px 28px rgba(0,0,0,.06)}
+.teacher-photo{width:92px;height:92px;border-radius:50%;object-fit:cover;border:5px solid white;box-shadow:0 12px 28px rgba(0,0,0,.18)}
+.quick-link{display:block;padding:14px 16px;border-radius:16px;background:#f8fafc;text-decoration:none;color:#0f172a;font-weight:900;margin-bottom:10px;border:1px solid #e5e7eb}
+.quick-link:hover{background:#e0f2fe;color:#075985}
 </style>
 
 <div class="td-head">
@@ -113,7 +46,6 @@
 {% endif %}
 
 <div class="row g-3 mb-4">
-
     <div class="col-md-3">
         <div class="td-card">
             <div class="td-icon">📍</div>
@@ -145,11 +77,9 @@
             <div class="td-label">Absent Today</div>
         </div>
     </div>
-
 </div>
 
 <div class="row g-3">
-
     <div class="col-md-6">
         <div class="td-card">
             <h5 class="fw-bold mb-3">💰 Salary Summary</h5>
@@ -191,7 +121,127 @@
             {% endif %}
         </div>
     </div>
+</div>
 
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+
+            <div class="card-header text-white py-3"
+                 style="background:linear-gradient(135deg,#0f172a,#2563eb);">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <div>
+                        <h4 class="mb-1 fw-bold">📝 Assigned Class Complaints</h4>
+                        <small>Only your assigned class / section complaints</small>
+                    </div>
+
+                    <div class="mt-2 mt-md-0">
+                        <span class="badge bg-light text-dark px-3 py-2">Total {{ total_complaints }}</span>
+                        <span class="badge bg-danger px-3 py-2">Pending {{ pending_complaints }}</span>
+                        <span class="badge bg-success px-3 py-2">Solved {{ solved_complaints }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body">
+                {% if complaints %}
+                <div class="table-responsive">
+                    <table class="table align-middle table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Student</th>
+                                <th>Class</th>
+                                <th>Title</th>
+                                <th>Complaint</th>
+                                <th>Teacher Remark</th>
+                                <th>Status</th>
+                                <th width="180">Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for c in complaints %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+
+                                <td>
+                                    <div class="fw-bold">{{ c.student.student_name }}</div>
+                                    <small class="text-muted">{{ c.parent_name }}</small>
+                                </td>
+
+                                <td>
+                                    <span class="badge bg-primary">{{ c.student.class_assigned }}</span>
+                                    {% if c.student.section %}
+                                        <span class="badge bg-dark">{{ c.student.section }}</span>
+                                    {% endif %}
+                                </td>
+
+                                <td><strong>{{ c.title }}</strong></td>
+
+                                <td style="min-width:220px;">
+                                    {{ c.description|truncatechars:100 }}
+                                </td>
+
+                                <td style="min-width:220px;">
+                                    {% if c.teacher_solution %}
+                                        <div class="text-success fw-bold">
+                                            {{ c.teacher_solution|truncatechars:80 }}
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">No remark yet</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if c.status == "PENDING_TEACHER" or c.status == "Pending" %}
+                                        <span class="badge bg-danger">Pending Teacher</span>
+                                    {% elif c.status == "PENDING_ADMIN_APPROVAL" or c.status == "Pending Admin Approval" %}
+                                        <span class="badge bg-warning text-dark">Pending Admin</span>
+                                    {% elif c.status == "SOLVED" or c.status == "Solved" %}
+                                        <span class="badge bg-success">Solved</span>
+                                    {% elif c.status == "REJECTED" or c.status == "Rejected" %}
+                                        <span class="badge bg-secondary">Rejected</span>
+                                    {% else %}
+                                        <span class="badge bg-dark">{{ c.status }}</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    {% if c.status == "PENDING_ADMIN_APPROVAL" or c.status == "Pending Admin Approval" %}
+
+                                        <span class="badge bg-warning text-dark p-2">
+                                            Waiting Admin Approval
+                                        </span>
+
+                                    {% elif c.status == "SOLVED" or c.status == "Solved" %}
+
+                                        <span class="text-success fw-bold">✔ Completed</span>
+
+                                    {% else %}
+
+                                        <a href="/complaints/teacher-submit/{{ c.id }}/"
+                                           class="btn btn-primary btn-sm rounded-pill px-3">
+                                            🛠 Solve / Submit
+                                        </a>
+
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% else %}
+                    <div class="alert alert-success border-0 shadow-sm mb-0">
+                        ✅ No complaints found for your assigned class.
+                    </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
 </div>
 
 {% endblock %}

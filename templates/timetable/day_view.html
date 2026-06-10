@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.day-hero{
+    background:linear-gradient(135deg,#0f766e,#2563eb,#7c3aed);
+    color:white;
+    border-radius:22px;
+    padding:18px;
+    box-shadow:0 12px 30px rgba(15,23,42,.16);
+}
+.day-grid-card{
+    border:0;
+    border-radius:18px;
+    box-shadow:0 8px 22px rgba(15,23,42,.08);
+}
+.day-table{
+    font-size:13px;
+}
+.day-table th{
+    background:#f8fafc!important;
+    text-align:center;
+    vertical-align:middle;
+}
+.day-table td{
+    vertical-align:top;
+    min-width:210px;
+    height:75px;
+}
+.period-col{
+    width:130px;
+    min-width:130px!important;
+    font-weight:900;
+    background:#f1f5f9!important;
+}
+.routine-cell{
+    line-height:1.35;
+}
+.routine-cell b{
+    color:#111827;
+}
+.subject-text{
+    color:#1d4ed8;
+    font-weight:900;
+}
+.break-row td{
+    background:#e5e7eb!important;
+    text-align:center;
+    font-weight:900;
+    color:#64748b;
+}
+@media print{
+    .no-print,.sidebar,.topbar{display:none!important}
+    .content-area{padding:0!important}
+    @page{size:A4 landscape;margin:8mm}
+    .day-hero{
+        background:white!important;
+        color:#000!important;
+        box-shadow:none!important;
+        border-radius:0!important;
+        text-align:center;
+        padding:0!important;
+        margin-bottom:8px!important;
+    }
+    .day-grid-card{
+        box-shadow:none!important;
+        border:0!important;
+    }
+    .day-table{
+        font-size:10px;
+    }
+    .day-table td{
+        min-width:auto!important;
+        height:auto!important;
+        padding:4px!important;
+    }
+    .period-col{
+        width:90px!important;
+        min-width:90px!important;
+    }
+}
+</style>
+
+<div class="day-hero mb-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h4 class="fw-bold mb-1">📆 Day Wise Timetable</h4>
+            <div>{{ day }} {% if selected_class %}| Class Wise{% else %}| All Class{% endif %}</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap no-print">
+            <button onclick="window.print()" class="btn btn-success">🖨 Print This Page</button>
+            <a target="_blank" href="{% url 'timetable_print' %}?type=day_all&day={{ day }}" class="btn btn-light">A4 Day All Class</a>
+            {% if selected_class %}
+                <a target="_blank" href="{% url 'timetable_print' %}?type=day_class&day={{ day }}&class={{ selected_class }}&section={{ section }}" class="btn btn-warning">A4 Day Class</a>
+            {% endif %}
+            <a href="{% url 'weekly_timetable' %}" class="btn btn-secondary">Weekly Setup</a>
+        </div>
+    </div>
+</div>
+
+<form method="get" class="card card-body mb-3 no-print">
+    <div class="row g-2">
+        <div class="col-md-3">
+            <label class="form-label fw-bold">Day</label>
+            <select name="day" class="form-select">
+                {% for k,v in days %}
+                    <option value="{{ k }}" {% if day == k %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-bold">Class</label>
+            <select name="class" class="form-select">
+                <option value="">All Class</option>
+                {% for c in classes %}
+                    <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label fw-bold">Section</label>
+            <input type="text" name="section" value="{{ section }}" class="form-control" placeholder="A / B / Girls">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-success w-100">View</button>
+        </div>
+    </div>
+</form>
+
+{% if holiday %}
+    <div class="alert alert-danger fw-bold">This day is marked as Holiday: {{ holiday.title }}</div>
+{% endif %}
+
+<div class="card day-grid-card">
+    <div class="card-body table-responsive">
+        <table class="table table-bordered day-table">
+            <thead>
+                <tr>
+                    <th class="period-col">Period</th>
+                    {% for c in display_classes %}
+                        <th>{{ c }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for p in periods %}
+                {% if p.is_break %}
+                    <tr class="break-row">
+                        <td class="period-col">
+                            {{ p.name }}<br>
+                            <small>{{ p.start_time }} - {{ p.end_time }}</small>
+                        </td>
+                        <td colspan="999">Tiffin / Break</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td class="period-col">
+                            {{ p.name }}<br>
+                            <small>{{ p.start_time }} - {{ p.end_time }}</small>
+                        </td>
+                        {% for c in display_classes %}
+                            <td>
+                                {% for e in entries %}
+                                    {% if e.period_id == p.id and e.class_assigned_id == c.id %}
+                                        <div class="routine-cell">
+                                            <b>Teacher :</b> {{ e.teacher|default:"-" }}<br>
+                                            <b>Room:</b> {{ e.room_no|default:"-" }}<br>
+                                            <b>Subject:</b> <span class="subject-text">{{ e.subject|default:"-" }}</span>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

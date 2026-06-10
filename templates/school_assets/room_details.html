@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <div>
+        <h4 class="fw-bold mb-0">🏫 {{ room.room_no }} - {{ room.room_name|default:"Room Details" }}</h4>
+        <div class="text-muted">{{ room.get_room_type_display }} | {{ room.building|default:"-" }} | {{ room.floor|default:"-" }}</div>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'asset_room_list' %}" class="btn btn-secondary">Back</a>
+        {% if can_manage_assets %}<a href="{% url 'asset_item_add' %}" class="btn btn-primary">➕ Add Asset</a>{% endif %}
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    <div class="col-md-4"><div class="card"><div class="card-body"><h6>Total Items</h6><h2>{{ total_assets }}</h2></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><h6>Repair Needed</h6><h2>{{ repair_assets }}</h2></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><h6>Capacity</h6><h2>{{ room.capacity }}</h2></div></div></div>
+</div>
+
+<div class="table-responsive">
+<table class="table table-bordered align-middle">
+    <thead class="table-light"><tr><th>Category</th><th>Item</th><th>Code</th><th>Qty</th><th>Condition</th><th>Status</th><th>Last Check</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for a in assets %}
+    <tr>
+        <td>{{ a.category.name }}</td>
+        <td>{{ a.item_name }}</td>
+        <td>{{ a.item_code|default:"-" }}</td>
+        <td class="fw-bold">{{ a.quantity }}</td>
+        <td>{{ a.get_condition_display }}</td>
+        <td>{{ a.get_status_display }}</td>
+        <td>{{ a.last_checked_date|default:"-" }}</td>
+        <td>{% if can_manage_assets %}<a href="{% url 'asset_item_edit' a.id %}" class="btn btn-sm btn-warning">Edit</a>{% endif %}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="8" class="text-center text-muted">No assets in this room.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

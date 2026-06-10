@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.beh-head{
+    background:linear-gradient(135deg,#7c3aed,#2563eb);
+    color:white;
+    padding:24px;
+    border-radius:24px;
+    box-shadow:0 14px 35px rgba(37,99,235,.25);
+}
+.beh-card{
+    border:none;
+    border-radius:22px;
+    padding:22px;
+    background:white;
+    box-shadow:0 12px 30px rgba(0,0,0,.08);
+    height:100%;
+}
+.beh-icon{
+    width:55px;
+    height:55px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#ede9fe;
+    color:#6d28d9;
+    font-size:26px;
+    margin-bottom:12px;
+}
+.beh-value{
+    font-size:30px;
+    font-weight:900;
+    color:#0f172a;
+}
+.quick-btn{
+    display:block;
+    padding:14px 16px;
+    border-radius:16px;
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    text-decoration:none;
+    color:#0f172a;
+    font-weight:900;
+    margin-bottom:10px;
+}
+.quick-btn:hover{
+    background:#ede9fe;
+    color:#6d28d9;
+}
+</style>
+
+<div class="beh-head mb-4">
+    <h3 class="fw-bold mb-1">🌟 Behaviour & Skills Dashboard</h3>
+    <div>Student behaviour, discipline and skill evaluation system</div>
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-3">
+        <div class="beh-card">
+            <div class="beh-icon">📋</div>
+            <div class="beh-value">{{ total_behaviour_records }}</div>
+            <div class="text-muted fw-bold">Total Behaviour Records</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="beh-card">
+            <div class="beh-icon">✅</div>
+            <div class="beh-value">{{ positive_records }}</div>
+            <div class="text-muted fw-bold">Positive Records</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="beh-card">
+            <div class="beh-icon">⚠️</div>
+            <div class="beh-value">{{ negative_records }}</div>
+            <div class="text-muted fw-bold">Negative Records</div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="beh-card">
+            <div class="beh-icon">🌟</div>
+            <div class="beh-value">{{ total_skill_evaluations }}</div>
+            <div class="text-muted fw-bold">Skill Evaluations</div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-3">
+
+    <div class="col-md-4">
+        <div class="beh-card">
+            <h5 class="fw-bold mb-3">⚡ Quick Actions</h5>
+
+            <a href="{% url 'behaviour_record_add' %}" class="quick-btn">
+                ➕ Add Behaviour Record
+            </a>
+
+            <a href="{% url 'behaviour_record_list' %}" class="quick-btn">
+                📋 View Behaviour Records
+            </a>
+
+            <a href="{% url 'skill_evaluation_add' %}" class="quick-btn">
+                ✍️ Add Skill Evaluation
+            </a>
+
+            <a href="{% url 'skill_evaluation_list' %}" class="quick-btn">
+                🌟 View Skill Evaluations
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="beh-card">
+            <h5 class="fw-bold mb-3">🕘 Recent Behaviour Records</h5>
+
+            {% if recent_behaviours %}
+            <div class="table-responsive p-0 shadow-none">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>#</th>
+                            <th>Student</th>
+                            <th>Type</th>
+                            <th>Title</th>
+                            <th>Points</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in recent_behaviours %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td class="fw-bold">{{ r.student.student_name }}</td>
+                            <td>
+                                {% if r.behaviour_type == "Positive" %}
+                                    <span class="badge bg-success">Positive</span>
+                                {% elif r.behaviour_type == "Negative" %}
+                                    <span class="badge bg-danger">Negative</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Neutral</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ r.title }}</td>
+                            <td class="fw-bold">{{ r.points }}</td>
+                            <td>{{ r.date }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <div class="alert alert-info mb-0">
+                    No behaviour records found.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

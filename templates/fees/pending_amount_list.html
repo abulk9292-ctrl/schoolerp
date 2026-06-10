@@ -175,6 +175,16 @@
                     {% endfor %}
                 </select>
             </div>
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Select Section</label>
+                    <select name="section" class="form-select form-select-sm">
+                        <option value="">All Sections</option>
+                        <option value="A" {% if selected_section == "A" %}selected{% endif %}>A</option>
+                        <option value="B" {% if selected_section == "B" %}selected{% endif %}>B</option>
+                        <option value="C" {% if selected_section == "C" %}selected{% endif %}>C</option>
+                        <option value="D" {% if selected_section == "D" %}selected{% endif %}>D</option>
+                    </select>
+                </div>
 
             <div class="col-md-4">
                 <label class="form-label fw-bold">Search</label>
@@ -224,11 +234,13 @@
                     <th class="name-col">Name</th>
                     <th class="father-col">Father Name</th>
                     <th>Mobile</th>
+                    <th>Section</th>
                     <th>Balance</th>
                     {% for month in months %}
                         <th>{{ month|slice:":3" }}</th>
                     {% endfor %}
                     <th>Total / SMS</th>
+                    <th class="no-print">Promise</th>
                     <th class="no-print">Send</th>
                 </tr>
             </thead>
@@ -240,6 +252,7 @@
                     <td class="name-col">{{ row.student.student_name }}</td>
                     <td class="father-col">{{ row.student.father_name }}</td>
                     <td>{{ row.student.phone }}</td>
+                    <td>{{ row.student.section|default:"-" }}</td>
                     <td>
                         {% if row.balance > 0 %}
                             <span class="month-due">{{ row.balance }}</span>
@@ -264,6 +277,7 @@
 
                     <td><span class="month-due">{{ row.total_pending }}</span></td>
 
+                    <td class="no-print"><a href="{% url 'fee_followup_add_student' row.student.id %}" class="btn btn-sm btn-danger">Promise</a></td>
                     <td class="no-print">
                         <input type="checkbox" class="sms-checkbox" value="{{ row.student.phone }}">
                     </td>
@@ -275,7 +289,7 @@
                 {% endfor %}
 
                 <tr class="summary-row">
-                    <td colspan="5">Total</td>
+                    <td colspan="6">Total</td>
                     <td></td>
                     {% for month in months %}
                         <td></td>

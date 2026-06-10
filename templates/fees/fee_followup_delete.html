@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="card card-box">
+    <div class="card-body">
+        <h3 class="mb-3 text-danger">Delete Fee Follow-up</h3>
+
+        <p>
+            Are you sure you want to delete follow-up for
+            <strong>{{ followup.student.student_name }}</strong>
+            promised on <strong>{{ followup.promise_date }}</strong>?
+        </p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Yes, Delete</button>
+            <a href="{% url 'fee_followup_list' %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

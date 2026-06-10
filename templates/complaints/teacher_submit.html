@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+<div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+<div class="card-header text-white py-3" style="background:linear-gradient(135deg,#0f172a,#2563eb);">
+<h4 class="mb-0">🛠 Teacher Complaint Solution</h4>
+<small>Teacher Status + Teacher Remark</small>
+</div>
+<div class="card-body">
+<p><b>Student:</b> {{ complaint.student.student_name }}</p>
+<p><b>Class:</b> {{ complaint.student.class_assigned }} {% if complaint.student.section %}- {{ complaint.student.section }}{% endif %}</p>
+<p><b>Complaint:</b> {{ complaint.title }}</p>
+<div class="alert alert-light border">{{ complaint.description }}</div>
+<form method="POST">{% csrf_token %}
+<div class="mb-3">
+<label class="form-label fw-bold">Teacher Status</label>
+<select name="teacher_status" class="form-control" required>
+<option value="">Select Teacher Status</option>
+<option value="Solved by Teacher">Solved by Teacher</option>
+<option value="Need Parent Meeting">Need Parent Meeting</option>
+<option value="Need Admin Help">Need Admin Help</option>
+<option value="Student Counselling Required">Student Counselling Required</option>
+<option value="Discipline Action Required">Discipline Action Required</option>
+</select>
+</div>
+<div class="mb-4">
+<label class="form-label fw-bold">Teacher Remark / Solution</label>
+<textarea name="teacher_solution" class="form-control" rows="6" required>{{ complaint.teacher_solution|default:'' }}</textarea>
+</div>
+<button type="submit" class="btn btn-success px-4 rounded-pill">✅ Submit to Admin Approval</button>
+<a href="{% url 'teacher_complaint_dashboard' %}" class="btn btn-secondary px-4 rounded-pill">Back</a>
+</form>
+</div>
+</div>
+</div>
+{% endblock %}

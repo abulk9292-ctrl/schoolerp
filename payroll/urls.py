@@ -12,4 +12,21 @@ urlpatterns = [
     path('salary/<int:pk>/delete/', views.salary_delete, name='salary_delete'),
     path('salary/<int:pk>/print/', views.salary_print, name='salary_print'),
     path('get-employee-absent-days/', views.get_employee_absent_days, name='get_employee_absent_days'),
+    path(
+        'salary/recycle-bin/',
+        views.salary_recycle_bin,
+        name='salary_recycle_bin'
+    ),
+
+    path(
+        'salary/restore/<int:pk>/',
+        views.salary_restore,
+        name='salary_restore'
+    ),
+
+    path(
+        'salary/permanent-delete/<int:pk>/',
+        views.salary_permanent_delete,
+        name='salary_permanent_delete'
+    ),
 ]

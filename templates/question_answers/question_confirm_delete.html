@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .page-wrap{padding:18px}
+    .glass-card{background:#fff;border-radius:18px;box-shadow:0 12px 35px rgba(15,23,42,.08);border:1px solid rgba(15,23,42,.08)}
+    .stat-card{border-radius:18px;padding:18px;background:linear-gradient(135deg,#111827,#7c3aed);color:white;box-shadow:0 12px 30px rgba(124,58,237,.22)}
+    .btn-soft{border-radius:12px;font-weight:700}
+    .table thead th{background:#f8fafc;font-size:13px;text-transform:uppercase}
+</style>
+
+<div class="page-wrap">
+    <div class="glass-card p-4">
+        <h3 class="fw-bold text-danger">Delete Question?</h3>
+        <p>Are you sure you want to delete <b>{{ question.title }}</b>?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button class="btn btn-danger btn-soft">Yes, Delete</button>
+            <a href="{% url 'question_answers:question_list' %}" class="btn btn-secondary btn-soft">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

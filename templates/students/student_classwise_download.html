@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+@page{
+    size:A4 portrait;
+    margin:8mm;
+}
+
+.print-sheet{
+    background:white;
+    padding:12px;
+    border-radius:16px;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+
+.school-title{
+    text-align:center;
+    font-size:22px;
+    font-weight:900;
+    color:#0f2f66;
+}
+
+.sub-title{
+    text-align:center;
+    font-size:13px;
+    font-weight:800;
+    margin-bottom:8px;
+}
+
+.student-table{
+    font-size:10px;
+    margin-bottom:0;
+}
+
+.student-table th{
+    background:#0f2f66!important;
+    color:white!important;
+    text-align:center;
+    padding:4px!important;
+}
+
+.student-table td{
+    padding:4px!important;
+    text-align:center;
+    font-weight:700;
+}
+
+.student-table tbody tr{
+    height:17px;
+}
+
+@media print{
+    body *{visibility:hidden}
+    .print-sheet,.print-sheet *{visibility:visible}
+
+    .print-sheet{
+        position:absolute;
+        top:0;
+        left:0;
+        width:100%;
+        box-shadow:none!important;
+        border-radius:0!important;
+        padding:0!important;
+    }
+
+    .no-print,.sidebar,.topbar{
+        display:none!important;
+    }
+
+    .content-area,.main-area{
+        padding:0!important;
+        margin:0!important;
+        width:100%!important;
+    }
+
+    .student-table{
+        font-size:9px;
+    }
+
+    .student-table td,
+    .student-table th{
+        padding:3px!important;
+    }
+}
+</style>
+
+<div class="container-fluid mt-3">
+
+    <div class="card shadow-sm mb-3 no-print">
+        <div class="card-body">
+
+            <form method="get">
+
+                <div class="row g-3">
+
+                    <div class="col-md-2">
+                        <label class="fw-bold">Class</label>
+                        <select name="class_id" class="form-select">
+                            <option value="">All</option>
+                            {% for cls in classes %}
+                            <option value="{{ cls.id }}" {% if selected_class == cls.id|stringformat:"s" %}selected{% endif %}>
+                                {{ cls.class_name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="fw-bold">Section</label>
+                        <select name="section" class="form-select">
+                            <option value="">All</option>
+                            {% for sec in sections %}
+                            <option value="{{ sec }}" {% if selected_section == sec %}selected{% endif %}>
+                                {{ sec }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="fw-bold">Gender</label>
+                        <select name="gender" class="form-select">
+                            <option value="">All</option>
+                            <option value="Male" {% if selected_gender == "Male" %}selected{% endif %}>Boys</option>
+                            <option value="Female" {% if selected_gender == "Female" %}selected{% endif %}>Girls</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="fw-bold">Religion</label>
+                        <select name="religion" class="form-select">
+                            <option value="">All</option>
+                            <option value="Islam" {% if selected_religion == "Islam" %}selected{% endif %}>Islam</option>
+                            <option value="Hindu" {% if selected_religion == "Hindu" %}selected{% endif %}>Hindu</option>
+                            <option value="Christian" {% if selected_religion == "Christian" %}selected{% endif %}>Christian</option>
+                            <option value="Other" {% if selected_religion == "Other" %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="fw-bold">Village</label>
+                        <select name="village" class="form-select">
+                            <option value="">All</option>
+                            {% for v in villages %}
+                            <option value="{{ v }}" {% if selected_village == v %}selected{% endif %}>
+                                {{ v }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button class="btn btn-primary w-100">Filter</button>
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <label class="fw-bold mb-2">Select Columns for Download / Print</label>
+
+                <div class="row g-2">
+                    <div class="col-md-2"><label><input type="checkbox" name="columns" value="roll" {% if "roll" in selected_columns %}checked{% endif %}> Roll</label></div>
+                    <div class="col-md-2"><label><input type="checkbox" name="columns" value="student_id" {% if "student_id" in selected_columns %}checked{% endif %}> Student ID</label></div>
+                    <div class="col-md-2"><label><input type="checkbox" name="columns" value="student_name" {% if "student_name" in selected_columns %}checked{% endif %}> Name</label></div>
+                    <div class="col-md-2"><label><input type="checkbox" name="columns" value="father_name" {% if "father_name" in selected_columns %}checked{% endif %}> Father</label></div>
+                    <div class="col-md-2"><label><input type="checkbox" name="columns" value="mother_name" {% if "mother_name" in selected_columns %}checked{% endif %}> Mother</label></div>
+                    <div class="col-md-2"><label><input type="checkbox" name="columns" value="class" {% if "class" in selected_columns %}checked{% endif %}> Class</label></div>
+                    <div class="col-md-2"><label><input type="checkbox" name="columns" value="section" {% if "section" in selected_columns %}checked{% endif %}> Section</label></div>
+                    <div class="col-md-2"><label><input type="checkbox" name="columns" value="gender" {% if "gender" in selected_columns %}checked{% endif %}> Gender</label></div>
+                    <div class="col-md-2"><label><input type="checkbox" name="columns" value="religion" {% if "religion" in selected_columns %}checked{% endif %}> Religion</label></div>
+                    <div class="col-md-2"><label><input type="checkbox" name="columns" value="village" {% if "village" in selected_columns %}checked{% endif %}> Village</label></div>
+                    <div class="col-md-2"><label><input type="checkbox" name="columns" value="phone" {% if "phone" in selected_columns %}checked{% endif %}> Phone</label></div>
+                    <div class="col-md-2"><label><input type="checkbox" name="columns" value="address" {% if "address" in selected_columns %}checked{% endif %}> Address</label></div>
+                </div>
+                <div class="col-md-2">
+                    <label>
+                        <input type="checkbox"
+                               name="columns"
+                               value="blank_column"
+                               {% if "blank_column" in selected_columns %}checked{% endif %}>
+                        Blank Column
+                    </label>
+                </div>
+
+                <div class="mt-3">
+                    <button class="btn btn-dark">Apply Columns</button>
+                    <button type="button" onclick="window.print()" class="btn btn-success">
+                        🖨 Download / Print A4
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <div class="print-sheet">
+
+        <div class="school-title">AL RAHMAN MISSION</div>
+        <div class="sub-title">
+            Class Wise Student List |
+            Session: {{ selected_session }} |
+            Total Students: {{ students|length }}
+        </div>
+
+        <table class="table table-bordered student-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    {% if "roll" in selected_columns %}<th>Roll</th>{% endif %}
+                    {% if "student_id" in selected_columns %}<th>Student ID</th>{% endif %}
+                    {% if "student_name" in selected_columns %}<th>Name</th>{% endif %}
+                    {% if "father_name" in selected_columns %}<th>Father</th>{% endif %}
+                    {% if "mother_name" in selected_columns %}<th>Mother</th>{% endif %}
+                    {% if "class" in selected_columns %}<th>Class</th>{% endif %}
+                    {% if "section" in selected_columns %}<th>Sec</th>{% endif %}
+                    {% if "gender" in selected_columns %}<th>Gender</th>{% endif %}
+                    {% if "religion" in selected_columns %}<th>Religion</th>{% endif %}
+                    {% if "village" in selected_columns %}<th>Village</th>{% endif %}
+                    {% if "phone" in selected_columns %}<th>Phone</th>{% endif %}
+                    {% if "address" in selected_columns %}<th>Address</th>{% endif %}
+                    {% if "blank_column" in selected_columns %}<th style="min-width:120px;">Blank</th>{% endif %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for s in students %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    {% if "roll" in selected_columns %}<td>{{ s.roll_no|default:"-" }}</td>{% endif %}
+                    {% if "student_id" in selected_columns %}<td>{{ s.student_id }}</td>{% endif %}
+                    {% if "student_name" in selected_columns %}<td>{{ s.student_name }}</td>{% endif %}
+                    {% if "father_name" in selected_columns %}<td>{{ s.father_name|default:"-" }}</td>{% endif %}
+                    {% if "mother_name" in selected_columns %}<td>{{ s.mother_name|default:"-" }}</td>{% endif %}
+                    {% if "class" in selected_columns %}<td>{{ s.class_assigned }}</td>{% endif %}
+                    {% if "section" in selected_columns %}<td>{{ s.section|default:"-" }}</td>{% endif %}
+                    {% if "gender" in selected_columns %}<td>{{ s.gender|default:"-" }}</td>{% endif %}
+                    {% if "religion" in selected_columns %}<td>{{ s.religion|default:"-" }}</td>{% endif %}
+                    {% if "village" in selected_columns %}<td>{{ s.village|default:"-" }}</td>{% endif %}
+                    {% if "phone" in selected_columns %}<td>{{ s.phone|default:"-" }}</td>{% endif %}
+                    {% if "address" in selected_columns %}<td>{{ s.address|default:"-" }}</td>{% endif %}
+                    {% if "blank_column" in selected_columns %}<td></td>{% endif %}
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="13" class="text-center text-danger fw-bold">
+                        No students found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

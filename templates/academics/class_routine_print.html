@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+@page{
+    size:A4 landscape;
+    margin:8mm;
+}
+
+.routine-filter-card{
+    border:none;
+    border-radius:18px;
+    box-shadow:0 10px 28px rgba(0,0,0,0.08);
+}
+
+.print-area{
+    background:#fff;
+    padding:18px;
+    border-radius:14px;
+    border:1px solid #dbeafe;
+}
+
+.school-title{
+    text-align:center;
+    font-weight:900;
+    font-size:27px;
+    color:#0f2f66;
+    letter-spacing:.5px;
+}
+
+.sub-title{
+    text-align:center;
+    font-size:16px;
+    font-weight:700;
+    margin-bottom:15px;
+    color:#111827;
+}
+
+.info-line{
+    text-align:center;
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:12px;
+    color:#374151;
+}
+
+.routine-table{
+    font-size:13px;
+}
+
+.routine-table th{
+    background:#0f2f66!important;
+    color:white!important;
+    text-align:center;
+    vertical-align:middle;
+    white-space:nowrap;
+}
+
+.routine-table td{
+    text-align:center;
+    vertical-align:middle;
+    font-weight:600;
+}
+
+.routine-table .day-cell{
+    font-weight:900;
+    color:#0f2f66;
+}
+
+.no-data{
+    color:#dc2626;
+    font-weight:900;
+    padding:18px!important;
+}
+
+@media print{
+    body{
+        background:white!important;
+    }
+
+    body *{
+        visibility:hidden;
+    }
+
+    .print-area, .print-area *{
+        visibility:visible;
+    }
+
+    .print-area{
+        position:absolute;
+        left:0;
+        top:0;
+        width:100%;
+        box-shadow:none!important;
+        border:none!important;
+        padding:0!important;
+        border-radius:0!important;
+    }
+
+    .no-print{
+        display:none!important;
+    }
+
+    .routine-table{
+        font-size:12px;
+    }
+
+    .table th,
+    .table td{
+        padding:5px!important;
+    }
+}
+</style>
+
+<div class="container-fluid mt-3">
+
+    <div class="card routine-filter-card no-print mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Select Class</label>
+                    <select name="class_name" class="form-select" required>
+                        <option value="">-- Select Class --</option>
+                        {% for cls in classes %}
+                            <option value="{{ cls }}" {% if selected_class == cls %}selected{% endif %}>
+                                {{ cls }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Section</label>
+                    <select name="section" class="form-select">
+                        <option value="">All Sections</option>
+                        {% if sections %}
+                            {% for sec in sections %}
+                                <option value="{{ sec }}" {% if selected_section == sec %}selected{% endif %}>
+                                    {{ sec }}
+                                </option>
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100">
+                        🔍 Show
+                    </button>
+                </div>
+
+                {% if selected_class %}
+                <div class="col-md-3">
+                    <button type="button" onclick="window.print()" class="btn btn-success w-100">
+                        🖨 Print Routine
+                    </button>
+                </div>
+                {% endif %}
+
+            </form>
+        </div>
+    </div>
+
+    {% if selected_class %}
+    <div class="print-area shadow-sm">
+
+        <div class="school-title">AL RAHMAN MISSION</div>
+
+        <div class="sub-title">
+            Class Routine / Timetable
+        </div>
+
+        <div class="info-line">
+            Class: {{ selected_class }}
+            {% if selected_section %}
+                | Section: {{ selected_section }}
+            {% endif %}
+        </div>
+
+        <table class="table table-bordered table-striped routine-table">
+            <thead>
+                <tr>
+                    <th width="120">Day</th>
+                    <th width="120">Period</th>
+                    <th width="150">Time</th>
+                    <th>Subject</th>
+                    <th>Teacher</th>
+                    <th width="100">Room</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for routine in routines %}
+                <tr>
+                    <td class="day-cell">{{ routine.day }}</td>
+                    <td>{{ routine.period }}</td>
+                    <td>
+                        {{ routine.start_time|time:"h:i A" }}
+                        -
+                        {{ routine.end_time|time:"h:i A" }}
+                    </td>
+                    <td>{{ routine.subject }}</td>
+                    <td>{{ routine.teacher|default:"-" }}</td>
+                    <td>{{ routine.room|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center no-data">
+                        No routine found for this class.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

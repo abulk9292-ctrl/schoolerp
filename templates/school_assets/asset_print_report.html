@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+@media print{.no-print{display:none!important}.print-title{text-align:center}.table{font-size:11px}}
+</style>
+<div class="d-flex justify-content-between mb-3 no-print">
+    <h4 class="fw-bold">🖨 Asset Print Report</h4>
+    <button onclick="window.print()" class="btn btn-success">Print</button>
+</div>
+
+<div class="print-title mb-3">
+    <h3 class="fw-bold">AL RAHMAN MISSION</h3>
+    <h5>School Assets / Room Monitor Report</h5>
+    <div>Date: {{ print_date|date:"d-m-Y h:i A" }} | Total Quantity: {{ total_quantity }}</div>
+</div>
+
+<table class="table table-bordered align-middle">
+    <thead>
+        <tr><th>SL</th><th>Room</th><th>Category</th><th>Item</th><th>Code</th><th>Qty</th><th>Condition</th><th>Status</th><th>Remarks</th></tr>
+    </thead>
+    <tbody>
+    {% for a in items %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ a.room.room_no|default:"-" }}</td>
+        <td>{{ a.category.name }}</td>
+        <td>{{ a.item_name }}</td>
+        <td>{{ a.item_code|default:"-" }}</td>
+        <td>{{ a.quantity }}</td>
+        <td>{{ a.get_condition_display }}</td>
+        <td>{{ a.get_status_display }}</td>
+        <td>{{ a.remarks|default:"" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="9" class="text-center">No asset found.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

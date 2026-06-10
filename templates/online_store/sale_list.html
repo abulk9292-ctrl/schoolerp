@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3"><h4 class="fw-bold">Sales</h4><a href="{% url 'store_pos' %}" class="btn btn-primary">New Sale</a></div>
+<form method="get" class="card card-body mb-3"><div class="row g-2"><div class="col-md-10"><input name="q" value="{{ q }}" class="form-control" placeholder="Search invoice/customer/mobile"></div><div class="col-md-2"><button class="btn btn-success w-100">Search</button></div></div></form>
+<div class="table-responsive"><table class="table table-bordered"><tr><th>Date</th><th>Invoice</th><th>Customer</th><th>Total</th><th>Paid</th><th>Due</th><th>Action</th></tr>{% for s in sales %}<tr><td>{{ s.sale_date|date:"d-m-Y h:i A" }}</td><td>{{ s.invoice_no }}</td><td>{{ s.customer_name|default:"-" }}</td><td>₹{{ s.grand_total }}</td><td>₹{{ s.paid_amount }}</td><td>₹{{ s.due_amount }}</td><td><a href="{% url 'store_sale_invoice' s.id %}" class="btn btn-sm btn-primary">Invoice</a> <a href="{% url 'store_sale_delete' s.id %}" class="btn btn-sm btn-danger">Delete</a></td></tr>{% empty %}<tr><td colspan="7" class="text-center">No sale.</td></tr>{% endfor %}</table></div>
+{% endblock %}

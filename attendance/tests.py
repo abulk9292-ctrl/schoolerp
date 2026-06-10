@@ -1,3 +1,3 @@
 from django.test import TestCase
 
-# Create your tests here.
+# Attendance tests can be added here later.

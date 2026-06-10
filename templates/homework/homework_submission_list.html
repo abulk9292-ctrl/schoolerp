@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.sub-page{background:linear-gradient(135deg,#f8fafc,#eef6ff);min-height:100vh;padding:22px;border-radius:18px}
+.sub-hero{background:linear-gradient(135deg,#0f172a,#7c3aed,#2563eb);color:white;border-radius:28px;padding:24px;box-shadow:0 18px 45px rgba(124,58,237,.25)}
+.sub-card{background:white;border-radius:24px;box-shadow:0 12px 30px rgba(15,23,42,.08);border:1px solid #e5e7eb;overflow:hidden}
+.sub-table th{background:#0f172a!important;color:white!important;font-size:12px;text-transform:uppercase}
+.sub-table td{vertical-align:middle}
+.badge-pill{border-radius:999px;padding:7px 12px;font-weight:800}
+</style>
+
+<div class="sub-page">
+    <div class="sub-hero mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2 class="fw-bold mb-1">📥 Homework Submissions</h2>
+                <div>Teacher Review Center</div>
+            </div>
+            <a href="{% url 'homework_list' %}" class="btn btn-light fw-bold rounded-pill">📚 Homework List</a>
+        </div>
+    </div>
+
+    <div class="sub-card mb-3 p-3">
+        <form method="get" class="row g-2">
+            <div class="col-md-5">
+                <input type="text" name="search" value="{{ search|default:'' }}" class="form-control rounded-4" placeholder="Search student name">
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-control rounded-4">
+                    <option value="">All Status</option>
+                    <option value="Submitted" {% if selected_status == "Submitted" %}selected{% endif %}>Submitted</option>
+                    <option value="Late" {% if selected_status == "Late" %}selected{% endif %}>Late</option>
+                    <option value="Reviewed" {% if selected_status == "Reviewed" %}selected{% endif %}>Reviewed</option>
+                    <option value="Rejected" {% if selected_status == "Rejected" %}selected{% endif %}>Rejected</option>
+                </select>
+            </div>
+            <div class="col-md-2"><button class="btn btn-primary w-100 fw-bold rounded-4">Filter</button></div>
+            <div class="col-md-2"><a href="{% url 'homework_submission_list' %}" class="btn btn-secondary w-100 fw-bold rounded-4">Reset</a></div>
+        </form>
+    </div>
+
+    <div class="sub-card">
+        <div class="table-responsive">
+            <table class="table table-hover sub-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Homework</th>
+                        <th>Subject</th>
+                        <th>Submitted</th>
+                        <th>Status</th>
+                        <th>Marks</th>
+                        <th>File</th>
+                        <th width="140">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in submissions %}
+                    <tr>
+                        <td><b>{{ s.student.student_name }}</b><br><small>{{ s.student.student_id }}</small></td>
+                        <td>{{ s.homework.title }}</td>
+                        <td>{{ s.homework.subject }}</td>
+                        <td>{{ s.submitted_at }}</td>
+                        <td>
+                            {% if s.status == "Reviewed" %}
+                                <span class="badge bg-success badge-pill">Reviewed</span>
+                            {% elif s.status == "Late" %}
+                                <span class="badge bg-danger badge-pill">Late</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark badge-pill">{{ s.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ s.marks|default:0 }}</td>
+                        <td>
+                            {% if s.submitted_file %}
+                                <a href="{{ s.submitted_file.url }}" target="_blank" class="btn btn-info btn-sm fw-bold rounded-pill">View</a>
+                            {% else %}-{% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'homework_submission_review' s.id %}" class="btn btn-warning btn-sm fw-bold rounded-pill">Review</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="text-center text-muted fw-bold py-5">No submissions found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

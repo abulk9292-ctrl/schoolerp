@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3 no-print">
+    <h4 class="fw-bold">🏫 Room Wise Asset Report</h4>
+    <button onclick="window.print()" class="btn btn-success">🖨 Print</button>
+</div>
+
+{% for room in rooms %}
+<div class="card mb-3">
+    <div class="card-header fw-bold">{{ room.room_no }} - {{ room.room_name|default:"" }}</div>
+    <div class="card-body table-responsive">
+        <table class="table table-sm table-bordered">
+            <thead><tr><th>Category</th><th>Item</th><th>Qty</th><th>Condition</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for a in room.assets.all %}
+            <tr><td>{{ a.category.name }}</td><td>{{ a.item_name }}</td><td>{{ a.quantity }}</td><td>{{ a.get_condition_display }}</td><td>{{ a.get_status_display }}</td></tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center text-muted">No assets.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

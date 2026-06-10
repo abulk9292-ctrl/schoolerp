@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.reset-head{
+    background:linear-gradient(135deg,#7f1d1d,#dc2626);
+    color:white;
+    padding:22px;
+    border-radius:22px;
+    margin-bottom:20px;
+}
+
+.card-box{
+    border:none;
+    border-radius:22px;
+    box-shadow:0 10px 28px rgba(0,0,0,0.08);
+}
+</style>
+
+<div class="container mt-4">
+
+    <div class="reset-head">
+        <h3 class="fw-bold mb-1">♻ Attendance Reset</h3>
+        <div>Date range + class + section wise attendance reset system</div>
+    </div>
+
+    <div class="card card-box p-4 mb-4">
+
+        <form method="get" class="row g-3">
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">From Date</label>
+                <input type="date" name="from_date" value="{{ from_date }}" class="form-control" required>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">To Date</label>
+                <input type="date" name="to_date" value="{{ to_date }}" class="form-control" required>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Class</label>
+                <select name="class_id" class="form-select">
+                    <option value="">All Classes</option>
+                    {% for c in classes %}
+                        <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>
+                            {{ c.class_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Section</label>
+                <input type="text" name="section" value="{{ selected_section|default:'' }}" class="form-control" placeholder="A">
+            </div>
+
+            <div class="col-md-1 d-flex align-items-end">
+                <button class="btn btn-primary w-100">
+                    Show
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+    {% if from_date and to_date %}
+
+    <div class="card card-box p-4 border-danger">
+
+        <h5 class="fw-bold text-danger">
+            ⚠ Reset Preview
+        </h5>
+
+        <p class="mb-2">
+            Selected attendance records:
+            <strong class="text-danger">{{ reset_count }}</strong>
+        </p>
+
+        <p class="text-muted">
+            From <b>{{ from_date }}</b> to <b>{{ to_date }}</b>
+        </p>
+
+        <form method="post"
+              onsubmit="return confirm('Are you sure? This attendance data will be permanently deleted.');">
+
+            {% csrf_token %}
+
+            <input type="hidden" name="from_date" value="{{ from_date }}">
+            <input type="hidden" name="to_date" value="{{ to_date }}">
+            <input type="hidden" name="class_id" value="{{ selected_class }}">
+            <input type="hidden" name="section" value="{{ selected_section }}">
+            <input type="hidden" name="confirm_reset" value="YES">
+
+            <button class="btn btn-danger">
+                🗑 Confirm Reset Attendance
+            </button>
+
+            <a href="{% url 'attendance_reset' %}" class="btn btn-secondary">
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

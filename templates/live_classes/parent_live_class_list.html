@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .page-wrap{padding:18px}
+    .glass-card{background:#fff;border-radius:18px;box-shadow:0 12px 35px rgba(15,23,42,.08);border:1px solid rgba(15,23,42,.08)}
+    .stat-card{border-radius:18px;padding:18px;background:linear-gradient(135deg,#0f172a,#2563eb);color:white;box-shadow:0 12px 30px rgba(37,99,235,.22)}
+    .btn-soft{border-radius:12px;font-weight:700}
+    .table thead th{background:#f8fafc;font-size:13px;text-transform:uppercase}
+    .badge-soft{border-radius:30px;padding:7px 12px;font-weight:700}
+</style>
+
+<div class="page-wrap">
+    <h3 class="fw-bold mb-3">🎥 Student Live Classes</h3>
+    <div class="glass-card p-3 table-responsive">
+        <table class="table table-hover align-middle">
+            <thead><tr><th>Title</th><th>Subject</th><th>Start</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+            {% for item in live_classes %}
+                <tr>
+                    <td class="fw-bold">{{ item.title }}</td>
+                    <td>{{ item.subject|default:"-" }}</td>
+                    <td>{{ item.start_time|date:"d M Y, h:i A" }}</td>
+                    <td><span class="badge bg-primary">{{ item.status }}</span></td>
+                    <td><a href="{% url 'live_classes:live_class_join' item.id %}" class="btn btn-success btn-sm" target="_blank">Join Class</a></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5" class="text-center text-muted">No live class available.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -20,6 +20,29 @@
         font-weight: 800;
         display: inline-block;
     }
+
+    .status-badge {
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-weight: 800;
+        font-size: 12px;
+    }
+
+    .status-active {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-inactive {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .soft-card {
+        border: 0;
+        border-radius: 22px;
+        box-shadow: 0 14px 35px rgba(15, 23, 42, .08);
+    }
 </style>
 
 <div class="class-head">
@@ -27,7 +50,7 @@
     <div>Class setup + Class Teacher assign system</div>
 </div>
 
-<div class="card card-box mb-4">
+<div class="card soft-card mb-4">
     <div class="card-body p-4">
         <h5 class="fw-bold mb-3">
             {% if edit_mode %}
@@ -40,15 +63,34 @@
         <form method="POST">
             {% csrf_token %}
 
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
             <div class="row g-3">
-                <div class="col-md-5">
+                <div class="col-md-4">
                     <label class="form-label fw-bold">Class Name</label>
                     {{ form.class_name }}
+                    {% if form.class_name.errors %}
+                        <div class="text-danger small mt-1">{{ form.class_name.errors }}</div>
+                    {% endif %}
                 </div>
 
-                <div class="col-md-5">
+                <div class="col-md-4">
                     <label class="form-label fw-bold">Class Teacher</label>
                     {{ form.class_teacher }}
+                    {% if form.class_teacher.errors %}
+                        <div class="text-danger small mt-1">{{ form.class_teacher.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+                    <div class="form-check mb-2">
+                        {{ form.is_active }}
+                        <label class="form-check-label fw-bold">Active</label>
+                    </div>
                 </div>
 
                 <div class="col-md-2 d-flex align-items-end">
@@ -73,7 +115,7 @@
     </div>
 </div>
 
-<div class="card card-box">
+<div class="card soft-card">
     <div class="card-body p-4">
         <h5 class="fw-bold mb-3">📋 Class List</h5>
 
@@ -81,10 +123,11 @@
             <table class="table table-bordered table-hover align-middle">
                 <thead class="table-dark">
                     <tr>
-                        <th>#</th>
+                        <th width="70">#</th>
                         <th>Class Name</th>
                         <th>Class Teacher</th>
-                        <th width="180">Action</th>
+                        <th width="120">Status</th>
+                        <th width="190">Action</th>
                     </tr>
                 </thead>
 
@@ -100,10 +143,25 @@
                         <td>
                             {% if c.class_teacher %}
                                 <span class="teacher-badge">
-                                    👨‍🏫 {{ c.class_teacher.name }}
+                                    👨‍🏫
+                                    {% if c.class_teacher.name %}
+                                        {{ c.class_teacher.name }}
+                                    {% elif c.class_teacher.employee_name %}
+                                        {{ c.class_teacher.employee_name }}
+                                    {% else %}
+                                        {{ c.class_teacher }}
+                                    {% endif %}
                                 </span>
                             {% else %}
                                 <span class="badge bg-secondary">Not Assigned</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {% if c.is_active %}
+                                <span class="status-badge status-active">Active</span>
+                            {% else %}
+                                <span class="status-badge status-inactive">Inactive</span>
                             {% endif %}
                         </td>
 
@@ -125,7 +183,7 @@
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" class="text-center fw-bold text-muted py-4">
+                        <td colspan="5" class="text-center fw-bold text-muted py-4">
                             No class found.
                         </td>
                     </tr>

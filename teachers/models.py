@@ -18,6 +18,21 @@ class Employee(models.Model):
     qualification = models.CharField(max_length=150, blank=True, null=True)
     subject_specialization = models.CharField(max_length=150, blank=True, null=True)
 
+    # ✅ CLASS TEACHER ASSIGNMENT
+    assigned_class = models.ForeignKey(
+        'academics.Class',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_teachers'
+    )
+
+    assigned_section = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True
+    )
+
     phone = models.CharField(max_length=20, blank=True, null=True)
     aadhaar_number = models.CharField(max_length=30, blank=True, null=True)
 
@@ -45,7 +60,33 @@ class Employee(models.Model):
     can_access_backup = models.BooleanField(default=False)
     can_access_settings = models.BooleanField(default=False)
 
+    # =========================
+    # RECYCLE BIN
+    # =========================
+
+    is_deleted = models.BooleanField(default=False)
+
+    deleted_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    deleted_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='deleted_employees'
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    
 
     def get_default_raw_password(self):
         if self.phone:
@@ -57,17 +98,14 @@ class Employee(models.Model):
     def save(self, *args, **kwargs):
         is_new = self.pk is None
 
-        # ✅ First save to get ID
         super().save(*args, **kwargs)
 
-        # ✅ Auto Employee ID
         if not self.employee_id:
             self.employee_id = f"EMP{self.id}"
             super().save(update_fields=['employee_id'])
 
         password = self.get_default_raw_password()
 
-        # ✅ Create / Link Django User
         existing_user = User.objects.filter(username=self.employee_id).first()
 
         if existing_user and self.user != existing_user:
@@ -93,8 +131,6 @@ class Employee(models.Model):
             self.user.first_name = self.name
             self.user.is_active = self.is_active
 
-            # ✅ New employee হলে password set হবে
-            # পুরোনো employee edit করলে password reset হবে না
             if is_new:
                 self.user.set_password(password)
 

@@ -5,11 +5,17 @@ from .models import Employee
 class EmployeeForm(forms.ModelForm):
     class Meta:
         model = Employee
+
         fields = [
             'name',
             'designation',
             'qualification',
             'subject_specialization',
+
+            # ✅ CLASS TEACHER ASSIGNMENT
+            'assigned_class',
+            'assigned_section',
+
             'phone',
             'aadhaar_number',
             'joining_date',
@@ -36,35 +42,113 @@ class EmployeeForm(forms.ModelForm):
         ]
 
         widgets = {
+            'name': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'designation': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'qualification': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'subject_specialization': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'assigned_class': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+
+            'assigned_section': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Example: A / B / C'
+            }),
+
+            'phone': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
+            'aadhaar_number': forms.TextInput(attrs={
+                'class': 'form-control'
+            }),
+
             'joining_date': forms.DateInput(attrs={
                 'type': 'date',
                 'class': 'form-control'
             }),
 
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'designation': forms.TextInput(attrs={'class': 'form-control'}),
-            'qualification': forms.TextInput(attrs={'class': 'form-control'}),
-            'subject_specialization': forms.TextInput(attrs={'class': 'form-control'}),
-            'phone': forms.TextInput(attrs={'class': 'form-control'}),
-            'aadhaar_number': forms.TextInput(attrs={'class': 'form-control'}),
-            'salary': forms.NumberInput(attrs={'class': 'form-control'}),
-            'photo': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'salary': forms.NumberInput(attrs={
+                'class': 'form-control'
+            }),
 
-            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'photo': forms.ClearableFileInput(attrs={
+                'class': 'form-control'
+            }),
 
-            'is_erp_admin': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_students': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_teachers': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_academics': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_attendance': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_fees': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_payroll': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_exams': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_reports': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_admissions': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_idcards': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_communications': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_expenses': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_backup': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'can_access_settings': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_active': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'is_erp_admin': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_students': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_teachers': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_academics': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_attendance': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_fees': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_payroll': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_exams': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_reports': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_admissions': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_idcards': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_communications': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_expenses': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_backup': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
+
+            'can_access_settings': forms.CheckboxInput(attrs={
+                'class': 'form-check-input'
+            }),
         }

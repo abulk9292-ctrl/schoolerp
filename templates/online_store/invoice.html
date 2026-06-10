@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<style>@media print{.no-print{display:none!important}.invoice-box{box-shadow:none!important}}</style>
+<div class="no-print mb-3"><button onclick="window.print()" class="btn btn-success">Print</button> <a href="{% url 'store_sale_list' %}" class="btn btn-secondary">Back</a></div>
+<div class="card invoice-box"><div class="card-body">
+<div class="text-center mb-3"><h3 class="fw-bold">AL RAHMAN MISSION</h3><h5>Online Store & POS Invoice</h5></div>
+<div class="row mb-3"><div class="col-md-6"><b>Invoice:</b> {{ sale.invoice_no }}<br><b>Date:</b> {{ sale.sale_date|date:"d-m-Y h:i A" }}</div><div class="col-md-6 text-md-end"><b>Customer:</b> {{ sale.customer_name|default:"-" }}<br><b>Mobile:</b> {{ sale.customer_mobile|default:"-" }}</div></div>
+<table class="table table-bordered"><tr><th>SL</th><th>Product</th><th>Qty</th><th>Price</th><th>Total</th></tr>{% for item in sale.items.all %}<tr><td>{{ forloop.counter }}</td><td>{{ item.product.name }}</td><td>{{ item.quantity }}</td><td>₹{{ item.price }}</td><td>₹{{ item.total }}</td></tr>{% endfor %}</table>
+<div class="text-end"><h6>Subtotal: ₹{{ sale.subtotal }}</h6><h6>Discount: ₹{{ sale.discount }}</h6><h5>Grand Total: ₹{{ sale.grand_total }}</h5><h6>Paid: ₹{{ sale.paid_amount }}</h6><h6>Due: ₹{{ sale.due_amount }}</h6></div>
+</div></div>
+{% endblock %}

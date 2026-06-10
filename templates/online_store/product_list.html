@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3 flex-wrap gap-2"><h4 class="fw-bold">Products</h4><a href="{% url 'store_product_add' %}" class="btn btn-primary">Add Product</a></div>
+<form method="get" class="card card-body mb-3"><div class="row g-2"><div class="col-md-10"><input name="q" value="{{ q }}" class="form-control" placeholder="Search product/code"></div><div class="col-md-2"><button class="btn btn-success w-100">Search</button></div></div></form>
+<div class="table-responsive"><table class="table table-bordered"><tr><th>Code</th><th>Name</th><th>Category</th><th>Buy</th><th>Sell</th><th>Stock</th><th>Status</th><th>Action</th></tr>{% for p in products %}<tr><td>{{ p.product_code }}</td><td>{{ p.name }}</td><td>{{ p.category|default:"-" }}</td><td>₹{{ p.purchase_price }}</td><td>₹{{ p.selling_price }}</td><td>{% if p.is_low_stock %}<span class="badge bg-danger">{{ p.stock_quantity }}</span>{% else %}<b>{{ p.stock_quantity }}</b>{% endif %}</td><td>{{ p.is_active|yesno:"Active,Inactive" }}</td><td><a href="{% url 'store_product_edit' p.id %}" class="btn btn-sm btn-warning">Edit</a> <a href="{% url 'store_product_delete' p.id %}" class="btn btn-sm btn-danger">Delete</a></td></tr>{% empty %}<tr><td colspan="8" class="text-center">No product.</td></tr>{% endfor %}</table></div>
+{% endblock %}

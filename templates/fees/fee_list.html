@@ -9,7 +9,8 @@
 <div class="card card-box mb-4">
     <div class="card-body">
         <form method="get" class="row g-3">
-            <div class="col-md-4">
+
+            <div class="col-md-3">
                 <label class="form-label">Class</label>
                 <select name="class_id" class="form-select">
                     <option value="">All Classes</option>
@@ -21,7 +22,18 @@
                 </select>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-2">
+                <label class="form-label">Section</label>
+                <select name="section" class="form-select">
+                    <option value="">All Sections</option>
+                    <option value="A" {% if selected_section == "A" %}selected{% endif %}>A</option>
+                    <option value="B" {% if selected_section == "B" %}selected{% endif %}>B</option>
+                    <option value="C" {% if selected_section == "C" %}selected{% endif %}>C</option>
+                    <option value="D" {% if selected_section == "D" %}selected{% endif %}>D</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
                 <label class="form-label">Date</label>
                 <input type="date" name="payment_date" value="{{ selected_date }}" class="form-control">
             </div>
@@ -30,6 +42,7 @@
                 <button type="submit" class="btn btn-primary me-2">Filter</button>
                 <a href="/fees/" class="btn btn-secondary">Reset</a>
             </div>
+
         </form>
     </div>
 </div>
@@ -41,18 +54,21 @@
             <h4>{{ total_fee }}</h4>
         </div>
     </div>
+
     <div class="col-md-3">
         <div class="card card-box p-3 text-center">
             <h6>Total Discount</h6>
             <h4>{{ total_discount }}</h4>
         </div>
     </div>
+
     <div class="col-md-3">
         <div class="card card-box p-3 text-center">
             <h6>Total Paid</h6>
             <h4>{{ total_paid }}</h4>
         </div>
     </div>
+
     <div class="col-md-3">
         <div class="card card-box p-3 text-center">
             <h6>Total Due</h6>
@@ -72,15 +88,17 @@
                 <th>Name</th>
                 <th>Guardian</th>
                 <th>Class</th>
+                <th>Section</th>
                 <th>Total</th>
                 <th>Discount</th>
                 <th>Paid</th>
                 <th>Balance</th>
                 <th>Mode</th>
                 <th>Operator</th>
-                <th width="220">Action</th>
+                <th width="280">Action</th>
             </tr>
         </thead>
+
         <tbody>
             {% for fee in fees %}
             <tr>
@@ -91,6 +109,7 @@
                 <td>{{ fee.student.student_name }}</td>
                 <td>{{ fee.student.guardian_name }}</td>
                 <td>{{ fee.student.class_assigned }}</td>
+                <td>{{ fee.section|default:fee.student.section|default:"-" }}</td>
                 <td>{{ fee.total_amount }}</td>
                 <td>{{ fee.discount_amount }}</td>
                 <td>{{ fee.deposit_amount }}</td>
@@ -107,11 +126,13 @@
                     <a href="/fees/receipt/{{ fee.id }}/" class="btn btn-sm btn-info text-white">Receipt</a>
                     <a href="/fees/edit/{{ fee.id }}/" class="btn btn-sm btn-warning">Edit</a>
                     <a href="/fees/delete/{{ fee.id }}/" class="btn btn-sm btn-danger">Delete</a>
+                    <a href="{% url 'fee_followup_add_student' fee.student.id %}" class="btn btn-sm btn-danger">Promise</a>
+                    <a href="/fees/student-payment-statement/{{ fee.student.id }}/"class="btn btn-sm btn-dark">Statement</a>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="14" class="text-center">No fee records found.</td>
+                <td colspan="15" class="text-center">No fee records found.</td>
             </tr>
             {% endfor %}
         </tbody>

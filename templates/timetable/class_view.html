@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.class-hero{
+    background:linear-gradient(135deg,#0f766e,#2563eb,#7c3aed);
+    color:white;
+    border-radius:22px;
+    padding:18px;
+    box-shadow:0 12px 30px rgba(15,23,42,.16);
+}
+.routine-card{
+    border:0;
+    border-radius:18px;
+    box-shadow:0 8px 22px rgba(15,23,42,.08);
+}
+.routine-table th{
+    background:#eff6ff!important;
+    color:#0f172a;
+    text-align:center;
+    vertical-align:middle;
+}
+.routine-table td{
+    vertical-align:top;
+    min-width:150px;
+    height:78px;
+    font-size:12px;
+}
+.period-col{
+    width:150px;
+    background:#f8fafc!important;
+    font-weight:900;
+}
+.routine-box{
+    border-radius:12px;
+    padding:8px;
+    background:#f8fafc;
+    border:1px solid rgba(15,23,42,.08);
+}
+.subject-text{font-weight:900;color:#1d4ed8;}
+.teacher-text{font-weight:800;color:#0f172a;}
+.room-text{font-size:11px;color:#64748b;font-weight:800;}
+.break-row td{background:#f1f5f9!important;text-align:center;font-weight:900;color:#64748b;}
+.holiday-cell{background:#fee2e2!important;color:#991b1b;text-align:center;font-weight:900;}
+@media print{
+    .no-print,.sidebar,.topbar{display:none!important}
+    .content-area{padding:0!important}
+    @page{size:A4 landscape;margin:8mm}
+    .class-hero{box-shadow:none!important;border-radius:0!important;color:#000!important;background:#fff!important;padding:0!important;text-align:center}
+    .routine-card{box-shadow:none!important;border:0!important}
+    .routine-table{font-size:10px}
+    .routine-table td{height:auto;min-width:auto;padding:4px!important}
+}
+</style>
+
+<div class="class-hero mb-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h4 class="fw-bold mb-1">🏫 Class Wise Timetable</h4>
+            <div>
+                {% if selected_class_obj %}
+                    {{ selected_class_obj }} {% if section %} | Section: {{ section }}{% endif %}
+                {% else %}
+                    Select a class to view full weekly routine.
+                {% endif %}
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap no-print">
+            <button onclick="window.print()" class="btn btn-success">🖨 Print This Page</button>
+            {% if selected_class %}
+            <a target="_blank" href="{% url 'timetable_print' %}?type=weekly_class&class={{ selected_class }}&section={{ section }}" class="btn btn-light">A4 Class Print</a>
+            {% endif %}
+            <a href="{% url 'weekly_timetable' %}" class="btn btn-warning">Weekly Setup</a>
+            <a href="{% url 'timetable_dashboard' %}" class="btn btn-secondary">Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<form method="get" class="card card-body mb-3 no-print">
+    <div class="row g-2">
+        <div class="col-md-5">
+            <label class="form-label fw-bold">Class</label>
+            <select name="class" class="form-select">
+                <option value="">Select Class</option>
+                {% for c in classes %}
+                    <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>{{ c }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label fw-bold">Section</label>
+            <input name="section" value="{{ section }}" class="form-control" placeholder="A / B / Girls / Boys">
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button class="btn btn-success w-100">View</button>
+        </div>
+    </div>
+</form>
+
+<div class="card routine-card">
+    <div class="card-body table-responsive">
+        {% if not selected_class %}
+            <div class="alert alert-info mb-0">Please select class first.</div>
+        {% else %}
+        <table class="table table-bordered routine-table">
+            <thead>
+                <tr>
+                    <th class="period-col">Period / Time</th>
+                    {% for day_code, day_label in days %}
+                        <th>{{ day_label }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for period in periods %}
+                {% if period.is_break %}
+                    <tr class="break-row">
+                        <td class="period-col">{{ period.name }}<br><small>{{ period.start_time }} - {{ period.end_time }}</small></td>
+                        <td colspan="7">Tiffin / Break Time</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td class="period-col">{{ period.name }}<br><small>{{ period.start_time }} - {{ period.end_time }}</small></td>
+                        {% for day_code, day_label in days %}
+                            {% if day_code in holiday_map %}
+                                <td class="holiday-cell">Holiday</td>
+                            {% else %}
+                                <td>
+                                    {% for e in entries %}
+                                        {% if e.day == day_code and e.period_id == period.id %}
+                                            <div class="routine-box">
+                                                <div class="subject-text">{{ e.subject|default:"-" }}</div>
+                                                <div class="teacher-text">{{ e.teacher|default:"-" }}</div>
+                                                <div class="room-text">Room: {{ e.room_no|default:"-" }}</div>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

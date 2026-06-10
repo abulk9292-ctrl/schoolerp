@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3"><h4 class="fw-bold">Store Categories</h4><a href="{% url 'store_category_add' %}" class="btn btn-primary">Add Category</a></div>
+<div class="table-responsive"><table class="table table-bordered"><tr><th>Name</th><th>Description</th><th>Action</th></tr>{% for c in categories %}<tr><td>{{ c.name }}</td><td>{{ c.description|default:"-" }}</td><td><a href="{% url 'store_category_edit' c.id %}" class="btn btn-sm btn-warning">Edit</a> <a href="{% url 'store_category_delete' c.id %}" class="btn btn-sm btn-danger">Delete</a></td></tr>{% empty %}<tr><td colspan="3" class="text-center">No category.</td></tr>{% endfor %}</table></div>
+{% endblock %}

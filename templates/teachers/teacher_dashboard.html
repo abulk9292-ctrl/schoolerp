@@ -1,0 +1,341 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Teacher Dashboard | AL RAHMAN MISSION ERP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    min-height:100vh;
+    background:linear-gradient(135deg,#eef6ff,#f8fafc);
+    font-family:Segoe UI,Arial,sans-serif;
+    color:#0f172a;
+}
+.td-top{
+    background:
+        radial-gradient(circle at top left,rgba(255,255,255,.24),transparent 30%),
+        linear-gradient(135deg,#0f172a,#2563eb,#06b6d4);
+    color:white;
+    padding:22px 26px 78px;
+    border-radius:0 0 34px 34px;
+    box-shadow:0 16px 45px rgba(37,99,235,.28);
+}
+.td-top h2{font-weight:900;margin:0}
+.td-top small{font-weight:700;opacity:.92}
+.logout-btn{
+    background:#ef4444;color:white;text-decoration:none;padding:10px 20px;
+    border-radius:999px;font-weight:900;box-shadow:0 10px 24px rgba(239,68,68,.28)
+}
+.main-wrap{padding:24px;margin-top:-64px}
+.profile-card,.stat-card,.section-card{
+    background:white;border-radius:28px;box-shadow:0 14px 35px rgba(15,23,42,.09);
+    border:1px solid rgba(148,163,184,.20)
+}
+.profile-card{padding:24px}
+.teacher-photo{
+    width:110px;height:110px;border-radius:30px;object-fit:cover;
+    border:5px solid #fff;box-shadow:0 12px 28px rgba(15,23,42,.18)
+}
+.name-title{font-size:30px;font-weight:900;margin:0}
+.info-chip{
+    background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;
+    padding:9px 12px;font-weight:800;color:#0f172a
+}
+.stat-link{text-decoration:none;color:inherit;display:block;height:100%}
+.stat-card{padding:20px;height:100%;transition:.25s}
+.stat-card:hover{transform:translateY(-4px);box-shadow:0 18px 45px rgba(15,23,42,.14)}
+.stat-icon{
+    width:54px;height:54px;border-radius:18px;background:#eef2ff;
+    display:flex;align-items:center;justify-content:center;font-size:26px;margin-bottom:12px
+}
+.stat-label{
+    font-size:12px;color:#64748b;font-weight:900;text-transform:uppercase;letter-spacing:.35px
+}
+.stat-value{font-size:30px;font-weight:900;line-height:1;margin-top:4px}
+.section-card{padding:22px;height:100%}
+.section-title{font-size:21px;font-weight:900;margin-bottom:16px}
+.quick-link{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:14px 16px;margin-bottom:11px;background:#f8fafc;
+    border:1px solid #e5e7eb;border-radius:18px;text-decoration:none;color:#0f172a;
+    font-weight:900;transition:.2s
+}
+.quick-link:hover{background:#dbeafe;color:#1d4ed8;transform:translateX(4px)}
+.ai-card{
+    background:
+        radial-gradient(circle at top right,rgba(255,255,255,.30),transparent 34%),
+        linear-gradient(135deg,#111827,#4f46e5,#0891b2);
+    color:white;border-radius:28px;padding:22px;height:100%;
+    box-shadow:0 16px 40px rgba(79,70,229,.25)
+}
+.ai-score{font-size:46px;font-weight:900;line-height:1}
+.ai-badge{border-radius:999px;padding:8px 14px;font-weight:900}
+.progress{height:20px;border-radius:999px;background:rgba(255,255,255,.25)}
+.progress-bar{font-weight:900}
+.info-row{
+    display:flex;justify-content:space-between;gap:14px;border-bottom:1px solid #e5e7eb;
+    padding:10px 0;font-weight:750
+}
+@media(max-width:768px){
+    .td-top{padding:20px 18px 72px}
+    .main-wrap{padding:15px}
+    .name-title{font-size:24px;text-align:center}
+    .teacher-photo{width:92px;height:92px;margin:auto}
+}
+</style>
+</head>
+
+<body>
+
+<div class="td-top d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+        <h2>👨‍🏫 Teacher Dashboard V2</h2>
+        <small>AL RAHMAN MISSION ERP · Smart Teacher Panel</small>
+    </div>
+    <a href="{% url 'teacher_logout' %}" class="logout-btn">Logout</a>
+</div>
+
+<div class="main-wrap">
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} rounded-4 fw-bold">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="profile-card mb-4">
+        <div class="row g-4 align-items-center">
+            <div class="col-12 col-md-2 text-center">
+                {% if employee.photo %}
+                    <img src="{{ employee.photo.url }}" class="teacher-photo">
+                {% else %}
+                    <div class="teacher-photo bg-primary text-white d-flex align-items-center justify-content-center fs-1 fw-bold">
+                        {{ employee.name|slice:":1" }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-12 col-md-6">
+                <h1 class="name-title">{{ employee.name }}</h1>
+                <div class="text-muted fw-bold mb-2">{{ employee.designation }}</div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="badge bg-primary px-3 py-2">{{ employee.employee_id }}</span>
+                    {% if employee.is_active %}
+                        <span class="badge bg-success px-3 py-2">Active</span>
+                    {% else %}
+                        <span class="badge bg-danger px-3 py-2">Inactive</span>
+                    {% endif %}
+                    {% if employee.is_erp_admin %}
+                        <span class="badge bg-dark px-3 py-2">ERP Admin</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="info-chip">Class: {{ employee.assigned_class|default:"-" }}</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="info-chip">Section: {{ employee.assigned_section|default:"-" }}</div>
+                    </div>
+                    <div class="col-12">
+                        <div class="info-chip">Phone: {{ employee.phone|default:"-" }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <a href="/students/" class="stat-link">
+                <div class="stat-card">
+                    <div class="stat-icon">👨‍🎓</div>
+                    <div class="stat-label">Assigned Students</div>
+                    <div class="stat-value">{{ assigned_students_count|default:0 }}</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <a href="/attendance/students/daily-report/" class="stat-link">
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-label">Present Today</div>
+                    <div class="stat-value">{{ present_today|default:0 }}</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <a href="/attendance/students/daily-report/" class="stat-link">
+                <div class="stat-card">
+                    <div class="stat-icon">❌</div>
+                    <div class="stat-label">Absent Today</div>
+                    <div class="stat-value">{{ absent_today|default:0 }}</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <a href="{% url 'teacher_mobile_attendance' %}" class="stat-link">
+                <div class="stat-card">
+                    <div class="stat-icon">📍</div>
+                    <div class="stat-label">Teacher Attendance</div>
+                    <div class="stat-value">{{ teacher_attendance_percentage|default:0 }}%</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <a href="/complaints/teacher-dashboard/" class="stat-link">
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-label">Pending Complaints</div>
+                    <div class="stat-value">{{ pending_complaints|default:0 }}</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <a href="/homework/" class="stat-link">
+                <div class="stat-card">
+                    <div class="stat-icon">📚</div>
+                    <div class="stat-label">Active Homework</div>
+                    <div class="stat-value">{{ active_homework|default:0 }}</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <a href="/homework/submissions/" class="stat-link">
+                <div class="stat-card">
+                    <div class="stat-icon">📥</div>
+                    <div class="stat-label">Pending Reviews</div>
+                    <div class="stat-value">{{ pending_reviews|default:0 }}</div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-6 col-lg-3">
+            <a href="/payroll/salary/" class="stat-link">
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-label">Salary Due</div>
+                    <div class="stat-value">₹{{ salary_due|default:0 }}</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="ai-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold mb-0">🤖 AI Teacher Score</h4>
+                    <span class="badge bg-warning text-dark ai-badge">{{ teacher_grade|default:"No Data" }}</span>
+                </div>
+
+                <div class="ai-score">{{ teacher_score|default:0 }}%</div>
+                <div class="progress mt-3 mb-3">
+                    <div class="progress-bar" style="width: {{ teacher_score|default:0 }}%;">
+                        {{ teacher_score|default:0 }}%
+                    </div>
+                </div>
+
+                <small class="fw-bold">
+                    Based on attendance, class attendance, complaint solving and homework review.
+                </small>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="section-card">
+                <h4 class="section-title">⚡ Quick Actions</h4>
+
+                <a href="{% url 'teacher_mobile_attendance' %}" class="quick-link">
+                    <span>📍 Mark Teacher Attendance</span><span>›</span>
+                </a>
+
+                <a href="/attendance/teachers/daily-report/" class="quick-link">
+                    <span>📄 Attendance Report</span><span>›</span>
+                </a>
+
+                <a href="/complaints/teacher-dashboard/" class="quick-link">
+                    <span>📝 Complaint Dashboard</span><span>›</span>
+                </a>
+
+                <a href="/homework/" class="quick-link">
+                    <span>📚 Homework Dashboard</span><span>›</span>
+                </a>
+
+                <a href="/homework/submissions/" class="quick-link">
+                    <span>📥 Homework Review</span><span>›</span>
+                </a>
+
+                <a href="/notices/" class="quick-link">
+                    <span>🔔 Notices</span><span>›</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="section-card">
+                <h4 class="section-title">👤 Teacher Information</h4>
+
+                <div class="info-row">
+                    <strong>Name</strong>
+                    <span>{{ employee.name }}</span>
+                </div>
+
+                <div class="info-row">
+                    <strong>Employee ID</strong>
+                    <span>{{ employee.employee_id }}</span>
+                </div>
+
+                <div class="info-row">
+                    <strong>Phone</strong>
+                    <span>{{ employee.phone|default:"-" }}</span>
+                </div>
+
+                <div class="info-row">
+                    <strong>Designation</strong>
+                    <span>{{ employee.designation }}</span>
+                </div>
+
+                <div class="info-row">
+                    <strong>Assigned Class</strong>
+                    <span>{{ employee.assigned_class|default:"-" }}</span>
+                </div>
+
+                <div class="info-row">
+                    <strong>Assigned Section</strong>
+                    <span>{{ employee.assigned_section|default:"-" }}</span>
+                </div>
+
+                <div class="info-row">
+                    <strong>Today Attendance</strong>
+                    <span>
+                        {% if today_teacher_attendance %}
+                            {{ today_teacher_attendance.status }}
+                        {% else %}
+                            Not Marked
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

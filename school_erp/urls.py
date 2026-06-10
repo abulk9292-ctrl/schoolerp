@@ -5,9 +5,9 @@ from django.conf.urls.static import static
 from django.shortcuts import redirect
 from django.contrib.auth import logout
 
+
 from core.views import (
     dashboard,
-    teacher_dashboard,
     custom_login,
 )
 
@@ -17,16 +17,16 @@ from core.views import (
 # =========================================================
 
 def home_redirect(request):
-    return redirect('/site/')
+    return redirect("/site/")
 
 
 # =========================================================
-# CLEAN LOGOUT
+# LOGOUT VIEW
 # =========================================================
 
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    return redirect("/admin-login/")
 
 
 # =========================================================
@@ -35,187 +35,62 @@ def logout_view(request):
 
 urlpatterns = [
 
-    # =====================================================
-    # ADMIN PANEL
-    # =====================================================
+    # DJANGO ADMIN PANEL
+    path("admin/", admin.site.urls),
 
-    path(
-        'admin/',
-        admin.site.urls
-    ),
-
-    # =====================================================
-    # ROOT WEBSITE
-    # =====================================================
-
-    path(
-        '',
-        home_redirect
-    ),
-    
-    path("admissions/", include("admissions.urls")),
-
-    # =====================================================
     # PUBLIC WEBSITE
-    # =====================================================
+    path("", home_redirect, name="home"),
+    path("site/", include("website.urls")),
 
-    path(
-        'site/',
-        include('website.urls')
-    ),
+    # ADMIN / STAFF LOGIN
+    path("admin-login/", custom_login, name="login"),
+    path("logout/", logout_view, name="logout"),
 
-    # =====================================================
-    # AUTHENTICATION
-    # =====================================================
+    # ADMIN DASHBOARD
+    path("dashboard/", dashboard, name="dashboard"),
 
-    path(
-        'login/',
-        custom_login,
-        name='login'
-    ),
-
-    path(
-        'logout/',
-        logout_view,
-        name='logout'
-    ),
-
-    # =====================================================
-    # DASHBOARDS
-    # =====================================================
-
-    path(
-        'dashboard/',
-        dashboard,
-        name='dashboard'
-    ),
-
-    path(
-        'teacher-dashboard/',
-        teacher_dashboard,
-        name='teacher_dashboard'
-    ),
-
-    # =====================================================
     # MAIN ERP MODULES
-    # =====================================================
+    path("academics/", include("academics.urls")),
+    path("students/", include("students.urls")),
+    path("teachers/", include("teachers.urls")),
+    path("attendance/", include("attendance.urls")),
+    path("fees/", include("fees.urls")),
+    path("payroll/", include("payroll.urls")),
+    path("expenses/", include("expenses.urls")),
+    path("reports/", include("reports.urls")),
+    path("admissions/", include("admissions.urls")),
+    path("idcards/", include("idcards.urls")),
+    path("communications/", include("communications.urls")),
+    path("complaints/", include("complaints.urls")),
+    path("settings/", include("settings_app.urls")),
+    path("exams/", include("exams.urls")),
+    path("backup/", include("backup.urls")),
+    path("certificates/", include("certificates.urls")),
+    path("behaviour/", include("behaviour.urls")),
+    path("homework/", include("homework.urls")),
+    path("notices/", include("notices.urls")),
+    path("live-classes/", include("live_classes.urls")),
+    path("question-answers/", include("question_answers.urls")),
 
-    path(
-        'academics/',
-        include('academics.urls')
-    ),
+    # API URLS
+    path("api/", include("api.urls")),
+    path("mobile-api/", include("mobile_api.urls")),
 
-    path(
-        'students/',
-        include('students.urls')
-    ),
-
-    path(
-        'teachers/',
-        include('teachers.urls')
-    ),
-
-    path(
-        'attendance/',
-        include('attendance.urls')
-    ),
-
-    path(
-        'fees/',
-        include('fees.urls')
-    ),
-
-    path(
-        'payroll/',
-        include('payroll.urls')
-    ),
-
-    path(
-        'expenses/',
-        include('expenses.urls')
-    ),
-
-    # =====================================================
-    # EXTRA MODULES
-    # =====================================================
-
-    path(
-        'reports/',
-        include('reports.urls')
-    ),
-
-    path(
-        'admissions/',
-        include('admissions.urls')
-    ),
-
-    path(
-        'idcards/',
-        include('idcards.urls')
-    ),
-
-    path(
-        'communications/',
-        include('communications.urls')
-    ),
-
-    path(
-        'complaints/',
-        include('complaints.urls')
-    ),
-
-    path(
-        'settings/',
-        include('settings_app.urls')
-    ),
-
-    # =====================================================
-    # EXAMS + BACKUP
-    # =====================================================
-
-    path(
-        'exams/',
-        include('exams.urls')
-    ),
-
-    path(
-        'backup/',
-        include('backup.urls')
-    ),
-
-    # =====================================================
-    # APIs
-    # =====================================================
-
-    # Main API
-    path(
-        'api/',
-        include('api.urls')
-    ),
-
-    # Mobile API
-    path(
-        'mobile-api/',
-        include('mobile_api.urls')
-    ),
-
-    # =====================================================
     # CORE EXTRA URLS
-    # =====================================================
+    path("", include("core.urls")),
 
-    path(
-        '',
-        include('core.urls')
-    ),
+    # ONLINE STORE URLS
+    path("online-store/", include("online_store.urls")),
 
-    # =====================================================
-    # HOMEWORK URLS
-    # =====================================================
+    # TIMETABLE URLS
+    path("timetable/", include("timetable.urls")),
 
-    path('homework/', include('homework.urls')),
+    # SCHOOL ASSETS URLS
+    path("assets/", include("school_assets.urls")),
 
-    path('notices/', include('notices.urls')),
-    
+
+
+
 ]
 
 
@@ -224,19 +99,7 @@ urlpatterns = [
 # =========================================================
 
 if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-    # MEDIA FILES
-    urlpatterns += static(
-        settings.MEDIA_URL,
-        document_root=settings.MEDIA_ROOT
-    )
-
-    # STATIC FILES
-    urlpatterns += static(
-        settings.STATIC_URL,
-        document_root=settings.STATIC_ROOT
-    )
-
-    
-
-    
+    if settings.STATIC_ROOT:
+        urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

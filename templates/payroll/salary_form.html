@@ -156,6 +156,9 @@
                 <div class="col-md-4">
                     <label class="form-label">Year</label>
                     {{ form.year }}
+                    <small class="mini-note">
+                        Active Session: {{ selected_session }} থেকে year auto set হবে।
+                    </small>
                 </div>
 
                 <div class="col-md-4">
@@ -198,40 +201,13 @@
                     <div class="calc-box">
                         <div class="calc-title">📌 Salary Calculation</div>
 
-                        <div class="calc-row">
-                            <span>Month Days</span>
-                            <b id="monthDays">30</b>
-                        </div>
-
-                        <div class="calc-row">
-                            <span>Per Day Salary</span>
-                            <b>₹<span id="perDaySalary">0.00</span></b>
-                        </div>
-
-                        <div class="calc-row">
-                            <span>Absent Days</span>
-                            <b id="absentShow">0</b>
-                        </div>
-
-                        <div class="calc-row">
-                            <span>Payable Absent Days</span>
-                            <b id="payableAbsentDays">0</b>
-                        </div>
-
-                        <div class="calc-row">
-                            <span>Attendance Deduction</span>
-                            <b>₹<span id="attendanceDeduction">0.00</span></b>
-                        </div>
-
-                        <div class="calc-row">
-                            <span>Extra Deduction</span>
-                            <b>₹<span id="extraDeductionShow">0.00</span></b>
-                        </div>
-
-                        <div class="calc-row">
-                            <span>Bonus</span>
-                            <b>₹<span id="bonusShow">0.00</span></b>
-                        </div>
+                        <div class="calc-row"><span>Month Days</span><b id="monthDays">30</b></div>
+                        <div class="calc-row"><span>Per Day Salary</span><b>₹<span id="perDaySalary">0.00</span></b></div>
+                        <div class="calc-row"><span>Absent Days</span><b id="absentShow">0</b></div>
+                        <div class="calc-row"><span>Payable Absent Days</span><b id="payableAbsentDays">0</b></div>
+                        <div class="calc-row"><span>Attendance Deduction</span><b>₹<span id="attendanceDeduction">0.00</span></b></div>
+                        <div class="calc-row"><span>Extra Deduction</span><b>₹<span id="extraDeductionShow">0.00</span></b></div>
+                        <div class="calc-row"><span>Bonus</span><b>₹<span id="bonusShow">0.00</span></b></div>
 
                         <div class="calc-row total">
                             <span>Net Salary</span>
@@ -244,30 +220,16 @@
                     <div class="calc-box">
                         <div class="calc-title">💳 Payment Summary</div>
 
-                        <div class="calc-row">
-                            <span>Previous Due</span>
-                            <b>₹<span id="previousDue">0.00</span></b>
-                        </div>
+                        <div class="calc-row"><span>Previous Due</span><b>₹<span id="previousDue">0.00</span></b></div>
 
                         <div class="calc-row total">
                             <span>Total Payable</span>
                             <b>₹<span id="payable">0.00</span></b>
                         </div>
 
-                        <div class="calc-row">
-                            <span>Already Paid</span>
-                            <b>₹<span id="alreadyPaid">0.00</span></b>
-                        </div>
-
-                        <div class="calc-row">
-                            <span>New Payment</span>
-                            <b>₹<span id="newPayment">0.00</span></b>
-                        </div>
-
-                        <div class="calc-row">
-                            <span>Total Paid</span>
-                            <b>₹<span id="totalPaid">0.00</span></b>
-                        </div>
+                        <div class="calc-row"><span>Already Paid</span><b>₹<span id="alreadyPaid">0.00</span></b></div>
+                        <div class="calc-row"><span>New Payment</span><b>₹<span id="newPayment">0.00</span></b></div>
+                        <div class="calc-row"><span>Total Paid</span><b>₹<span id="totalPaid">0.00</span></b></div>
 
                         <div class="calc-row due">
                             <span>Due After Save</span>
@@ -291,6 +253,8 @@
 </div>
 
 <script>
+const selectedSession = "{{ selected_session|default:'' }}";
+
 const employeeSalaryMap = {
     {% for emp in employees %}
         "{{ emp.id }}": "{{ emp.salary|default:0 }}",
@@ -325,6 +289,10 @@ if(absent){
     absent.setAttribute("readonly", "readonly");
 }
 
+if(year){
+    year.classList.add("readonly-soft");
+}
+
 function val(el){
     if(!el) return 0;
     return parseFloat(el.value) || 0;
@@ -332,6 +300,14 @@ function val(el){
 
 function money(num){
     return (parseFloat(num) || 0).toFixed(2);
+}
+
+function getSessionStartYear(){
+    if(selectedSession && selectedSession.includes("-")){
+        return selectedSession.split("-")[0];
+    }
+
+    return new Date().getFullYear();
 }
 
 function getMonthNumber(monthName){
@@ -355,7 +331,7 @@ function getMonthNumber(monthName){
 
 function getDaysInMonth(monthName, yearValue){
     const m = getMonthNumber(monthName);
-    const y = parseInt(yearValue) || new Date().getFullYear();
+    const y = parseInt(yearValue) || parseInt(getSessionStartYear());
 
     return new Date(y, m + 1, 0).getDate();
 }
@@ -382,8 +358,8 @@ function setDefault(){
         month.value = months[now.getMonth()];
     }
 
-    if(year && !year.value){
-        year.value = now.getFullYear();
+    if(year){
+        year.value = getSessionStartYear();
     }
 
     if(date && !date.value){
@@ -415,10 +391,12 @@ function setSalary(){
 
 function loadAbsentDays(){
     if(!employee || !month || !year || !absent){
+        calculate();
         return;
     }
 
     if(!employee.value || !month.value || !year.value){
+        absent.value = 0;
         calculate();
         return;
     }
@@ -427,6 +405,11 @@ function loadAbsentDays(){
         .then(response => response.json())
         .then(data => {
             absent.value = data.absent_days || 0;
+
+            if(bonus){
+                bonus.dataset.manual = "0";
+            }
+
             calculate();
         })
         .catch(() => {

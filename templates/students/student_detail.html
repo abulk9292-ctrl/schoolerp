@@ -1,275 +1,1177 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 
-<div class="container mt-4">
+<style>
+.profile-hero{
+    background:linear-gradient(135deg,#0f172a,#1d4ed8,#06b6d4);
+    border-radius:28px;
+    padding:28px;
+    color:white;
+    box-shadow:0 20px 45px rgba(15,23,42,.25);
+}
+.student-photo{
+    width:150px;height:150px;border-radius:26px;object-fit:cover;
+    border:5px solid rgba(255,255,255,.85);background:white;
+}
+.photo-placeholder{
+    width:150px;height:150px;border-radius:26px;background:rgba(255,255,255,.2);
+    display:flex;align-items:center;justify-content:center;font-weight:900;
+    border:5px solid rgba(255,255,255,.85);
+}
+.glass-box{
+    background:rgba(255,255,255,.16);
+    border:1px solid rgba(255,255,255,.25);
+    border-radius:22px;
+    padding:14px 18px;
+}
+.stat-card{
+    border:0;border-radius:24px;
+    box-shadow:0 12px 30px rgba(15,23,42,.08);
+    overflow:hidden;height:100%;
+}
+.stat-card .card-body{padding:22px}
+.stat-icon{
+    width:48px;height:48px;border-radius:16px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:22px;background:#eef2ff;
+}
+.premium-card{
+    border:0;border-radius:26px;
+    box-shadow:0 12px 30px rgba(15,23,42,.08);
+    overflow:hidden;margin-bottom:24px;
+}
+.section-title{font-weight:900;color:#0f172a;margin:0}
+.soft-badge{
+    border-radius:999px;padding:8px 14px;
+    font-weight:800;font-size:12px;
+}
+.nav-pills .nav-link{
+    border-radius:999px;font-weight:800;color:#334155;
+    background:#f1f5f9;margin:4px;
+}
+.nav-pills .nav-link.active{background:#0f172a;color:#fff}
+.mini-label{
+    font-size:12px;color:#64748b;font-weight:800;text-transform:uppercase;
+}
+.info-row{
+    display:flex;justify-content:space-between;gap:12px;
+    padding:10px 0;border-bottom:1px dashed #e2e8f0;
+}
+.info-row:last-child{border-bottom:0}
+.ai-box{
+    background:linear-gradient(135deg,#fff7ed,#eff6ff);
+    border:1px solid #fed7aa;
+    border-radius:22px;
+    padding:18px;
+}
+.table thead th{
+    background:#f8fafc;
+    color:#0f172a;
+    font-size:13px;
+    text-transform:uppercase;
+}
+.chart-box{
+    height:280px;
+    padding:16px;
+}
+@media print{
+    .no-print,.nav-pills,.profile-actions{display:none!important}
+    .profile-hero,.premium-card,.stat-card{
+        box-shadow:none!important;
+        border:1px solid #ddd!important;
+    }
+}
+</style>
 
-    <div class="card shadow mb-4">
-        <div class="card-body d-flex align-items-center flex-wrap gap-3">
-            <div>
+<div class="container-fluid mt-4 mb-5">
+
+    <div class="profile-hero mb-4">
+        <div class="row align-items-center g-4">
+
+            <div class="col-lg-2 text-center">
                 {% if student.photo %}
-                    <img src="{{ student.photo.url }}" width="120" height="120" style="border-radius:12px; object-fit:cover;">
+                    <img src="{{ student.photo.url }}" class="student-photo">
                 {% else %}
-                    <div style="width:120px;height:120px;background:#ddd;border-radius:12px;display:flex;align-items:center;justify-content:center;">
-                        No Photo
+                    <div class="photo-placeholder">No Photo</div>
+                {% endif %}
+            </div>
+
+            <div class="col-lg-6">
+                <div class="d-flex flex-wrap gap-2 mb-3">
+                    {% if student.is_active %}
+                        <span class="badge bg-success soft-badge">Active Student</span>
+                    {% else %}
+                        <span class="badge bg-danger soft-badge">Discontinued</span>
+                    {% endif %}
+
+                    <span class="badge bg-light text-dark soft-badge">
+                        Session: {{ selected_session|default:"-" }}
+                    </span>
+
+                    <span class="badge bg-dark soft-badge">
+                        Attendance: {{ attendance_risk|default:"No Data" }}
+                    </span>
+
+                    <span class="badge bg-primary soft-badge">
+                        Academic: {{ academic_status|default:"No Data" }}
+                    </span>
+                </div>
+
+                <h1 class="fw-bold mb-2">{{ student.student_name }}</h1>
+
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <div class="glass-box">
+                            <div class="mini-label text-white-50">Student ID</div>
+                            <b>{{ student.student_id }}</b>
+                        </div>
                     </div>
-                {% endif %}
-            </div>
-
-            <div class="ms-2">
-                <h3>{{ student.student_name }}</h3>
-
-                {% if student.is_active %}
-                    <span class="badge bg-success mb-2">Active</span>
-                {% else %}
-                    <span class="badge bg-danger mb-2">Discontinued</span>
-                {% endif %}
-
-                <p><b>ID:</b> {{ student.student_id }}</p>
-                <p><b>Reg No:</b> {{ student.registration_no }}</p>
-                <p><b>Class:</b> {{ student.class_assigned }}</p>
-                <p><b>Roll:</b> {{ student.roll_no }}</p>
-            </div>
-
-            <div class="ms-auto">
-                <a href="{% url 'student_edit' student.id %}" class="btn btn-primary mb-2">Edit</a><br>
-                <a href="{% url 'student_delete' student.id %}" class="btn btn-danger mb-2">Delete</a><br>
-                <a href="{% url 'add_sibling' student.id %}" class="btn btn-success mb-2">Add Sibling</a><br>
-                <a href="{% url 'complaint_add' student.id %}" class="btn btn-warning mb-2">Add Complaint</a><br>
-
-                <a href="/exams/report-card/?student_id={{ student.id }}" class="btn btn-dark mb-2">
-                    🖨 Print Result
-                </a><br>
-
-                {% if student.is_active %}
-                    <a href="{% url 'student_discontinue' student.id %}" class="btn btn-dark mb-2">Discontinue</a><br>
-                {% else %}
-                    <a href="{% url 'student_readmit' student.id %}" class="btn btn-success mb-2">Re-Admit</a><br>
-                {% endif %}
-
-                <a href="{% url 'student_promote' student.id %}" class="btn btn-info mb-2">Promote</a><br>
-                <a href="{% url 'student_demote' student.id %}" class="btn btn-secondary mb-2">De-Promote</a>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-
-        <div class="col-md-6">
-            <div class="card shadow mb-3">
-                <div class="card-header bg-primary text-white">Student Details</div>
-                <div class="card-body">
-                    <p><b>Father:</b> {{ student.father_name }}</p>
-                    <p><b>Mother:</b> {{ student.mother_name }}</p>
-                    <p><b>Guardian:</b> {{ student.guardian_name }}</p>
-                    <p><b>Phone:</b> {{ student.phone }}</p>
-                    <p><b>DOB:</b> {{ student.date_of_birth }}</p>
-                    <p><b>Aadhaar:</b> {{ student.aadhaar_number }}</p>
-                    <p><b>Address:</b> {{ student.address }}</p>
+                    <div class="col-md-6">
+                        <div class="glass-box">
+                            <div class="mini-label text-white-50">Registration No</div>
+                            <b>{{ student.registration_no }}</b>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="glass-box">
+                            <div class="mini-label text-white-50">Class</div>
+                            <b>{{ student.class_assigned }}</b>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="glass-box">
+                            <div class="mini-label text-white-50">Section</div>
+                            <b>{{ student.section|default:"-" }}</b>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="glass-box">
+                            <div class="mini-label text-white-50">Roll</div>
+                            <b>{{ student.roll_no|default:"-" }}</b>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-md-6">
-            <div class="card shadow mb-3">
-                <div class="card-header bg-success text-white">Transport Details</div>
-                <div class="card-body">
-                    <p><b>Transport Required:</b> {{ student.transport_required }}</p>
-                    <p><b>Transport Details:</b> {{ student.transport_details }}</p>
-                </div>
-            </div>
-        </div>
+            <div class="col-lg-4">
+                <div class="glass-box mb-3">
 
-    </div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold mb-0">🤖 AI Smart Analysis</h6>
 
-    <div class="card shadow mb-4">
-        <div class="card-header bg-info text-white">Siblings</div>
-        <div class="card-body">
-            {% if siblings %}
-                {% for sib in siblings %}
-                    <a href="{% url 'student_detail' sib.id %}" class="btn btn-outline-primary btn-sm mb-2">
-                        {{ sib.student_name }} - {{ sib.student_id }}
-                    </a>
-                {% endfor %}
-            {% else %}
-                <p>No sibling added.</p>
-            {% endif %}
-        </div>
-    </div>
-
-    <div class="card shadow mb-4">
-        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-            <span>Complaints</span>
-            <a href="{% url 'complaint_add' student.id %}" class="btn btn-warning btn-sm">
-                + Add Complaint
-            </a>
-        </div>
-
-        <div class="card-body">
-            <table class="table table-bordered table-sm align-middle">
-                <tr class="table-light">
-                    <th>Title</th>
-                    <th>Parent</th>
-                    <th>Status</th>
-                    <th>Solution</th>
-                    <th width="220">Action</th>
-                </tr>
-
-                {% for c in complaints %}
-                <tr>
-                    <td>{{ c.title }}</td>
-                    <td>{{ c.parent_name }}</td>
-                    <td>
-                        {% if c.status == 'Solved' %}
-                            <span class="badge bg-success">Solved</span>
+                        {% if ai_risk_level == "High Risk" %}
+                            <span class="badge bg-danger soft-badge">{{ ai_risk_level }}</span>
+                        {% elif ai_risk_level == "Medium Risk" %}
+                            <span class="badge bg-warning text-dark soft-badge">{{ ai_risk_level }}</span>
                         {% else %}
-                            <span class="badge bg-danger">Pending</span>
+                            <span class="badge bg-success soft-badge">{{ ai_risk_level|default:"Low Risk" }}</span>
                         {% endif %}
-                    </td>
-                    <td>{{ c.solution|default:"-" }}</td>
-                    <td>
-                        {% if c.status == 'Pending' %}
-                            <a href="{% url 'complaint_solve' c.id %}" class="btn btn-sm btn-success">
-                                Solve
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <div class="bg-white text-dark rounded-4 p-3 text-center">
+                                <div class="mini-label">Health Index</div>
+                                <h3 class="fw-bold mb-0">{{ student_health_index|default:"0" }}/100</h3>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="bg-white text-dark rounded-4 p-3 text-center">
+                                <div class="mini-label">Growth Status</div>
+                                <h6 class="fw-bold mb-0">{{ improvement_status|default:"Stable" }}</h6>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if smart_flags %}
+                    <div class="mb-3">
+                        {% for flag in smart_flags %}
+                            <span class="badge bg-light text-dark soft-badge mb-1">⭐ {{ flag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="ai-box mb-3">
+                        {% for remark in ai_remarks %}
+                            <div class="mb-2">✅ {{ remark }}</div>
+                        {% empty %}
+                            <div>✅ Overall performance is stable.</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="bg-dark rounded-4 p-3">
+                        <h6 class="fw-bold mb-3 text-white">📢 Parent Alerts</h6>
+
+                        {% for alert in smart_parent_alerts %}
+                            <div class="mb-2 text-white">⚠ {{ alert }}</div>
+                        {% empty %}
+                            <div class="mb-2 text-white">✅ No urgent parent alert.</div>
+                        {% endfor %}
+                    </div>
+
+                </div>
+
+                <div class="d-grid gap-2 profile-actions">
+                    <a href="{% url 'student_edit' student.id %}" class="btn btn-light rounded-pill fw-bold">Edit Profile</a>
+                    <a href="{% url 'add_sibling' student.id %}" class="btn btn-success rounded-pill fw-bold">Add Sibling</a>
+                    <a href="/exams/report-card/?student_id={{ student.id }}" class="btn btn-dark rounded-pill fw-bold">Print Result</a>
+                    <a href="/fees/student-payment-statement/{{ student.id }}/" class="btn btn-warning rounded-pill fw-bold">Fees Statement Print</a>
+
+                    {% if student.is_active %}
+                        <a href="{% url 'student_discontinue' student.id %}" class="btn btn-danger rounded-pill fw-bold">Discontinue</a>
+                    {% else %}
+                        <a href="{% url 'student_readmit' student.id %}" class="btn btn-success rounded-pill fw-bold">Re-Admit</a>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card"><div class="card-body">
+                <div class="stat-icon mb-3">🤖</div>
+                <div class="mini-label">AI Health Index</div>
+                <h3 class="fw-bold">{{ student_health_index|default:"0" }}/100</h3>
+
+                {% if ai_risk_level == "High Risk" %}
+                    <small class="badge bg-danger soft-badge">{{ ai_risk_level }}</small>
+                {% elif ai_risk_level == "Medium Risk" %}
+                    <small class="badge bg-warning text-dark soft-badge">{{ ai_risk_level }}</small>
+                {% else %}
+                    <small class="badge bg-success soft-badge">{{ ai_risk_level|default:"Low Risk" }}</small>
+                {% endif %}
+            </div></div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card">
+                <div class="card-body">
+
+                    <div class="stat-icon mb-3">🏆</div>
+
+                    <div class="mini-label">
+                        Class Rank
+                    </div>
+
+                    <h3 class="fw-bold">
+                        {% if class_rank %}
+                            #{{ class_rank }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </h3>
+
+                    <small>
+                        Out of {{ total_students_in_class|default:"0" }}
+                    </small>
+        
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card">
+                <div class="card-body">
+
+                    <div class="stat-icon mb-3">🎯</div>
+
+                    <div class="mini-label">
+                        Pass Probability
+                    </div>
+
+                    <h3 class="fw-bold">
+                        {{ pass_probability|default:"0" }}%
+                    </h3>
+
+                    <small>
+                        Future Risk:
+                        {{ future_risk|default:"Medium" }}
+                    </small>
+        
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card stat-card">
+                <div class="card-body">
+
+                    <div class="stat-icon mb-3">📉</div>
+
+                    <div class="mini-label">
+                        Fail Probability
+                    </div>
+
+                    <h3 class="fw-bold">
+                        {{ fail_probability|default:"0" }}%
+                    </h3>
+
+                    <small>
+                        AI Prediction Engine
+                    </small>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-2">
+            <div class="card stat-card"><div class="card-body">
+                <div class="stat-icon mb-3">📅</div>
+                <div class="mini-label">Attendance</div>
+                <h3 class="fw-bold">{{ attendance_percentage }}%</h3>
+                <small>{{ attendance_present }} Present / {{ attendance_total }} Days</small>
+            </div></div>
+        </div>
+
+        <div class="col-md-6 col-xl-2">
+            <div class="card stat-card"><div class="card-body">
+                <div class="stat-icon mb-3">₹</div>
+                <div class="mini-label">Fee Due</div>
+                <h3 class="fw-bold">₹{{ total_due }}</h3>
+                <small>Paid ₹{{ total_paid }}</small>
+            </div></div>
+        </div>
+
+        <div class="col-md-6 col-xl-2">
+            <div class="card stat-card"><div class="card-body">
+                <div class="stat-icon mb-3">🎓</div>
+                <div class="mini-label">Average</div>
+                <h3 class="fw-bold">{{ average_percentage }}%</h3>
+                <small>{{ academic_status }}</small>
+            </div></div>
+        </div>
+
+        <div class="col-md-6 col-xl-2">
+            <div class="card stat-card"><div class="card-body">
+                <div class="stat-icon mb-3">⭐</div>
+                <div class="mini-label">Behaviour</div>
+                <h3 class="fw-bold">{{ behaviour_score }}</h3>
+                <small>+{{ positive_count }} / -{{ negative_count }}</small>
+            </div></div>
+        </div>
+
+        <div class="col-md-6 col-xl-2">
+            <div class="card stat-card"><div class="card-body">
+                <div class="stat-icon mb-3">⚠️</div>
+                <div class="mini-label">Complaints</div>
+                <h3 class="fw-bold">{{ pending_complaints }}</h3>
+                <small>{{ solved_complaints }} Solved</small>
+            </div></div>
+        </div>
+
+        <div class="col-md-6 col-xl-2">
+            <div class="card stat-card"><div class="card-body">
+                <div class="stat-icon mb-3">📜</div>
+                <div class="mini-label">Certificates</div>
+                <h3 class="fw-bold">{{ certificate_count }}</h3>
+                <small>Issued Certificates</small>
+            </div></div>
+        </div>
+    </div>
+
+    <ul class="nav nav-pills mb-4 no-print">
+        <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#overview" type="button">Overview</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#analytics" type="button">Graphs</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#academics" type="button">Academics</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#attendance" type="button">Attendance</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#fees" type="button">Fees</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#behaviour" type="button">Behaviour & Skills</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#complaints" type="button">Complaints</button></li>
+        <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#certificates" type="button">Certificates</button></li>
+    </ul>
+
+    <div class="tab-content">
+
+        <div class="tab-pane fade show active" id="overview">
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card premium-card">
+                        <div class="card-body">
+                            <h5 class="section-title mb-3">Student Details</h5>
+                            <div class="info-row"><span>Father</span><b>{{ student.father_name|default:"-" }}</b></div>
+                            <div class="info-row"><span>Mother</span><b>{{ student.mother_name|default:"-" }}</b></div>
+                            <div class="info-row"><span>Guardian</span><b>{{ student.guardian_name|default:"-" }}</b></div>
+                            <div class="info-row"><span>Phone</span><b>{{ student.phone|default:"-" }}</b></div>
+                            <div class="info-row"><span>DOB</span><b>{{ student.date_of_birth|default:"-" }}</b></div>
+                            <div class="info-row"><span>Aadhaar</span><b>{{ student.aadhaar_number|default:"-" }}</b></div>
+                            <div class="info-row"><span>Transport</span><b>{% if student.transport_required %}Yes{% else %}No{% endif %}</b></div>
+                            <div class="info-row"><span>Address</span><b>{{ student.address|default:"-" }}</b></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card premium-card">
+                        <div class="card-body">
+                            <h5 class="section-title mb-3">Smart Risk Detection</h5>
+
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <div class="alert alert-primary rounded-4 mb-0 text-center">
+                                        <div class="mini-label">Health Index</div>
+                                        <h4 class="fw-bold mb-0">{{ student_health_index|default:"0" }}/100</h4>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="alert alert-warning rounded-4 mb-0 text-center">
+                                        <div class="mini-label">AI Risk</div>
+                                        <h5 class="fw-bold mb-0">{{ ai_risk_level|default:"Low Risk" }}</h5>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="alert alert-success rounded-4 mb-0 text-center">
+                                        <div class="mini-label">Growth</div>
+                                        <h6 class="fw-bold mb-0">{{ improvement_status|default:"Stable" }}</h6>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                                <div class="card-body">
+                            
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h6 class="fw-bold mb-0">
+                                            🤖 AI Recommendations
+                                        </h6>
+                            
+                                        {% if future_risk == "Critical" %}
+                                            <span class="badge bg-danger soft-badge">
+                                                Critical Risk
+                                            </span>
+                                        {% elif future_risk == "Warning" %}
+                                            <span class="badge bg-warning text-dark soft-badge">
+                                                Warning
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-success soft-badge">
+                                                Safe
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                            
+                                    {% for rec in ai_recommendations %}
+                                        <div class="alert alert-light border rounded-4 py-2 mb-2">
+                                            ✅ {{ rec }}
+                                        </div>
+                                    {% empty %}
+                                        <div class="alert alert-light border rounded-4 py-2 mb-2">
+                                            ✅ Overall progress is stable.
+                                        </div>
+                                    {% endfor %}
+                            
+                                </div>
+                            </div>
+
+                            <div class="ai-box">
+                                {% for remark in ai_remarks %}
+                                    <div class="mb-2 fw-bold">🤖 {{ remark }}</div>
+                                {% empty %}
+                                    <div class="mb-2 fw-bold">🤖 Overall performance is stable.</div>
+                                {% endfor %}
+                            </div>
+
+                            <hr>
+
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <h4 class="fw-bold">{{ attendance_risk }}</h4>
+                                    <small>Attendance</small>
+                                </div>
+                                <div class="col-4">
+                                    <h4 class="fw-bold">{{ academic_status }}</h4>
+                                    <small>Academic</small>
+                                </div>
+                                <div class="col-4">
+                                    <h4 class="fw-bold">{{ behaviour_score }}</h4>
+                                    <small>Behaviour</small>
+                                </div>
+                            </div>
+
+                            {% if smart_parent_alerts %}
+                            <hr>
+                            <h6 class="fw-bold">Parent Alert Suggestions</h6>
+                            {% for alert in smart_parent_alerts %}
+                                <div class="alert alert-light border rounded-4 py-2 mb-2">⚠ {{ alert }}</div>
+                            {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="card premium-card">
+                        <div class="card-body">
+                
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="section-title">
+                                    🏆 Class Top Performers
+                                </h5>
+                
+                                <span class="badge bg-dark soft-badge">
+                                    Top 10
+                                </span>
+                            </div>
+                
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Student</th>
+                                            <th>Percentage</th>
+                                        </tr>
+                                    </thead>
+                
+                                    <tbody>
+                
+                                        {% for item in top_students %}
+                                        <tr>
+                
+                                            <td>
+                                                <b>#{{ forloop.counter }}</b>
+                                            </td>
+                
+                                            <td>
+                                                {{ item.student.student_name }}
+                                            </td>
+                
+                                            <td>
+                                                {{ item.percentage }}%
+                                            </td>
+                
+                                        </tr>
+                                        {% empty %}
+                
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted py-4">
+                                                No ranking data available.
+                                            </td>
+                                        </tr>
+                
+                                        {% endfor %}
+                
+                                    </tbody>
+                
+                                </table>
+                            </div>
+                
+                        </div>
+                    </div>
+                </div>
+                
+                {% if siblings %}
+                <div class="col-12">
+                    <div class="card premium-card">
+                        <div class="card-body">
+                            <h5 class="section-title mb-3">Siblings</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Name</th>
+                                            <th>Class</th>
+                                            <th>Roll</th>
+                                            <th>Student ID</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for s in siblings %}
+                                        <tr>
+                                            <td>{{ s.student_name }}</td>
+                                            <td>{{ s.class_assigned }}</td>
+                                            <td>{{ s.roll_no }}</td>
+                                            <td>{{ s.student_id }}</td>
+                                            <td><a href="{% url 'student_detail' s.id %}" class="btn btn-sm btn-dark rounded-pill">View</a></td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="analytics">
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="card premium-card">
+                        <div class="card-body">
+                            <h5 class="section-title mb-3">Attendance Graph</h5>
+                            <div class="chart-box"><canvas id="attendanceChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card premium-card">
+                        <div class="card-body">
+                            <h5 class="section-title mb-3">Fees Graph</h5>
+                            <div class="chart-box"><canvas id="feesChart"></canvas></div>
+                            <div class="text-end no-print">
+                                <a href="/fees/student-payment-statement/{{ student.id }}/" class="btn btn-dark rounded-pill">
+                                    Print Fees Statement
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card premium-card">
+                        <div class="card-body">
+                            <h5 class="section-title mb-3">Behaviour Graph</h5>
+                            <div class="chart-box"><canvas id="behaviourChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card premium-card">
+                        <div class="card-body">
+                            <h5 class="section-title mb-3">Academic Graph</h5>
+                            <div class="chart-box"><canvas id="academicChart"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="academics">
+            <div class="card premium-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+                        <h5 class="section-title">Unit Test Performance Analytics</h5>
+                        <a href="{% url 'class_test_dashboard' %}" class="btn btn-dark btn-sm rounded-pill px-3 no-print">View Dashboard</a>
+                    </div>
+
+                    {% for unit in unit_test_summary %}
+                    <div class="card border-0 shadow-sm rounded-4 mb-4">
+                        <div class="card-body">
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-3">
+                                    <div class="mini-label">Unit Test</div>
+                                    <h6 class="fw-bold">{{ unit.class_test.test_name }}</h6>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mini-label">Total</div>
+                                    <h6 class="fw-bold">{{ unit.total_marks }} / {{ unit.max_marks }}</h6>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mini-label">Percentage</div>
+                                    <h6 class="fw-bold">{{ unit.percentage }}%</h6>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mini-label">Performance</div>
+                                    <span class="badge bg-dark soft-badge">{{ unit.performance }}</span>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    {% if unit.best_subject %}
+                                    <div class="alert alert-success rounded-4">
+                                        <b>Best Subject:</b> {{ unit.best_subject.subject }} ({{ unit.best_subject.marks }})
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {% if unit.weak_subject %}
+                                    <div class="alert alert-danger rounded-4">
+                                        <b>Weak Subject:</b> {{ unit.weak_subject.subject }} ({{ unit.weak_subject.marks }})
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Subject</th>
+                                            <th>Marks</th>
+                                            <th>%</th>
+                                            <th>Performance</th>
+                                            <th>Remarks</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for s in unit.subjects %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td><b>{{ s.subject }}</b></td>
+                                            <td>{{ s.marks }}/{{ s.total_marks }}</td>
+                                            <td>{{ s.percentage }}%</td>
+                                            <td><span class="badge bg-secondary soft-badge">{{ s.performance }}</span></td>
+                                            <td>{{ s.remarks|default:"-" }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                    {% empty %}
+                        <div class="text-center py-5 text-muted">No academic performance found.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="attendance">
+            <div class="card premium-card">
+                <div class="card-body">
+                    <h5 class="section-title mb-3">Attendance Analytics</h5>
+
+                    <div class="row g-4 align-items-center">
+                        <div class="col-md-5 text-center">
+                            <h1 class="fw-bold display-4">{{ attendance_percentage }}%</h1>
+                            <span class="badge bg-dark soft-badge">{{ attendance_risk }}</span>
+                        </div>
+
+                        <div class="col-md-7">
+                            <p><b>Total Days:</b> {{ attendance_total }}</p>
+                            <p><b>Present:</b> {{ attendance_present }}</p>
+                            <p><b>Absent:</b> {{ attendance_absent }}</p>
+
+                            <div class="progress" style="height:28px;border-radius:999px;">
+                                <div class="progress-bar bg-success" style="width: {{ attendance_percentage }}%;">
+                                    {{ attendance_percentage }}%
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <div class="chart-box">
+                        <canvas id="attendanceChart2"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="fees">
+            <div class="card premium-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+                        <h5 class="section-title">Fees Details</h5>
+                        <div class="no-print">
+                            <a href="/fees/student-payment-statement/{{ student.id }}/" class="btn btn-dark rounded-pill">
+                                Statement Print
                             </a>
-                        {% endif %}
+                            <button onclick="window.print()" class="btn btn-primary rounded-pill">
+                                Print Profile
+                            </button>
+                        </div>
+                    </div>
 
-                        <a href="/complaints/edit/{{ c.id }}/" class="btn btn-sm btn-warning">
-                            Edit
-                        </a>
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-4">
+                            <div class="alert alert-primary rounded-4">
+                                <div class="mini-label">Monthly Fee</div>
+                                <h3 class="fw-bold">₹{{ monthly_fee }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="alert alert-success rounded-4">
+                                <div class="mini-label">Total Paid</div>
+                                <h3 class="fw-bold">₹{{ total_paid }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="alert alert-danger rounded-4">
+                                <div class="mini-label">Total Due</div>
+                                <h3 class="fw-bold">₹{{ total_due }}</h3>
+                            </div>
+                        </div>
+                    </div>
 
-                        <a href="/complaints/delete/{{ c.id }}/"
-                           onclick="return confirm('Delete this complaint?')"
-                           class="btn btn-sm btn-danger">
-                            Delete
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center">No complaints</td>
-                </tr>
-                {% endfor %}
-            </table>
-        </div>
-    </div>
+                    <div class="chart-box mb-4">
+                        <canvas id="feesChart2"></canvas>
+                    </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header bg-warning">Attendance Performance</div>
-        <div class="card-body">
-            <h4>{{ attendance_percentage }}%</h4>
-            <p><b>Total Days:</b> {{ attendance_total }}</p>
-            <p><b>Present:</b> {{ attendance_present }}</p>
-            <p><b>Absent:</b> {{ attendance_absent }}</p>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Date</th>
+                                    <th>Amount Paid</th>
+                                    <th>Month</th>
+                                    <th>Status</th>
+                                    <th class="no-print">Receipt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fee in fee_records %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ fee.payment_date|default:"-" }}</td>
+                                    <td>₹{{ fee.amount_paid|default:"0" }}</td>
+                                    <td>{{ fee.month|default:"-" }}</td>
+                                    <td>{{ fee.status|default:"-" }}</td>
+                                    <td class="no-print">
+                                        <a href="/fees/receipt/{{ fee.id }}/" class="btn btn-sm btn-success rounded-pill">
+                                            Print
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">No fee records found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
 
-            <div class="progress">
-                <div class="progress-bar bg-success" style="width: {{ attendance_percentage }}%;">
-                    {{ attendance_percentage }}%
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header bg-danger text-white">Fees Details</div>
-        <div class="card-body">
-            <p><b>Monthly Fee:</b> ₹{{ monthly_fee }}</p>
-            <p><b>Total Paid:</b> ₹{{ total_paid }}</p>
-            <p><b>Total Due:</b> ₹{{ total_due }}</p>
+        <div class="tab-pane fade" id="behaviour">
+            <div class="row g-4">
+                <div class="col-lg-5">
+                    <div class="card premium-card">
+                        <div class="card-body">
+                            <h5 class="section-title mb-3">Behaviour Score</h5>
+                            <h1 class="fw-bold display-5">{{ behaviour_score }}/100</h1>
 
-            <hr>
+                            <div class="progress mb-3" style="height:25px;border-radius:999px;">
+                                <div class="progress-bar bg-primary" style="width: {{ behaviour_score }}%;">
+                                    {{ behaviour_score }}
+                                </div>
+                            </div>
 
-            <h6>Fee Payment History</h6>
-            <table class="table table-bordered table-sm">
-                <tr>
-                    <th>Month</th>
-                    <th>Paid Amount</th>
-                    <th>Date</th>
-                </tr>
-                {% for fee in fee_records %}
-                <tr>
-                    <td>{{ fee.month }}</td>
-                    <td>₹{{ fee.amount_paid }}</td>
-                    <td>{{ fee.date }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" class="text-center">No fee record found.</td>
-                </tr>
-                {% endfor %}
-            </table>
+                            <div class="chart-box">
+                                <canvas id="behaviourChart2"></canvas>
+                            </div>
+
+                            <div class="row text-center">
+                                <div class="col-4">
+                                    <h4 class="fw-bold text-success">{{ positive_count }}</h4>
+                                    <small>Positive</small>
+                                </div>
+                                <div class="col-4">
+                                    <h4 class="fw-bold text-danger">{{ negative_count }}</h4>
+                                    <small>Negative</small>
+                                </div>
+                                <div class="col-4">
+                                    <h4 class="fw-bold text-secondary">{{ neutral_count }}</h4>
+                                    <small>Neutral</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card premium-card">
+                        <div class="card-body">
+                            <h5 class="section-title mb-3">Latest Skill Evaluation</h5>
+
+                            {% if skill_latest %}
+                                <div class="info-row"><span>Month</span><b>{{ skill_latest.month }} {{ skill_latest.year }}</b></div>
+                                <div class="info-row"><span>Discipline</span><b>{{ skill_latest.discipline }}</b></div>
+                                <div class="info-row"><span>Punctuality</span><b>{{ skill_latest.punctuality }}</b></div>
+                                <div class="info-row"><span>Cleanliness</span><b>{{ skill_latest.cleanliness }}</b></div>
+                                <div class="info-row"><span>Communication</span><b>{{ skill_latest.communication }}</b></div>
+                                <div class="info-row"><span>Leadership</span><b>{{ skill_latest.leadership }}</b></div>
+                                <div class="info-row"><span>Homework Habit</span><b>{{ skill_latest.homework_habit }}</b></div>
+                                <div class="info-row"><span>Class Participation</span><b>{{ skill_latest.class_participation }}</b></div>
+                                <hr>
+                                <b>Teacher Remarks:</b>
+                                <p class="mb-0">{{ skill_latest.teacher_remarks|default:"-" }}</p>
+                            {% else %}
+                                <div class="text-muted text-center py-4">No skill evaluation found.</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="card premium-card">
+                        <div class="card-body">
+                            <h5 class="section-title mb-3">Behaviour Incident History</h5>
+
+                            <div class="table-responsive">
+                                <table class="table table-bordered align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Title</th>
+                                            <th>Points</th>
+                                            <th>Parent</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for b in behaviour_records %}
+                                        <tr>
+                                            <td>{{ b.date }}</td>
+                                            <td><span class="badge bg-dark soft-badge">{{ b.behaviour_type }}</span></td>
+                                            <td>
+                                                <b>{{ b.title }}</b><br>
+                                                <small>{{ b.description|default:"-" }}</small>
+                                            </td>
+                                            <td>{{ b.points }}</td>
+                                            <td>{% if b.parent_notified %}Yes{% else %}No{% endif %}</td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted py-4">No behaviour records found.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div class="card shadow mb-4">
-        <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-            <span>Exam Details</span>
-            <a href="/exams/report-card/?student_id={{ student.id }}" class="btn btn-light btn-sm fw-bold">
-                🖨 Print Result
-            </a>
+        <div class="tab-pane fade" id="complaints">
+            <div class="card premium-card">
+                <div class="card-body">
+                    <h5 class="section-title mb-3">Complaint History</h5>
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="alert alert-warning rounded-4">
+                                <div class="mini-label">Pending</div>
+                                <h3 class="fw-bold">{{ pending_complaints }}</h3>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="alert alert-success rounded-4">
+                                <div class="mini-label">Solved</div>
+                                <h3 class="fw-bold">{{ solved_complaints }}</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Teacher Solution</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in complaints %}
+                                <tr>
+                                    <td>{{ c.created_at|date:"d M Y"|default:"-" }}</td>
+                                    <td>
+                                        <b>{{ c.title }}</b><br>
+                                        <small>{{ c.description|default:"-" }}</small>
+                                    </td>
+                                    <td><span class="badge bg-dark soft-badge">{{ c.status }}</span></td>
+                                    <td>{{ c.teacher_solution|default:"-" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">No complaints found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
         </div>
 
-        <div class="card-body">
-            <table class="table table-bordered table-sm align-middle">
-                <tr class="table-light">
-                    <th>Exam</th>
-                    <th>Subject</th>
-                    <th>Marks / Number</th>
-                    <th>Total Marks</th>
-                    <th>Grade</th>
-                    <th>Print</th>
-                </tr>
+        <div class="tab-pane fade" id="certificates">
+            <div class="card premium-card">
+                <div class="card-body">
+                    <h5 class="section-title mb-3">Issued Certificates</h5>
 
-                {% for exam in exam_records %}
-                <tr>
-                    <td>{{ exam.exam }}</td>
-                    <td>{{ exam.subject }}</td>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Certificate No</th>
+                                    <th>Type</th>
+                                    <th>Issue Date</th>
+                                    <th>Conduct</th>
+                                    <th>Printed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cert in certificates %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td><b>{{ cert.certificate_no }}</b></td>
+                                    <td>{{ cert.title }}</td>
+                                    <td>{{ cert.issue_date }}</td>
+                                    <td>{{ cert.conduct }}</td>
+                                    <td>{% if cert.is_printed %}Yes{% else %}No{% endif %}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">No certificate issued.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
 
-                    <td>
-                        {% if exam.marks %}
-                            {{ exam.marks }}
-                        {% elif exam.obtained_marks %}
-                            {{ exam.obtained_marks }}
-                        {% elif exam.number %}
-                            {{ exam.number }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        {% if exam.total_marks %}
-                            {{ exam.total_marks }}
-                        {% elif exam.full_marks %}
-                            {{ exam.full_marks }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        {% if exam.grade %}
-                            <span class="badge bg-primary">{{ exam.grade }}</span>
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        <a href="/exams/report-card/?student_id={{ student.id }}&exam_id={{ exam.id }}"
-                           class="btn btn-sm btn-dark">
-                            Print
-                        </a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="6" class="text-center">No exam record found.</td>
-                </tr>
-                {% endfor %}
-            </table>
+                </div>
+            </div>
         </div>
-    </div>
 
+    </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    if (typeof Chart === "undefined") {
+        console.log("Chart.js not loaded");
+        return;
+    }
+
+    const attendanceLabels = {{ attendance_month_labels|default:"[]"|safe }};
+    const attendanceData = {{ attendance_month_data|default:"[]"|safe }};
+
+    const feeLabels = {{ fee_month_labels|default:"[]"|safe }};
+    const feePaidData = {{ fee_month_paid_data|default:"[]"|safe }};
+    const feeDueData = {{ fee_month_due_data|default:"[]"|safe }};
+
+    const behaviourData = [
+        {{ positive_count|default:0 }},
+        {{ negative_count|default:0 }},
+        {{ neutral_count|default:0 }}
+    ];
+
+    const academicLabels = [
+        {% for unit in unit_test_summary %}
+            "{{ unit.class_test.test_name|escapejs }}",
+        {% endfor %}
+    ];
+
+    const academicData = [
+        {% for unit in unit_test_summary %}
+            {{ unit.percentage|default:0 }},
+        {% endfor %}
+    ];
+
+    function lineChart(id, labels, data, labelName){
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        new Chart(el, {
+            type: "line",
+            data: {
+                labels: labels.length ? labels : ["No Data"],
+                datasets: [{
+                    label: labelName,
+                    data: data.length ? data : [0],
+                    tension: .35,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive:true,
+                maintainAspectRatio:false,
+                scales:{ y:{ beginAtZero:true, max:100 } },
+                plugins:{ legend:{ position:"bottom" } }
+            }
+        });
+    }
+
+    function feeChart(id){
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        new Chart(el, {
+            type: "bar",
+            data: {
+                labels: feeLabels.length ? feeLabels : ["No Data"],
+                datasets: [
+                    {
+                        label: "Paid",
+                        data: feePaidData.length ? feePaidData : [0]
+                    },
+                    {
+                        label: "Due",
+                        data: feeDueData.length ? feeDueData : [0]
+                    }
+                ]
+            },
+            options: {
+                responsive:true,
+                maintainAspectRatio:false,
+                plugins:{ legend:{ position:"bottom" } }
+            }
+        });
+    }
+
+    function doughnutChart(id, labels, data){
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        new Chart(el, {
+            type:"doughnut",
+            data:{
+                labels:labels,
+                datasets:[{ data:data }]
+            },
+            options:{
+                responsive:true,
+                maintainAspectRatio:false,
+                plugins:{ legend:{ position:"bottom" } }
+            }
+        });
+    }
+
+    function academicChart(id){
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        new Chart(el, {
+            type:"bar",
+            data:{
+                labels: academicLabels.length ? academicLabels : ["No Data"],
+                datasets:[{
+                    label:"Performance %",
+                    data: academicData.length ? academicData : [0]
+                }]
+            },
+            options:{
+                responsive:true,
+                maintainAspectRatio:false,
+                scales:{ y:{ beginAtZero:true, max:100 } },
+                plugins:{ legend:{ display:false } }
+            }
+        });
+    }
+
+    lineChart("attendanceChart", attendanceLabels, attendanceData, "Monthly Attendance %");
+    lineChart("attendanceChart2", attendanceLabels, attendanceData, "Monthly Attendance %");
+
+    feeChart("feesChart");
+    feeChart("feesChart2");
+
+    doughnutChart("behaviourChart", ["Positive", "Negative", "Neutral"], behaviourData);
+    doughnutChart("behaviourChart2", ["Positive", "Negative", "Neutral"], behaviourData);
+
+    academicChart("academicChart");
+});
+</script>
 
 {% endblock %}

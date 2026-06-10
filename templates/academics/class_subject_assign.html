@@ -1,10 +1,81 @@
 {% extends 'base.html' %}
 {% block content %}
 
+<style>
+    .card-box{
+        border:none;
+        border-radius:22px;
+        box-shadow:0 10px 28px rgba(0,0,0,0.08);
+    }
+
+    .subject-option{
+        border:1px solid #e5e7eb;
+        border-radius:14px;
+        padding:12px;
+        background:#ffffff;
+        transition:.2s;
+        min-height:92px;
+    }
+
+    .subject-option:hover{
+        background:#f8fafc;
+        border-color:#0d6efd;
+    }
+
+    .subject-option input[type="checkbox"]{
+        transform:scale(1.15);
+    }
+
+    .rank-input{
+        max-width:90px;
+        margin-top:8px;
+    }
+
+    .marks-box{
+        background:#f8fafc;
+        border:1px solid #e5e7eb;
+        border-radius:18px;
+        padding:16px;
+    }
+
+    .top-head{
+        background:linear-gradient(135deg,#111827,#0d6efd);
+        color:white;
+        border-radius:22px;
+        padding:22px;
+        box-shadow:0 12px 30px rgba(13,110,253,.18);
+    }
+
+    .mini-note{
+        font-size:13px;
+        color:#6b7280;
+    }
+</style>
+
 <div class="container mt-4">
 
+    <div class="top-head mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h3 class="fw-bold mb-1">✅ Class-wise Subject Assign</h3>
+                <div>Assign subjects with rank/order, full marks, pass marks, written, oral and practical marks.</div>
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{% url 'subject_rank_manage' %}" class="btn btn-warning fw-bold">
+                    🔢 Manage Subject Rank
+                </a>
+                <a href="{% url 'subject_list' %}" class="btn btn-light fw-bold">
+                    📚 Subject List
+                </a>
+                <a href="{% url 'subject_rank_manage' %}" class="btn btn-warning fw-bold">
+                    🏆 Subject Rank
+                </a>
+            </div>
+        </div>
+    </div>
+
     <div class="card card-box p-4 mb-4">
-        <h3 class="fw-bold mb-3">✅ Class-wise Subject Assign</h3>
 
         <form method="get" class="row g-3 mb-4">
             <div class="col-md-6">
@@ -17,54 +88,119 @@
                         </option>
                     {% endfor %}
                 </select>
+                <div class="mini-note mt-1">
+                    Select a class to view/edit already assigned subjects and their display order.
+                </div>
             </div>
         </form>
 
         <form method="post">
             {% csrf_token %}
 
-            <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Class</label>
-                    {{ form.school_class }}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="marks-box mb-4">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Class</label>
+                        {{ form.school_class }}
+                        {% if form.school_class.errors %}
+                            <div class="text-danger small mt-1">{{ form.school_class.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Full</label>
+                        {{ form.full_marks }}
+                        {% if form.full_marks.errors %}
+                            <div class="text-danger small mt-1">{{ form.full_marks.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Pass</label>
+                        {{ form.pass_marks }}
+                        {% if form.pass_marks.errors %}
+                            <div class="text-danger small mt-1">{{ form.pass_marks.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Written</label>
+                        {{ form.written_marks }}
+                        {% if form.written_marks.errors %}
+                            <div class="text-danger small mt-1">{{ form.written_marks.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label fw-bold">Oral</label>
+                        {{ form.oral_marks }}
+                        {% if form.oral_marks.errors %}
+                            <div class="text-danger small mt-1">{{ form.oral_marks.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-1">
+                        <label class="form-label fw-bold">Prac.</label>
+                        {{ form.practical_marks }}
+                        {% if form.practical_marks.errors %}
+                            <div class="text-danger small mt-1">{{ form.practical_marks.errors }}</div>
+                        {% endif %}
+                    </div>
+
                 </div>
 
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Full</label>
-                    {{ form.full_marks }}
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Pass</label>
-                    {{ form.pass_marks }}
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Written</label>
-                    {{ form.written_marks }}
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Oral</label>
-                    {{ form.oral_marks }}
-                </div>
-
-                <div class="col-md-2">
-                    <label class="form-label fw-bold">Practical</label>
-                    {{ form.practical_marks }}
-                </div>
             </div>
 
-            <hr>
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <h5 class="fw-bold mb-0">📚 Select Subjects & Set Rank</h5>
 
-            <h5 class="fw-bold mb-3">📚 Select Subjects</h5>
+                {% if selected_class %}
+                    <span class="badge bg-primary">
+                        Selected Class: {{ selected_class.class_name }}
+                    </span>
+                {% endif %}
+            </div>
+
+            <div class="alert alert-info">
+                Example: Rank 1 = first subject in report card/marks entry, Rank 2 = second subject.
+            </div>
 
             <div class="row">
-                {% for checkbox in form.subjects %}
-                    <div class="col-md-3 mb-2">
-                        <div class="border rounded p-2">
-                            {{ checkbox.tag }}
-                            <label class="ms-2">{{ checkbox.choice_label }}</label>
+                {% for row in subject_rows %}
+                    <div class="col-md-3 mb-3">
+                        <label class="subject-option w-100">
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="checkbox"
+                                       name="subjects"
+                                       value="{{ row.subject.id }}"
+                                       {% if row.is_assigned %}checked{% endif %}>
+                                <span class="fw-semibold">
+                                    {{ row.subject.subject_name }}
+                                </span>
+                            </div>
+
+                            <div class="mt-2">
+                                <small class="text-muted fw-bold">Subject Rank</small>
+                                <input type="number"
+                                       name="subject_rank_{{ row.subject.id }}"
+                                       value="{{ row.rank }}"
+                                       min="0"
+                                       class="form-control rank-input">
+                            </div>
+                        </label>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <div class="alert alert-warning">
+                            No active subjects found. Please add subjects first.
                         </div>
                     </div>
                 {% endfor %}
@@ -77,46 +213,57 @@
             {% endif %}
 
             <button class="btn btn-success mt-3">
-                💾 Save Class Subjects
+                💾 Save Class Subjects With Rank
             </button>
         </form>
     </div>
 
     <div class="card card-box p-4">
-        <h5 class="fw-bold mb-3">📋 Assigned Subjects</h5>
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h5 class="fw-bold mb-0">📋 Assigned Subjects</h5>
 
-        <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-                <tr>
-                    <th>Class</th>
-                    <th>Subject</th>
-                    <th>Full</th>
-                    <th>Pass</th>
-                    <th>Written</th>
-                    <th>Oral</th>
-                    <th>Practical</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for cs in class_subjects %}
+            <span class="badge bg-dark">
+                Total: {{ class_subjects|length }}
+            </span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-dark">
                     <tr>
-                        <td>{{ cs.school_class.class_name }}</td>
-                        <td>{{ cs.subject.subject_name }}</td>
-                        <td>{{ cs.full_marks }}</td>
-                        <td>{{ cs.pass_marks }}</td>
-                        <td>{{ cs.written_marks }}</td>
-                        <td>{{ cs.oral_marks }}</td>
-                        <td>{{ cs.practical_marks }}</td>
+                        <th width="70">Rank</th>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Full</th>
+                        <th>Pass</th>
+                        <th>Written</th>
+                        <th>Oral</th>
+                        <th>Practical</th>
                     </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="7" class="text-center text-muted">
-                            No assigned subjects found
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+
+                <tbody>
+                    {% for cs in class_subjects %}
+                        <tr>
+                            <td><span class="badge bg-primary">{{ cs.subject_rank }}</span></td>
+                            <td>{{ cs.school_class.class_name }}</td>
+                            <td class="fw-semibold">{{ cs.subject.subject_name }}</td>
+                            <td>{{ cs.full_marks }}</td>
+                            <td>{{ cs.pass_marks }}</td>
+                            <td>{{ cs.written_marks }}</td>
+                            <td>{{ cs.oral_marks }}</td>
+                            <td>{{ cs.practical_marks }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                No assigned subjects found
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 
 </div>

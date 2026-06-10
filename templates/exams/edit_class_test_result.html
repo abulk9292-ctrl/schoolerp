@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card border-0 shadow-lg rounded-4">
+        <div class="card-header bg-warning py-3 rounded-top-4">
+            <h4 class="mb-0">Edit Unit Test Result</h4>
+        </div>
+
+        <div class="card-body p-4">
+            <form method="POST">
+                {% csrf_token %}
+
+                <p><b>Student:</b> {{ mark.class_test_result.student.student_name }}</p>
+                <p><b>Unit Test:</b> {{ mark.class_test_result.class_test.test_name }}</p>
+                <p><b>Subject:</b> {{ mark.subject }}</p>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Marks</label>
+                    <input type="number" step="0.01" name="marks"
+                           value="{{ mark.total_marks }}"
+                           class="form-control">
+                </div>
+
+                <button class="btn btn-success rounded-pill px-4">
+                    Update Result
+                </button>
+
+                <a href="{% url 'class_test_result_list' %}"
+                   class="btn btn-secondary rounded-pill px-4">
+                    Back
+                </a>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

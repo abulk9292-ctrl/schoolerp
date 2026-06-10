@@ -19,12 +19,13 @@
 <div class="card card-box mb-4">
     <div class="card-body">
         <form method="get" class="row g-3">
-            <div class="col-md-4">
+
+            <div class="col-md-3">
                 <label class="form-label">Date</label>
                 <input type="date" name="date" value="{{ selected_date }}" class="form-control">
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label">Class</label>
                 <select name="class_id" class="form-select">
                     <option value="">All Classes</option>
@@ -36,9 +37,22 @@
                 </select>
             </div>
 
-            <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary">Filter</button>
+            <div class="col-md-3">
+                <label class="form-label">Section</label>
+                <select name="section" class="form-select">
+                    <option value="">All Sections</option>
+                    <option value="A" {% if selected_section == "A" %}selected{% endif %}>A</option>
+                    <option value="B" {% if selected_section == "B" %}selected{% endif %}>B</option>
+                    <option value="C" {% if selected_section == "C" %}selected{% endif %}>C</option>
+                    <option value="D" {% if selected_section == "D" %}selected{% endif %}>D</option>
+                </select>
             </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Filter</button>
+                <a href="{% url 'student_daily_report' %}" class="btn btn-secondary">Reset</a>
+            </div>
+
         </form>
     </div>
 </div>
@@ -53,6 +67,7 @@
                 <th>Registration No</th>
                 <th>Name</th>
                 <th>Class</th>
+                <th>Section</th>
                 <th>Roll No</th>
                 <th>Status</th>
             </tr>
@@ -76,6 +91,7 @@
                     <td>{{ item.student.registration_no }}</td>
                     <td>{{ item.student.student_name }}</td>
                     <td>{{ item.student.class_assigned }}</td>
+                    <td>{{ item.student.section|default:"-" }}</td>
                     <td>{{ item.student.roll_no }}</td>
 
                     <td>
@@ -95,7 +111,7 @@
             {% else %}
                 {% if holiday_info.is_holiday %}
                 <tr>
-                    <td colspan="8" class="text-center">
+                    <td colspan="9" class="text-center">
                         {% if holiday_info.is_half_day %}
                             <span class="badge bg-warning text-dark">Half Day</span>
                         {% else %}
@@ -107,7 +123,7 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="8" class="text-center">No attendance records found.</td>
+                    <td colspan="9" class="text-center">No attendance records found.</td>
                 </tr>
                 {% endif %}
             {% endif %}

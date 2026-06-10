@@ -1,0 +1,345 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+@page{size:A4 portrait;margin:7mm}
+
+.statement-box{
+    background:#fff;
+    border-radius:18px;
+    padding:14px 18px;
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+
+.school-title{
+    text-align:center;
+    font-size:26px;
+    font-weight:900;
+    color:#0f2f66;
+    margin:0;
+    letter-spacing:.5px;
+}
+
+.statement-title{
+    text-align:center;
+    font-size:15px;
+    font-weight:900;
+    margin:3px 0 12px;
+    color:#111827;
+}
+
+.info-table{
+    margin-bottom:10px!important;
+    font-size:12px;
+}
+
+.info-table td{
+    padding:5px 8px!important;
+    font-weight:700;
+}
+
+.info-table td:nth-child(1),
+.info-table td:nth-child(3){
+    background:#f1f5f9;
+    color:#0f172a;
+}
+
+.summary-wrap{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+    margin:8px 0 12px;
+}
+
+.summary-card{
+    border-radius:14px;
+    padding:10px;
+    color:#fff;
+    text-align:center;
+    font-weight:900;
+    min-height:58px;
+}
+
+.summary-card div{
+    font-size:11px;
+    opacity:.95;
+}
+
+.summary-card h4{
+    margin:2px 0 0;
+    font-size:18px;
+    font-weight:900;
+}
+
+.bg1{background:linear-gradient(135deg,#0d6efd,#084298)}
+.bg2{background:linear-gradient(135deg,#198754,#0f5132)}
+.bg3{background:linear-gradient(135deg,#dc3545,#842029)}
+.bg4{background:linear-gradient(135deg,#6f42c1,#3b0764)}
+
+.payment-table{
+    font-size:11px;
+    margin-bottom:0!important;
+}
+
+.payment-table thead th{
+    background:#0f2f66!important;
+    color:#fff!important;
+    text-align:center;
+    vertical-align:middle;
+    padding:6px!important;
+    white-space:nowrap;
+}
+
+.payment-table td{
+    vertical-align:middle;
+    font-weight:700;
+    text-align:center;
+    padding:6px!important;
+    white-space:nowrap;
+}
+
+.footer-sign{
+    display:flex;
+    justify-content:space-between;
+    margin-top:18px;
+    font-size:12px;
+    font-weight:800;
+}
+
+.sign-area{
+    width:220px;
+}
+
+.sign-line{
+    border-top:1px solid #111;
+    padding-top:4px;
+    text-align:center;
+    font-size:12px;
+    font-weight:800;
+}
+
+.sign-line{
+    border-top:1px solid #111;
+    padding-top:4px;
+    width:160px;
+    text-align:center;
+}
+
+@media print{
+    body{
+        background:#fff!important;
+    }
+
+    body *{
+        visibility:hidden;
+    }
+
+    .statement-box,
+    .statement-box *{
+        visibility:visible;
+    }
+
+    .statement-box{
+        position:absolute;
+        top:0;
+        left:0;
+        width:100%;
+        padding:8px 10px!important;
+        box-shadow:none!important;
+        border-radius:0!important;
+    }
+
+    .no-print,
+    .sidebar,
+    .topbar{
+        display:none!important;
+    }
+
+    .content-area,
+    .main-area{
+        padding:0!important;
+        margin:0!important;
+        width:100%!important;
+    }
+
+    .table-responsive{
+        overflow:visible!important;
+        box-shadow:none!important;
+        padding:0!important;
+    }
+
+    .badge{
+        border:1px solid #333;
+        color:#000!important;
+        background:#fff!important;
+    }
+
+    .school-title{font-size:24px}
+    .statement-title{font-size:14px;margin-bottom:8px}
+}
+</style>
+
+<div class="container-fluid mt-3">
+
+    <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+        <h3 class="fw-bold">Student Payment Statement</h3>
+        <button onclick="window.print()" class="btn btn-success">🖨 Print</button>
+    </div>
+
+    <div class="card shadow-sm mb-3 no-print">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Academic Session</label>
+                    <select name="session_id" class="form-select">
+                        <option value="">All Sessions</option>
+
+                        {% for session in sessions %}
+                        <option value="{{ session.id }}"
+                            {% if selected_session == session.id|stringformat:"s" %}selected{% endif %}>
+                            {{ session.session_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="statement-box">
+
+        <div class="text-center mb-1">
+            <small class="fw-bold">AL RAHMAN MISSION ERP</small>
+        </div>
+
+        <div class="school-title">AL RAHMAN MISSION</div>
+        <div class="statement-title">STUDENT PAYMENT STATEMENT</div>
+
+        <table class="table table-bordered info-table">
+            <tr>
+                <td width="18%">Student Name</td>
+                <td width="32%">{{ student.student_name }}</td>
+                <td width="18%">Student ID</td>
+                <td width="32%">{{ student.student_id }}</td>
+            </tr>
+            <tr>
+                <td>Class</td>
+                <td>{{ student.class_assigned }}</td>
+                <td>Section</td>
+                <td>{{ student.section|default:"-" }}</td>
+            </tr>
+            <tr>
+                <td>Roll No</td>
+                <td>{{ student.roll_no }}</td>
+                <td>Phone</td>
+                <td>{{ student.phone }}</td>
+            </tr>
+            <tr>
+                <td>Session</td>
+                <td colspan="3">
+                    {% if active_session %}
+                        {{ active_session.session_name }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </tr>
+        </table>
+
+        <div class="summary-wrap">
+            <div class="summary-card bg1">
+                <div>Total Fee</div>
+                <h4>₹{{ total_fee }}</h4>
+            </div>
+
+            <div class="summary-card bg2">
+                <div>Total Paid</div>
+                <h4>₹{{ total_paid }}</h4>
+            </div>
+
+            <div class="summary-card bg3">
+                <div>Total Due</div>
+                <h4>₹{{ total_due }}</h4>
+            </div>
+
+            <div class="summary-card bg4">
+                <div>Total Discount</div>
+                <h4>₹{{ total_discount }}</h4>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered payment-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Month</th>
+                        <th>Receipt No</th>
+                        <th>Total</th>
+                        <th>Discount</th>
+                        <th>Paid</th>
+                        <th>Due</th>
+                        <th>Status</th>
+                        <th>Mode</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for fee in payments %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ fee.payment_date }}</td>
+                        <td>{{ fee.fees_month }}</td>
+                        <td>{{ fee.receipt_no }}</td>
+                        <td>₹{{ fee.total_amount }}</td>
+                        <td>₹{{ fee.discount_amount }}</td>
+                        <td>₹{{ fee.deposit_amount }}</td>
+                        <td>₹{{ fee.due_balance }}</td>
+                        <td>{{ fee.status }}</td>
+                        <td>{{ fee.payment_mode }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="10" class="text-center text-danger fw-bold">
+                            No payment history found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer-sign">
+
+            <div class="sign-area text-center">
+                <img src="{% static 'images/round_seal.png' %}"
+                     style="height:75px;opacity:.92;margin-bottom:-12px;">
+
+                <div class="sign-line">
+                    School Seal
+                </div>
+            </div>
+
+            <div class="sign-area text-center">
+
+                <img src="{% static 'images/principal_sign.png' %}"
+                     style="height:55px;margin-bottom:-6px;">
+
+                <div class="sign-line">
+                    Principal Signature
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

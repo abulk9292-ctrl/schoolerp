@@ -1,41 +1,51 @@
 from django import forms
+
 from .models import Holiday
 
 
+# =========================================================
+# HOLIDAY FORM
+# =========================================================
+
 class HolidayForm(forms.ModelForm):
-    start_date = forms.DateField(
-        widget=forms.DateInput(attrs={
-            'class': 'form-control',
-            'type': 'date'
-        }),
-        required=True
-    )
-
-    end_date = forms.DateField(
-        widget=forms.DateInput(attrs={
-            'class': 'form-control',
-            'type': 'date'
-        }),
-        required=False
-    )
-
     class Meta:
         model = Holiday
+
         fields = [
-            'title',
-            'start_date',
-            'end_date',
-            'holiday_type',
-            'is_half_day',
-            'note',
+            "title",
+            "date",
+            "holiday_type",
+            "is_half_day",
+            "is_active",
+            "note",
         ]
 
         widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'holiday_type': forms.Select(attrs={'class': 'form-select'}),
-            'is_half_day': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'note': forms.Textarea(attrs={
-                'class': 'form-control',
-                'rows': 3
+            "title": forms.TextInput(attrs={
+                "class": "form-control",
+                "placeholder": "Holiday Title",
+            }),
+
+            "date": forms.DateInput(attrs={
+                "class": "form-control",
+                "type": "date",
+            }),
+
+            "holiday_type": forms.Select(attrs={
+                "class": "form-select",
+            }),
+
+            "is_half_day": forms.CheckboxInput(attrs={
+                "class": "form-check-input",
+            }),
+
+            "is_active": forms.CheckboxInput(attrs={
+                "class": "form-check-input",
+            }),
+
+            "note": forms.Textarea(attrs={
+                "class": "form-control",
+                "rows": 3,
+                "placeholder": "Optional Note",
             }),
         }

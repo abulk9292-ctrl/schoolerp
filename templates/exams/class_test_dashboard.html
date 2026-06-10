@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">🎯 Unit Test Dashboard</h2>
+            <p class="text-muted mb-0">Result • Rank • Performance Analysis</p>
+        </div>
+
+        <a href="{% url 'add_class_test_result' %}" class="btn btn-success rounded-pill px-4">
+            + Add Result
+        </a>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-3 mb-4">
+            <a href="{% url 'class_test_list' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-lg rounded-4">
+                    <div class="card-body text-white p-4" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);">
+                        <h6>Total Unit Tests</h6>
+                        <h1 class="fw-bold">{{ total_tests }}</h1>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <a href="{% url 'class_test_result_list' %}" class="text-decoration-none">
+                <div class="card border-0 shadow-lg rounded-4">
+                    <div class="card-body text-white p-4" style="background:linear-gradient(135deg,#059669,#047857);">
+                        <h6>Total Subject Results</h6>
+                        <h1 class="fw-bold">{{ total_results }}</h1>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-body text-white p-4" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+                    <h6>Average Marks</h6>
+                    <h1 class="fw-bold">{{ avg_marks }}</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-body text-white p-4" style="background:linear-gradient(135deg,#dc2626,#b91c1c);">
+                    <h6>Selected Test</h6>
+                    <h5 class="fw-bold mb-0">
+                        {% if class_test %}
+                            {{ class_test.test_name }}
+                        {% else %}
+                            None
+                        {% endif %}
+                    </h5>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card border-0 shadow-lg rounded-4 mb-4">
+        <div class="card-body p-4">
+            <form method="GET">
+                <label class="form-label fw-bold">Select Unit Test</label>
+
+                <select name="test"
+                        class="form-select form-select-lg rounded-4 shadow-sm"
+                        onchange="this.form.submit()">
+
+                    <option value="">---- Select Unit Test ----</option>
+
+                    {% for i in all_tests %}
+                    <option value="{{ i.id }}"
+                        {% if selected_test_id == i.id|stringformat:"s" %}selected{% endif %}>
+                        {{ i.test_name }} | {{ i.class_name }} | {{ i.section }} | {{ i.exam_date }}
+                    </option>
+                    {% endfor %}
+
+                </select>
+            </form>
+        </div>
+    </div>
+
+    {% if best_performer %}
+
+    <div class="row">
+
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-body text-center p-4">
+                    <h5 class="fw-bold text-success">🏆 Best Performer</h5>
+                    <h4>{{ best_performer.student.student_name }}</h4>
+                    <h2 class="fw-bold text-success">{{ best_performer.total_marks }}</h2>
+                    <span class="badge bg-success px-3 py-2">
+                        {{ best_performer.percentage }}% - {{ best_performer.performance }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-body text-center p-4">
+                    <h5 class="fw-bold text-warning">📘 Average Performer</h5>
+                    <h4>{{ average_performer.student.student_name }}</h4>
+                    <h2 class="fw-bold text-warning">{{ average_performer.total_marks }}</h2>
+                    <span class="badge bg-warning text-dark px-3 py-2">
+                        {{ average_performer.percentage }}% - {{ average_performer.performance }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-lg rounded-4">
+                <div class="card-body text-center p-4">
+                    <h5 class="fw-bold text-danger">⚠ Low Performer</h5>
+                    <h4>{{ low_performer.student.student_name }}</h4>
+                    <h2 class="fw-bold text-danger">{{ low_performer.total_marks }}</h2>
+                    <span class="badge bg-danger px-3 py-2">
+                        {{ low_performer.percentage }}% - {{ low_performer.performance }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {% endif %}
+
+    <div class="card border-0 shadow-lg rounded-4">
+
+        <div class="card-header bg-dark text-white py-3 rounded-top-4 d-flex justify-content-between">
+            <h5 class="mb-0">📊 Class Rank List</h5>
+            <button onclick="window.print()" class="btn btn-light btn-sm rounded-pill px-3">
+                Print
+            </button>
+        </div>
+
+        <div class="card-body table-responsive">
+
+            <table class="table table-bordered table-hover align-middle">
+
+                <thead class="table-light">
+                    <tr>
+                        <th>Rank</th>
+                        <th>Student</th>
+                        <th>Total Marks</th>
+                        <th>Max Marks</th>
+                        <th>Percentage</th>
+                        <th>Performance</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for i in result_rows %}
+
+                    <tr>
+                        <td class="fw-bold">
+                            {% if i.rank == 1 %}
+                                🥇
+                            {% elif i.rank == 2 %}
+                                🥈
+                            {% elif i.rank == 3 %}
+                                🥉
+                            {% else %}
+                                {{ i.rank }}
+                            {% endif %}
+                        </td>
+
+                        <td class="fw-semibold">
+                            {{ i.student.student_name }}
+                        </td>
+
+                        <td>{{ i.total_marks }}</td>
+
+                        <td>{{ i.max_marks }}</td>
+
+                        <td>{{ i.percentage }}%</td>
+
+                        <td>
+                            {% if i.performance == "Excellent" %}
+                                <span class="badge bg-primary px-3 py-2">Excellent</span>
+                            {% elif i.performance == "Best" %}
+                                <span class="badge bg-success px-3 py-2">Best</span>
+                            {% elif i.performance == "Better" %}
+                                <span class="badge bg-info px-3 py-2">Better</span>
+                            {% elif i.performance == "Average" %}
+                                <span class="badge bg-warning text-dark px-3 py-2">Average</span>
+                            {% else %}
+                                <span class="badge bg-danger px-3 py-2">Low</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            No Unit Test Selected / No Result Found
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

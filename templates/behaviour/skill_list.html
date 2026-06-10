@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.skill-head{
+    background:linear-gradient(135deg,#0891b2,#2563eb);
+    color:white;
+    padding:24px;
+    border-radius:24px;
+    box-shadow:0 14px 35px rgba(37,99,235,.22);
+}
+.skill-card{
+    border:none;
+    border-radius:24px;
+    background:white;
+    box-shadow:0 12px 30px rgba(0,0,0,.08);
+    overflow:hidden;
+}
+.table thead th{
+    background:#0f172a;
+    color:white;
+    border:none;
+    padding:14px;
+    font-size:14px;
+}
+.table tbody td{
+    padding:14px;
+    vertical-align:middle;
+}
+.grade-badge{
+    padding:7px 12px;
+    border-radius:30px;
+    font-size:12px;
+    font-weight:900;
+}
+.grade-excellent{background:#dcfce7;color:#166534;}
+.grade-good{background:#dbeafe;color:#1d4ed8;}
+.grade-average{background:#fef3c7;color:#92400e;}
+.grade-low{background:#fee2e2;color:#991b1b;}
+.action-btn{
+    border:none;
+    border-radius:10px;
+    padding:7px 12px;
+    font-size:13px;
+    font-weight:800;
+    text-decoration:none;
+}
+</style>
+
+<div class="skill-head mb-4 d-flex justify-content-between align-items-center flex-wrap">
+
+    <div>
+        <h3 class="fw-bold mb-1">🌟 Skill Evaluation List</h3>
+        <div>Monthly student skill and discipline evaluation</div>
+    </div>
+
+    <a href="{% url 'skill_evaluation_add' %}"
+       class="btn btn-light fw-bold px-4 py-2 rounded-4">
+        ➕ Add Evaluation
+    </a>
+
+</div>
+
+<div class="skill-card">
+
+    <div class="table-responsive">
+
+        <table class="table table-hover align-middle mb-0">
+
+            <thead>
+
+                <tr>
+
+                    <th>#</th>
+
+                    <th>Student</th>
+
+                    <th>Month</th>
+
+                    <th>Discipline</th>
+
+                    <th>Communication</th>
+
+                    <th>Leadership</th>
+
+                    <th>Participation</th>
+
+                    <th>Teacher</th>
+
+                    <th width="160">Action</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                {% for evaluation in evaluations %}
+
+                <tr>
+
+                    <td>
+                        {{ forloop.counter }}
+                    </td>
+
+                    <td>
+
+                        <div class="fw-bold">
+                            {{ evaluation.student.student_name }}
+                        </div>
+
+                        <small class="text-muted">
+                            {{ evaluation.student.student_id }}
+                        </small>
+
+                    </td>
+
+                    <td>
+
+                        <span class="fw-bold">
+                            {{ evaluation.month }}
+                        </span>
+
+                        <br>
+
+                        <small class="text-muted">
+                            {{ evaluation.year }}
+                        </small>
+
+                    </td>
+
+                    <td>
+
+                        {% if evaluation.discipline == "Excellent" %}
+
+                            <span class="grade-badge grade-excellent">
+                                Excellent
+                            </span>
+
+                        {% elif evaluation.discipline == "Very Good" or evaluation.discipline == "Good" %}
+
+                            <span class="grade-badge grade-good">
+                                {{ evaluation.discipline }}
+                            </span>
+
+                        {% elif evaluation.discipline == "Average" %}
+
+                            <span class="grade-badge grade-average">
+                                Average
+                            </span>
+
+                        {% else %}
+
+                            <span class="grade-badge grade-low">
+                                Needs Improvement
+                            </span>
+
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        <span class="fw-bold">
+                            {{ evaluation.communication }}
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        <span class="fw-bold">
+                            {{ evaluation.leadership }}
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        <span class="fw-bold">
+                            {{ evaluation.class_participation }}
+                        </span>
+
+                    </td>
+
+                    <td>
+
+                        {% if evaluation.teacher %}
+                            {{ evaluation.teacher.name }}
+                        {% else %}
+                            —
+                        {% endif %}
+
+                    </td>
+
+                    <td>
+
+                        <div class="d-flex gap-2 flex-wrap">
+
+                            <a href="{% url 'skill_evaluation_edit' evaluation.id %}"
+                               class="action-btn btn btn-primary">
+                                ✏️ Edit
+                            </a>
+
+                            <a href="{% url 'skill_evaluation_delete' evaluation.id %}"
+                               class="action-btn btn btn-danger">
+                                🗑 Delete
+                            </a>
+
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% empty %}
+
+                <tr>
+
+                    <td colspan="9">
+
+                        <div class="alert alert-info m-3">
+                            No skill evaluations found.
+                        </div>
+
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+{% endblock %}

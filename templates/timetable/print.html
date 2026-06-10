@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+@page{size:A4 landscape;margin:8mm}
+@media print{.no-print,.sidebar,.topbar{display:none!important}.content-area{padding:0!important}}
+.print-title{text-align:center;margin-bottom:8px}
+.print-table{font-size:10.5px}
+.print-table th,.print-table td{padding:4px!important;vertical-align:top}
+.print-table th{background:#f1f5f9!important;text-align:center}
+.period-col{width:90px;font-weight:900;background:#f8fafc!important}
+.break-row td{background:#e5e7eb!important;font-weight:900;text-align:center}
+.subject-text{font-weight:900;color:#1d4ed8}
+</style>
+<div class="no-print mb-3"><button onclick="window.print()" class="btn btn-success">Print</button></div>
+<div class="print-title">
+    <h3 class="fw-bold mb-0">AL RAHMAN MISSION</h3>
+    <h5>{{ title }}</h5>
+</div>
+
+{% if grid_mode %}
+<table class="table table-bordered print-table">
+    <thead>
+        <tr>
+            <th class="period-col">Period</th>
+            {% for c in display_classes %}
+                <th>{{ c }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+    {% for p in periods %}
+        {% if p.is_break %}
+            <tr class="break-row">
+                <td class="period-col">{{ p.name }}<br>{{ p.start_time }} - {{ p.end_time }}</td>
+                <td colspan="999">Tiffin / Break</td>
+            </tr>
+        {% else %}
+            <tr>
+                <td class="period-col">{{ p.name }}<br>{{ p.start_time }} - {{ p.end_time }}</td>
+                {% for c in display_classes %}
+                    <td>
+                    {% for e in entries %}
+                        {% if e.period_id == p.id and e.class_assigned_id == c.id %}
+                            <b>Teacher :</b> {{ e.teacher|default:"-" }}<br>
+                            <b>Room:</b> {{ e.room_no|default:"-" }}<br>
+                            <b>Subject:</b> <span class="subject-text">{{ e.subject|default:"-" }}</span>
+                        {% endif %}
+                    {% endfor %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endif %}
+    {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<table class="table table-bordered print-table">
+    <tr><th>SL</th><th>Day</th><th>Period</th><th>Time</th><th>Class</th><th>Subject</th><th>Teacher</th><th>Room</th></tr>
+    {% for e in entries %}
+    <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ e.get_day_display }}</td>
+        <td>{{ e.period.name }}</td>
+        <td>{{ e.period.start_time }} - {{ e.period.end_time }}</td>
+        <td>{{ e.class_assigned }} {{ e.section|default:"" }}</td>
+        <td>{{ e.subject|default:"-" }}</td>
+        <td>{{ e.teacher|default:"-" }}</td>
+        <td>{{ e.room_no|default:"-" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="8" class="text-center">No timetable found.</td></tr>
+    {% endfor %}
+</table>
+{% endif %}
+{% endblock %}

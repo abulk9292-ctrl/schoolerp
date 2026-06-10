@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid mt-4">
+<div class="p-4 text-white rounded-4 mb-4" style="background:linear-gradient(135deg,#0f172a,#1d4ed8);">
+<h2 class="fw-bold mb-1">✅ Admin Complaint Approval</h2>
+<p class="mb-0">Admin Final Status + Admin Remark</p>
+</div>
+<div class="row">
+{% for complaint in complaints %}
+<div class="col-lg-6 mb-4">
+<div class="card shadow border-0 rounded-4 h-100"><div class="card-body p-4">
+<h5 class="fw-bold">{{ complaint.title }}</h5>
+<p><b>Student:</b> {{ complaint.student.student_name }}</p>
+<p><b>Teacher:</b> {{ complaint.handled_by_teacher }}</p>
+<div class="alert alert-light border" style="white-space:pre-line;"><b>Teacher Status + Remark:</b><br>{{ complaint.teacher_solution }}</div>
+<form method="POST" action="{% url 'complaint_solve' complaint.id %}">{% csrf_token %}
+<label class="fw-bold">Admin Final Status</label>
+<select name="admin_status" class="form-control mb-2" required>
+<option value="">Select Admin Status</option>
+<option value="Approved and Solved">Approved and Solved</option>
+<option value="Parent Meeting Scheduled">Parent Meeting Scheduled</option>
+<option value="Warning Issued">Warning Issued</option>
+<option value="Counselling Required">Counselling Required</option>
+<option value="Management Decision Required">Management Decision Required</option>
+</select>
+<label class="fw-bold">Admin Remark</label>
+<textarea name="admin_solution" class="form-control mb-2" rows="4" required></textarea>
+<button class="btn btn-success w-100">✅ Approve & Solve</button>
+</form>
+<form method="POST" action="{% url 'complaint_reject' complaint.id %}" class="mt-2">{% csrf_token %}
+<textarea name="admin_solution" rows="2" class="form-control mb-2">Rejected by admin</textarea>
+<button class="btn btn-danger w-100">↩ Reject / Send Back</button>
+</form>
+</div></div>
+</div>
+{% empty %}
+<div class="col-12"><div class="alert alert-info">No pending approval.</div></div>
+{% endfor %}
+</div>
+</div>
+{% endblock %}

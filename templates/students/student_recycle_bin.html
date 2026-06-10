@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap">
+
+    <div>
+        <h2 class="fw-bold mb-0">
+            🗑 Student Recycle Bin
+        </h2>
+        <small class="text-muted">
+            Deleted students can be restored anytime.
+        </small>
+    </div>
+
+    <div>
+
+        <a href="{% url 'student_list' %}"
+           class="btn btn-primary">
+            ← Back To Students
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="card shadow-sm border-0">
+
+    <div class="card-body">
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-hover align-middle">
+
+                <thead class="table-danger">
+
+                    <tr>
+
+                        <th>#</th>
+                        <th>Photo</th>
+                        <th>Student ID</th>
+                        <th>Registration No</th>
+                        <th>Name</th>
+                        <th>Class</th>
+                        <th>Roll</th>
+                        <th>Father</th>
+                        <th>Phone</th>
+                        <th>Deleted Date</th>
+                        <th width="220">Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for student in students %}
+
+                    <tr>
+
+                        <td>{{ forloop.counter }}</td>
+
+                        <td>
+
+                            {% if student.photo %}
+
+                                <img src="{{ student.photo.url }}"
+                                     width="50"
+                                     height="50"
+                                     style="object-fit:cover;border-radius:8px;">
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    No Photo
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            <strong>{{ student.student_id }}</strong>
+                        </td>
+
+                        <td>
+                            {{ student.registration_no }}
+                        </td>
+
+                        <td>
+                            {{ student.student_name }}
+                        </td>
+
+                        <td>
+                            {{ student.class_assigned }}
+                        </td>
+
+                        <td>
+                            {{ student.roll_no }}
+                        </td>
+
+                        <td>
+                            {{ student.father_name }}
+                        </td>
+
+                        <td>
+                            {{ student.phone }}
+                        </td>
+
+                        <td>
+
+                            {% if student.deleted_at %}
+                                {{ student.deleted_at|date:"d M Y h:i A" }}
+                            {% else %}
+                                -
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <a href="{% url 'restore_student' student.id %}"
+                               class="btn btn-success btn-sm"
+                               onclick="return confirm('Restore this student?')">
+
+                                Restore
+
+                            </a>
+
+                            <a href="{% url 'permanent_delete_student' student.id %}"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Permanently delete this student? This cannot be undone!')">
+
+                                Permanent Delete
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="11"
+                            class="text-center text-muted py-4">
+
+                            No deleted students found.
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

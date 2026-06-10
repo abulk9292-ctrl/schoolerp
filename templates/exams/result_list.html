@@ -3,167 +3,61 @@
 {% block content %}
 
 <style>
-@page{ size:A4; margin:4mm; }
 
-*{
-    box-sizing:border-box;
-    -webkit-print-color-adjust:exact!important;
-    print-color-adjust:exact!important;
+@page{
+    size: A4 landscape;
+    margin: 5mm;
 }
 
-body{
-    background:#e5e7eb;
-    font-family:Arial,sans-serif;
+.result-print-sheet{
+    width: 287mm;
+    margin: auto;
+    background: white;
 }
 
-.no-print{
-    text-align:center;
-    margin-bottom:5px;
+.result-table{
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 8px;
 }
 
-.sheet{
-    width:194mm;
-    min-height:200mm;
-    margin:auto;
-    background:white;
-    padding:6mm;
-    border:2px solid #111;
-    position:relative;
+.result-table th,
+.result-table td{
+    border: 1px solid #999;
+    padding: 3px 2px;
+    text-align: center;
+    vertical-align: middle;
+    word-break: break-word;
 }
 
-.watermark{
-    position:absolute;
-    width:300px;
-    opacity:0.06;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
+.result-table th{
+    background: #111827 !important;
+    color: white !important;
+    font-size: 7px;
 }
 
-.content{
-    position:relative;
-    z-index:2;
+.student-col{
+    width: 34mm;
+    text-align: left !important;
 }
 
-.header-img{
-    width:100%;
-    max-height:50px;
-    object-fit:contain;
+.small-col{
+    width: 12mm;
 }
 
-.title{
-    text-align:center;
-    font-size:16px;
-    font-weight:700;
-    border:2px solid #111;
-    background:#f3f4f6;
-    padding:5px;
-    margin-top:3px;
-}
-
-.meta-table{
-    width:100%;
-    margin-top:1px;
-    font-size:9px;
-    font-weight:700;
-}
-
-.meta-table td{
-    padding:3px;
-}
-
-.marks-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:2px;
-    font-size:9px;
-    table-layout:fixed;
-}
-
-.marks-table th:nth-child(1),
-.marks-table td:nth-child(1){
-    width:22px;
-}
-
-.marks-table th:nth-child(2),
-.marks-table td:nth-child(2){
-    width:28px;
-}
-
-.marks-table th:nth-child(3),
-.marks-table td:nth-child(3){
-    width:75px;
-}
-
-.marks-table th:nth-child(4),
-.marks-table td:nth-child(4){
-    width:35px;
-}
-
-.marks-table th:nth-child(5),
-.marks-table td:nth-child(5){
-    width:22px;
-}
-
-.marks-table th,
-.marks-table td{
-    border:1px solid #111;
-    padding:2px;
-    text-align:center;
-    vertical-align:middle;
-    word-wrap:break-word;
-}
-
-.marks-table th{
-    background:#111827;
-    color:white;
-    font-size:7px;
-    line-height:1.1;
-}
-
-.text-left{
-    text-align:left!important;
-    font-size:8px!important;
-    padding-left:5px!important;
-    font-weight:700;
-    line-height:1.2;
-}
-
-.rank-box{
-    font-weight:900;
-    color:#111827;
-    font-size:9px;
-}
-
-.signature-row{
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr;
-    gap:12px;
-    margin-top:35px;
-    text-align:center;
-    font-size:12px;
-    font-weight:700;
-}
-
-.sign-line{
-    border-top:1px solid #111;
-    padding-top:5px;
-}
-
-.status-pass{
-    font-weight:900;
-    color:green;
-}
-
-.status-fail{
-    font-weight:900;
-    color:red;
+.subject-col{
+    width: 15mm;
 }
 
 @media print{
 
-    body{
-        background:white!important;
+    html, body{
+        width: 297mm !important;
+        height: 210mm !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: white !important;
     }
 
     .no-print,
@@ -176,109 +70,408 @@ body{
         display:none!important;
     }
 
-    .sheet{
-        width:194mm!important;
+    .container-fluid,
+    .print-area{
+        width:297mm!important;
+        margin:0!important;
+        padding:0!important;
+    }
+
+    .result-print-sheet{
+        width:287mm!important;
         margin:0 auto!important;
+        padding:0!important;
         box-shadow:none!important;
     }
+
+    .card{
+        border:none!important;
+        box-shadow:none!important;
+    }
+
+    .card-body{
+        padding:0!important;
+    }
+
+    .table-responsive{
+        overflow:visible!important;
+    }
+
+    .result-table{
+        width:100%!important;
+        table-layout:fixed!important;
+        font-size:9px!important;
+    }
+
+    .result-table th,
+    .result-table td{
+        padding:2px 1px!important;
+    }
 }
+
 </style>
 
+<div class="container-fluid mt-4 print-area">
 
-<div class="no-print">
-    <button onclick="window.print()" class="btn btn-success">🖨 Print / Save PDF</button>
-    <a href="{% url 'result_add' %}" class="btn btn-primary">➕ Add Marks</a>
-    <a href="{% url 'popup_result_entry' %}" class="btn btn-warning">⚡ Quick Entry</a>
-</div>
+    <div class="no-print d-flex justify-content-between align-items-center mb-4">
 
-<div class="sheet">
+        <div>
+            <h3 class="fw-bold mb-1">
+                📊 Optimized Result List
+            </h3>
 
-    <img src="{{ logo_url|default:'/static/images/logo.png' }}" class="watermark">
-
-    <div class="content">
-
-        <img src="{{ header_url|default:'/static/images/header.jpg' }}" class="header-img">
-
-        <div class="title">RESULT SHEET</div>
-
-        <table class="meta-table">
-            <tr>
-                <td width="120">Exam</td>
-                <td>: {% if selected_exam %}Selected Exam{% else %}All Exams{% endif %}</td>
-                <td width="120">Session</td>
-                <td>: 2026-27</td>
-            </tr>
-            <tr>
-                <td>Class</td>
-                <td>: {{ selected_class|default:"All Classes" }}</td>
-                <td>Date</td>
-                <td>: __________________</td>
-            </tr>
-        </table>
-
-        <div style="overflow-x:auto;">
-            <table class="marks-table">
-                <thead>
-                    <tr>
-                        <th width="20">SL</th>
-                        <th width="25">Roll</th>
-                        <th class="text-left">Student Name</th>
-                        <th width="35">Student ID</th>
-                        <th width="35">Class</th>
-
-                        {% for sub in subjects %}
-                            <th>{{ sub }}</th>
-                        {% endfor %}
-
-                        <th width="35">Total</th>
-                        <th width="35">Max</th>
-                        <th width="35">%</th>
-                        <th width="40">Class Rank</th>
-                        <th width="40">Status</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for item in grouped_results %}
-                    <tr>
-                        <td>{{ item.rank }}</td>
-                        <td>{{ item.student.roll_no|default:"-" }}</td>
-                        <td class="text-left">{{ item.student.student_name|default:item.student }}</td>
-                        <td>{{ item.student.student_id|default:item.student.id }}</td>
-                        <td>{{ item.student.class_assigned|default:"-" }}</td>
-
-                        {% for mark in item.subject_marks %}
-                            <td>{{ mark }}</td>
-                        {% endfor %}
-
-                        <td><b>{{ item.grand_total }}</b></td>
-                        <td>{{ item.max_total }}</td>
-                        <td>{{ item.percentage }}%</td>
-                        <td><span class="rank-box">{{ forloop.counter }}</span></td>
-                        <td>
-                            {% if item.status == "Pass" %}
-                                <span class="status-pass">PASS</span>
-                            {% else %}
-                                <span class="status-fail">FAIL</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="50">No result found.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <p class="text-muted mb-0">
+                Session: {{ selected_session }}
+            </p>
         </div>
 
-        <div class="signature-row">
-            <div class="sign-line">Subject Teacher</div>
-            <div class="sign-line">Exam Controller</div>
-            <div class="sign-line">Principal</div>
+        <div class="d-flex gap-2">
+
+            <a href="{% url 'result_add' %}" class="btn btn-success">
+                ➕ Add Marks
+            </a>
+
+            <a href="{% url 'popup_result_entry' %}" class="btn btn-warning">
+                ⚡ Quick Entry
+            </a>
+
+            <button onclick="window.print()" class="btn btn-dark">
+                🖨 Print
+            </button>
+
         </div>
 
     </div>
+
+    <div class="card border-0 shadow-lg rounded-4 no-print mb-4">
+
+        <div class="card-body p-4">
+
+            <form method="get" class="row g-3">
+
+                <div class="col-md-3">
+
+                    <label class="form-label fw-bold">
+                        Exam
+                    </label>
+
+                    <select name="exam" class="form-select" required>
+
+                        <option value="">
+                            Select Exam
+                        </option>
+
+                        {% for e in exams %}
+                            <option value="{{ e.id }}"
+                            {% if selected_exam_id|stringformat:"s" == e.id|stringformat:"s" %}selected{% endif %}>
+                                {{ e.name }} - {{ e.academic_session }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-2">
+
+                    <label class="form-label fw-bold">
+                        Class
+                    </label>
+
+                    <select name="class" class="form-select">
+
+                        <option value="">
+                            All Classes
+                        </option>
+
+                        {% for c in classes %}
+                            <option value="{{ c }}"
+                            {% if selected_class == c %}selected{% endif %}>
+                                {{ c }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-2">
+
+                    <label class="form-label fw-bold">
+                        Section
+                    </label>
+
+                    <select name="section" class="form-select">
+
+                        <option value="">All</option>
+                        <option value="A" {% if selected_section == "A" %}selected{% endif %}>A</option>
+                        <option value="B" {% if selected_section == "B" %}selected{% endif %}>B</option>
+                        <option value="C" {% if selected_section == "C" %}selected{% endif %}>C</option>
+                        <option value="D" {% if selected_section == "D" %}selected{% endif %}>D</option>
+
+                    </select>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <label class="form-label fw-bold">
+                        Search
+                    </label>
+
+                    <input type="text"
+                           name="search"
+                           value="{{ search }}"
+                           class="form-control"
+                           placeholder="Name / SID / Roll / Father">
+
+                </div>
+
+                <div class="col-md-2 d-flex align-items-end">
+
+                    <button class="btn btn-primary w-100">
+                        🔍 Load
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    {% if selected_exam %}
+
+    <div class="row no-print mb-4">
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow rounded-4 bg-primary text-white">
+                <div class="card-body">
+                    <h6>Total Students</h6>
+                    <h2 class="fw-bold">{{ total_students }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow rounded-4 bg-success text-white">
+                <div class="card-body">
+                    <h6>Pass</h6>
+                    <h2 class="fw-bold">{{ pass_count }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow rounded-4 bg-danger text-white">
+                <div class="card-body">
+                    <h6>Fail</h6>
+                    <h2 class="fw-bold">{{ fail_count }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow rounded-4 bg-dark text-white">
+                <div class="card-body">
+                    <h6>Average %</h6>
+                    <h2 class="fw-bold">{{ avg_percentage }}%</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="result-print-sheet">
+
+        <div class="card border-0 shadow-lg rounded-4">
+
+            <div class="card-header bg-dark text-white py-3">
+
+                <div class="d-flex justify-content-between">
+
+                    <div>
+                        <b>{{ selected_exam.name }}</b>
+                        |
+                        Session: {{ selected_session }}
+                        |
+                        Class: {{ selected_class|default:"All" }}
+                        |
+                        Section: {{ selected_section|default:"All" }}
+                    </div>
+
+                    <div>
+                        Result Sheet
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="card-body table-responsive">
+
+                <table class="result-table">
+
+                    <thead>
+
+                        <tr>
+
+                            <th class="small-col">Rank</th>
+                            <th class="small-col">Roll</th>
+                            <th class="student-col">Student</th>
+                            <th class="small-col">SID</th>
+                            <th class="small-col">Class</th>
+                            <th class="small-col">Sec</th>
+
+                            {% for subject in subjects %}
+                                <th class="subject-col">
+                                    {{ subject }}
+                                </th>
+                            {% endfor %}
+
+                            <th class="subject-col">Total</th>
+                            <th class="small-col">%</th>
+                            <th class="small-col">Grade</th>
+                            <th class="small-col">Status</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for row in result_rows %}
+
+                        <tr>
+
+                            <td>
+
+                                {% if row.summary.rank == 1 %}
+                                    🥇 {{ row.summary.rank }}
+                                {% elif row.summary.rank == 2 %}
+                                    🥈 {{ row.summary.rank }}
+                                {% elif row.summary.rank == 3 %}
+                                    🥉 {{ row.summary.rank }}
+                                {% else %}
+                                    {{ row.summary.rank|default:"-" }}
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                {{ row.student.roll_no|default:"-" }}
+                            </td>
+
+                            <td class="student-col">
+
+                                <b>
+                                    {{ row.student.student_name }}
+                                </b>
+
+                                <br>
+
+                                <small>
+                                    Father:
+                                    {{ row.student.father_name|default:"-" }}
+                                </small>
+
+                            </td>
+
+                            <td>
+                                {{ row.student.student_id }}
+                            </td>
+
+                            <td>
+                                {{ row.student.class_assigned.class_name }}
+                            </td>
+
+                            <td>
+                                {{ row.student.section|default:"-" }}
+                            </td>
+
+                            {% for sm in row.subject_marks %}
+
+                                <td>
+
+                                    {% if sm.mark %}
+
+                                        <b>
+                                            {{ sm.total }}
+                                        </b>/{{ sm.max }}
+
+                                        <br>
+
+                                        <small>
+                                            {{ sm.grade }}
+                                        </small>
+
+                                    {% else %}
+                                        -
+                                    {% endif %}
+
+                                </td>
+
+                            {% endfor %}
+
+                            <td>
+
+                                <b>
+                                    {{ row.summary.total_marks }}
+                                </b>/{{ row.summary.max_total_marks }}
+
+                            </td>
+
+                            <td>
+                                {{ row.summary.percentage }}%
+                            </td>
+
+                            <td>
+                                {{ row.summary.grade }}
+                            </td>
+
+                            <td>
+
+                                {% if row.summary.result_status == "Pass" %}
+                                    Pass
+                                {% else %}
+                                    Fail
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td colspan="50" class="text-center text-muted py-5">
+                                No result found.
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% else %}
+
+    <div class="alert alert-warning">
+        Please select an exam to view optimized result list.
+    </div>
+
+    {% endif %}
+
 </div>
 
 {% endblock %}

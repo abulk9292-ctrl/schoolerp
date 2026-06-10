@@ -1,320 +1,531 @@
 <!DOCTYPE html>
 <html lang="bn">
 <head>
-
     {% load static %}
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>AL RAHMAN MISSION ERP</title>
 
     <link rel="icon" type="image/png" href="{% static 'images/logo.png' %}">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 
     <style>
         :root {
+            --sidebar-width: 218px;
             --green: #0c9b57;
-            --deep: #052e2b;
             --blue: #0b7cff;
-            --gold: #ffd54a;
-            --dark: #07111f;
+            --gold: #facc15;
+            --dark: #0f172a;
         }
 
         * { box-sizing: border-box; }
 
-        body {
+        html, body {
             margin: 0;
             padding: 0;
+            min-height: 100%;
+            scroll-behavior: auto !important;
+        }
+
+        body {
             font-family: Arial, "Noto Sans Bengali", sans-serif;
-            background:
-                radial-gradient(circle at 90% 10%, rgba(12,155,87,.20), transparent 28%),
-                radial-gradient(circle at 15% 85%, rgba(11,124,255,.16), transparent 32%),
-                linear-gradient(135deg, #eef8f1, #eef5ff);
+            background: linear-gradient(135deg, #eef8f1, #eef5ff);
             color: #111827;
         }
 
-        .app-layout { display: flex; min-height: 100vh; }
+        a { text-decoration: none; }
 
-        .sidebar {
-            width: 292px;
+        .app-layout {
+            display: flex;
             min-height: 100vh;
-            background:
-                radial-gradient(circle at top left, rgba(255,213,74,.25), transparent 28%),
-                linear-gradient(180deg, #052e2b, #075985, #111827);
-            border-right: 1px solid rgba(255,255,255,.14);
-            box-shadow: 14px 0 40px rgba(0,0,0,.28);
-            padding: 18px 14px;
+            width: 100%;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================== */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-width: var(--sidebar-width);
+            height: 100vh;
             position: sticky;
             top: 0;
             overflow-y: auto;
+            z-index: 99;
+            padding: 9px 8px;
+            background: linear-gradient(180deg, #052e2b, #075985, #111827);
+            border-right: 1px solid rgba(255,255,255,.12);
+            box-shadow: 10px 0 28px rgba(0,0,0,.18);
+            scroll-behavior: auto !important;
         }
 
+        body.sidebar-theme-green .sidebar { background: linear-gradient(180deg, #052e2b, #075985, #111827); }
+        body.sidebar-theme-royal .sidebar { background: linear-gradient(180deg, #0f172a, #4338ca, #0369a1); }
+        body.sidebar-theme-gold .sidebar { background: linear-gradient(180deg, #111827, #78350f, #92400e); }
+        body.sidebar-theme-purple .sidebar { background: linear-gradient(180deg, #1e1b4b, #6d28d9, #9d174d); }
+        body.sidebar-theme-black .sidebar { background: linear-gradient(180deg, #020617, #0f172a, #111827); }
+
+        .sidebar-hidden .sidebar { display: none !important; }
+        .sidebar-hidden .main-area { width: 100%; }
+
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.28); border-radius: 10px; }
+
         .brand-box {
-            padding: 18px 12px;
-            margin-bottom: 14px;
-            border-radius: 24px;
+            padding: 9px 8px;
+            margin-bottom: 9px;
+            border-radius: 18px;
             background: rgba(255,255,255,.12);
-            border: 1px solid rgba(255,255,255,.18);
+            border: 1px solid rgba(255,255,255,.16);
             text-align: center;
         }
 
         .brand-logo {
-            width: 62px;
-            height: 62px;
+            width: 42px;
+            height: 42px;
             object-fit: contain;
             border-radius: 50%;
-            background: white;
-            padding: 5px;
-            margin-bottom: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,.25);
+            background: #fff;
+            padding: 4px;
+            margin-bottom: 5px;
         }
 
         .brand-title {
             color: #fff;
-            font-size: 22px;
+            font-size: 15px;
+            line-height: 1.05;
             font-weight: 900;
-            letter-spacing: .8px;
             margin: 0;
+            letter-spacing: .5px;
         }
 
         .brand-sub {
             color: #d1fae5;
-            font-size: 12px;
-            font-weight: 800;
-            margin-top: 4px;
+            font-size: 10.5px;
+            font-weight: 900;
+            margin-top: 2px;
         }
 
         .user-mini {
-            margin-top: 10px;
-            padding: 8px 10px;
-            border-radius: 14px;
+            margin-top: 7px;
+            padding: 6px 8px;
+            border-radius: 12px;
             background: rgba(0,0,0,.18);
             color: #fff;
-            font-size: 12px;
-            font-weight: 800;
+            font-size: 10.8px;
+            font-weight: 900;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .menu-title {
-            color: #bbf7d0;
+        .sidebar-tools {
+            display: grid;
+            gap: 7px;
+            margin-bottom: 9px;
+        }
+
+        .sidebar-search-box {
+            position: relative;
+            background: rgba(2, 6, 23, .25);
+            border: 1px solid rgba(255,255,255,.16);
+            border-radius: 13px;
+            padding: 6px;
+        }
+
+        .sidebar-search-icon {
+            position: absolute;
+            left: 15px;
+            top: 14px;
+            color: #64748b;
+            font-size: 12px;
+        }
+
+        .sidebar-search {
+            width: 100%;
+            height: 31px;
+            border: 0;
+            outline: 0;
+            border-radius: 10px;
+            padding: 6px 8px 6px 30px;
+            font-size: 11.5px;
+            font-weight: 900;
+            color: #0f172a;
+            background: #fff;
+        }
+
+        .theme-picker {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+        }
+
+        .theme-dot {
+            height: 17px;
+            border: 1px solid rgba(255,255,255,.35);
+            border-radius: 999px;
+            cursor: pointer;
+        }
+
+        .theme-dot.active-theme {
+            outline: 2px solid #fff;
+            outline-offset: 2px;
+        }
+
+        .theme-green { background: linear-gradient(135deg,#052e2b,#0c9b57,#075985); }
+        .theme-royal { background: linear-gradient(135deg,#0f172a,#4f46e5,#06b6d4); }
+        .theme-gold { background: linear-gradient(135deg,#111827,#92400e,#f59e0b); }
+        .theme-purple { background: linear-gradient(135deg,#1e1b4b,#7c3aed,#db2777); }
+        .theme-black { background: linear-gradient(135deg,#020617,#111827,#334155); }
+
+        .search-no-result {
+            display: none;
+            color: #fff;
+            background: rgba(239,68,68,.20);
+            border: 1px solid rgba(248,113,113,.35);
+            border-radius: 12px;
+            padding: 8px;
             font-size: 11px;
             font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: .8px;
-            margin: 14px 8px 8px;
+            text-align: center;
         }
 
-        .sidebar .nav-link {
-            color: rgba(255,255,255,.90);
-            padding: 11px 14px;
-            border-left: 4px solid transparent;
-            text-decoration: none;
+        .search-no-result.show { display: block; }
+
+        .menu-title {
+            color: #e0f2fe;
+            font-size: 8.8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .7px;
+            margin: 8px 7px 4px;
+            opacity: .9;
+        }
+
+        .sidebar .nav-link,
+        .sidebar button.nav-link {
+            width: 100%;
             display: block;
-            border-radius: 15px;
-            margin-bottom: 7px;
-            font-weight: 800;
-            transition: all .22s ease;
-            background: rgba(255,255,255,.055);
+            text-align: left;
+            color: rgba(255,255,255,.92);
+            background: rgba(255,255,255,.075);
+            border: 0;
+            border-left: 3px solid transparent;
+            border-radius: 11px;
+            padding: 6.5px 8px;
+            margin-bottom: 3px;
+            font-size: 12.2px;
+            line-height: 1.12;
+            font-weight: 900;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: none !important;
         }
 
         .sidebar .nav-link i {
-            color: #fde68a;
-            margin-right: 8px;
-            font-size: 17px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            min-width: 20px;
+            border-radius: 8px;
+            margin-right: 6px;
+            font-size: 12px;
+            color: #fff;
+            background: linear-gradient(135deg, #22c55e, #0ea5e9);
         }
 
         .sidebar .nav-link:hover,
-        .sidebar .nav-link.active {
-            color: #ffffff;
-            background: rgba(255,255,255,.17);
-            border-left: 4px solid var(--gold);
-            transform: translateX(4px);
+        .sidebar .nav-link.active,
+        .sidebar .nav-link.erp-parent-active {
+            color: #fff !important;
+            background: rgba(255,255,255,.20) !important;
+            border-left-color: var(--gold) !important;
+            box-shadow: 0 5px 14px rgba(0,0,0,.14);
+        }
+
+        .sidebar .nav-link.active::after {
+            content: "●";
+            float: right;
+            color: #22c55e;
+            font-size: 8px;
+            margin-top: 2px;
         }
 
         .submenu {
-            margin: 4px 0 12px 11px;
-            padding: 8px;
-            border-left: 1px dashed rgba(255,255,255,.30);
-            background: rgba(255,255,255,.08);
-            border-radius: 17px;
+            display: none;
+            margin: 3px 0 6px 7px;
+            padding: 5px;
+            border-left: 1px dashed rgba(255,255,255,.28);
+            border-radius: 12px;
+            background: rgba(15,23,42,.22);
+            list-style: none;
         }
+
+        .submenu.show { display: block; }
 
         .submenu .nav-link {
-            padding: 9px 12px 9px 20px;
-            font-size: 14px;
-            background: rgba(255,255,255,.07);
-            border-radius: 12px;
-            margin-bottom: 5px;
+            font-size: 11.2px;
+            padding: 5px 7px 5px 10px;
+            margin-bottom: 3px;
+            line-height: 1.14;
+            white-space: normal;
+            border-radius: 9px;
         }
 
-        .main-area { flex: 1; min-width: 0; }
+        .menu-search-hidden { display: none !important; }
+
+        /* =========================
+           MAIN / TOPBAR
+        ========================== */
+        .main-area {
+            flex: 1;
+            min-width: 0;
+        }
 
         .topbar {
-            background: rgba(255,255,255,.82);
-            backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(15,23,42,.08);
-            padding: 12px 24px;
             position: sticky;
             top: 0;
             z-index: 10;
-            box-shadow: 0 8px 24px rgba(0,0,0,.08);
+            padding: 7px 14px;
+            background: rgba(255,255,255,.92);
+            border-bottom: 1px solid rgba(15,23,42,.08);
+            box-shadow: 0 6px 18px rgba(0,0,0,.06);
         }
 
         .topbar-card {
-            background: linear-gradient(135deg, #0c9b57, #0b7cff);
+            background: linear-gradient(135deg, #059669, #2563eb, #7c3aed);
             color: white;
-            border-radius: 20px;
-            padding: 12px 18px;
-            box-shadow: 0 12px 28px rgba(11,124,255,.22);
+            border-radius: 15px;
+            padding: 8px 12px;
         }
 
-        .topbar-title { font-size: 15px; font-weight: 900; line-height: 1.2; }
-        .topbar-sub { font-size: 12px; opacity: .95; font-weight: 700; }
+        .topbar-title {
+            font-size: 13.8px;
+            font-weight: 900;
+            line-height: 1.2;
+        }
 
-        .content-area { padding: 26px; width: 100%; }
+        .topbar-sub {
+            font-size: 11.2px;
+            opacity: .95;
+            font-weight: 800;
+        }
 
-        .card-box {
+        .mobile-menu-btn,
+        .sidebar-toggle-btn {
+            border: 0;
+            color: #fff;
+            background: rgba(255,255,255,.22);
+            padding: 7px 10px;
+            border-radius: 11px;
+            font-size: 12px;
+            font-weight: 900;
+        }
+
+        .mobile-menu-btn { display: none; }
+
+        .content-area {
+            padding: 16px;
+            width: 100%;
+        }
+
+        .card-box,
+        .dashboard-card,
+        .module-card,
+        .stat-card,
+        .quick-card,
+        .option-card {
             border: none;
-            border-radius: 22px;
-            box-shadow: 0 14px 34px rgba(0,0,0,0.08);
+            border-radius: 16px !important;
+            box-shadow: 0 9px 24px rgba(15,23,42,.08) !important;
             background: #ffffff;
         }
 
+        .card-box .card-body,
+        .dashboard-card .card-body,
+        .module-card .card-body,
+        .stat-card .card-body,
+        .quick-card .card-body,
+        .option-card .card-body {
+            padding: 13px !important;
+        }
+
         .table-responsive {
-            background: white;
-            border-radius: 18px;
-            padding: 14px;
-            box-shadow: 0 10px 25px rgba(0,0,0,.06);
+            background: #fff;
+            border-radius: 14px !important;
+            padding: 10px !important;
+            box-shadow: 0 8px 18px rgba(0,0,0,.05);
         }
 
-        .alert { border-radius: 16px; font-weight: 700; }
-        .btn { border-radius: 12px; font-weight: 800; }
-
-        .sidebar::-webkit-scrollbar { width: 7px; }
-        .sidebar::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,.30);
-            border-radius: 10px;
+        .btn {
+            border-radius: 10px !important;
+            font-size: 12px !important;
+            font-weight: 800 !important;
+            padding: 7px 11px !important;
         }
 
+        .alert {
+            border-radius: 12px !important;
+            font-size: 12px !important;
+            font-weight: 800;
+            padding: 8px 12px !important;
+        }
+
+        .dashboard-icon,
+        .module-icon,
+        .stat-icon,
+        .card-icon {
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: 13px !important;
+            font-size: 18px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: #fff !important;
+            background: linear-gradient(135deg,#06b6d4,#2563eb) !important;
+        }
+
+        /* =========================
+           PRINT
+        ========================== */
         @media print {
-            .sidebar, .no-print { display: none !important; }
-            .topbar {
-                display: block !important;
-                background: #ffffff !important;
-                color: #111111 !important;
-                padding: 4px 0 8px 0 !important;
-                border-bottom: 1px solid #111111 !important;
-                margin-bottom: 8px !important;
-                box-shadow: none !important;
-            }
-            .topbar-card {
-                background: #fff !important;
-                color: #111 !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-            }
-            .topbar-title, .topbar-sub {
-                font-size: 9px !important;
-                color: #111111 !important;
-                text-align: left !important;
-            }
-            .content-area, .main-area {
-                padding: 0 !important;
+            html, body {
                 margin: 0 !important;
-                width: 100% !important;
+                padding: 0 !important;
+                background: #fff !important;
             }
-            .app-layout { display: block !important; }
+
+            .sidebar,
+            .topbar,
+            .no-print,
+            .mobile-menu-btn,
+            .sidebar-toggle-btn {
+                display: none !important;
+                visibility: hidden !important;
+            }
+
+            .app-layout,
+            .main-area,
+            .content-area {
+                display: block !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                box-shadow: none !important;
+                background: #fff !important;
+            }
         }
 
+        /* =========================
+           MOBILE
+        ========================== */
         @media(max-width: 900px) {
             .app-layout { display: block; }
+
+            .mobile-menu-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+
             .sidebar {
-                width: 100%;
+                display: none;
+                width: 100% !important;
+                min-width: 100% !important;
+                height: auto;
                 min-height: auto;
                 position: relative;
+                border-right: 0;
+                box-shadow: none;
             }
-            .content-area { padding: 16px; }
+
+            .sidebar.show-mobile { display: block; }
+
+            .content-area { padding: 14px; }
         }
     </style>
 </head>
 
 <body>
 
+{% with emp=request.user.employee %}
+
 <div class="app-layout">
 
-    {% with emp=request.user.employee %}
-    <div class="sidebar no-print">
+    <div class="sidebar no-print" id="erpSidebar">
+
         <div class="brand-box">
-            <img src="/static/images/logo.png" class="brand-logo" alt="Logo">
+            <img src="{% static 'images/logo.png' %}" class="brand-logo" alt="Logo">
             <h5 class="brand-title">AL RAHMAN</h5>
             <div class="brand-sub">MISSION ERP</div>
-
             <div class="user-mini">
                 {% if request.user.is_authenticated %}
                     <i class="bi bi-person-circle"></i> {{ request.user.username }}
                 {% else %}
-                    Guest
+                    <i class="bi bi-person-circle"></i> Guest
                 {% endif %}
             </div>
         </div>
 
-        <ul class="nav flex-column">
+        <div class="sidebar-tools">
+            <div class="sidebar-search-box">
+                <i class="bi bi-search sidebar-search-icon"></i>
+                <input type="text" id="sidebarSearch" class="sidebar-search" placeholder="Search menu...">
+            </div>
+
+            <div class="theme-picker" title="Sidebar Design">
+                <button type="button" class="theme-dot theme-green" data-theme="green" title="Green Premium"></button>
+                <button type="button" class="theme-dot theme-royal" data-theme="royal" title="Royal Blue"></button>
+                <button type="button" class="theme-dot theme-gold" data-theme="gold" title="Gold Dark"></button>
+                <button type="button" class="theme-dot theme-purple" data-theme="purple" title="Purple Glass"></button>
+                <button type="button" class="theme-dot theme-black" data-theme="black" title="Black Pro"></button>
+            </div>
+
+            <div class="search-no-result" id="sidebarNoResult">No menu found</div>
+        </div>
+
+        <ul class="nav flex-column" id="sidebarMenuList">
 
             <div class="menu-title">Main</div>
 
             <li>
                 {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin %}
-                    <a href="/dashboard/" class="nav-link">
-                        <i class="bi bi-speedometer2"></i> Dashboard
-                    </a>
+                    <a href="/dashboard/" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
                 {% else %}
-                    <a href="/teacher-dashboard/" class="nav-link">
-                        <i class="bi bi-speedometer2"></i> Dashboard
-                    </a>
+                    <a href="{% url 'teacher_dashboard' %}" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
                 {% endif %}
             </li>
 
             {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_settings %}
-                <li>
-                    <a href="{% url 'general_settings' %}" class="nav-link">
-                        <i class="bi bi-gear"></i> General Settings
-                    </a>
-                </li>
+                <li><a href="{% url 'general_settings' %}" class="nav-link"><i class="bi bi-gear"></i> General Settings</a></li>
             {% endif %}
 
             {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_academics %}
                 <div class="menu-title">Academics</div>
-
-                <li>
-                    <a href="/academics/classes/" class="nav-link">
-                        <i class="bi bi-building"></i> Classes
-                    </a>
-                </li>
-
-                <li>
-                    <a href="/academics/subjects/" class="nav-link">
-                        <i class="bi bi-book"></i> Subjects
-                    </a>
-                </li>
+                <li><a href="/academics/classes/" class="nav-link"><i class="bi bi-building"></i> Classes</a></li>
+                <li><a href="/academics/subjects/" class="nav-link"><i class="bi bi-book"></i> Subjects</a></li>
             {% endif %}
 
             {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_students %}
                 <div class="menu-title">Students</div>
-
                 <li>
-                    <a class="nav-link" data-bs-toggle="collapse" href="#studentsMenu" role="button" aria-expanded="true">
-                        <i class="bi bi-people"></i> Students ▾
-                    </a>
-                    <ul class="collapse show nav flex-column submenu" id="studentsMenu">
+                    <a class="nav-link menu-toggle" href="#studentsMenu"><i class="bi bi-people"></i> Students ▾</a>
+                    <ul class="nav flex-column submenu" id="studentsMenu">
                         <li><a href="/students/" class="nav-link">Student List</a></li>
-
+                        <li><a href="{% url 'student_classwise_download' %}" class="nav-link">📄 Class Wise Download</a></li>
                         {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin %}
                             <li><a href="/students/add/" class="nav-link">Add Student</a></li>
                             <li><a href="/admissions/" class="nav-link">Admission Form</a></li>
                             <li><a href="{% url 'bulk_student_password_print' %}" class="nav-link">🔐 Student Password</a></li>
+                            <li><a href="{% url 'recycle_bin' %}" class="nav-link">🗑️ Recycle Bin</a></li>
+                            <li><a href="{% url 'discontinued_students' %}" class="nav-link">❌ Discontinued Students</a></li>
                         {% endif %}
                     </ul>
                 </li>
@@ -322,125 +533,113 @@
 
             {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_teachers %}
                 <div class="menu-title">Employees</div>
-
                 <li>
-                    <a class="nav-link" data-bs-toggle="collapse" href="#employeesMenu" role="button" aria-expanded="true">
-                        <i class="bi bi-person-badge"></i> Employees ▾
-                    </a>
-                    <ul class="collapse show nav flex-column submenu" id="employeesMenu">
+                    <a class="nav-link menu-toggle" href="#employeesMenu"><i class="bi bi-person-badge"></i> Employees ▾</a>
+                    <ul class="nav flex-column submenu" id="employeesMenu">
                         <li><a href="/teachers/" class="nav-link">Employee List</a></li>
                         <li><a href="/teachers/add/" class="nav-link">Add Employee</a></li>
                         <li><a href="{% url 'teacher_password_print' %}" class="nav-link">👨‍🏫 Teacher Password</a></li>
+                        <li><a href="/teachers/recycle-bin/">🗑 Employee Recycle Bin</a></li>
                     </ul>
                 </li>
             {% endif %}
 
             {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_fees %}
                 <div class="menu-title">Fees</div>
-
                 <li>
-                    <a class="nav-link" data-bs-toggle="collapse" href="#feesMenu" role="button" aria-expanded="true">
-                        <i class="bi bi-receipt"></i> Fees ▾
-                    </a>
-                    <ul class="collapse show nav flex-column submenu" id="feesMenu">
+                    <a class="nav-link menu-toggle" href="#feesMenu"><i class="bi bi-receipt"></i> Fees ▾</a>
+                    <ul class="nav flex-column submenu" id="feesMenu">
                         <li><a href="/fees/" class="nav-link">Fee Collection</a></li>
                         <li><a href="/fees/structure/" class="nav-link">Fee Structure</a></li>
                         <li><a href="/fees/defaulters/" class="nav-link">Fees Defaulters</a></li>
                         <li><a href="/fees/pending-amount/" class="nav-link">Pending Amount List</a></li>
                         <li><a href="/fees/bulk-demand-slip/" class="nav-link">Bulk Demand Slip</a></li>
+                        <li><a href="/fees/recycle-bin/">🗑 Fee Recycle Bin</a></li>
+                        <li>
+                            <a href="/fees/followup/">
+                               📞 Fee Follow-up
+                            </a>
+                        </li>
                     </ul>
                 </li>
             {% endif %}
 
             {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_attendance %}
                 <div class="menu-title">Attendance</div>
-
                 <li>
-                    <a class="nav-link" data-bs-toggle="collapse" href="#attendanceMenu" role="button" aria-expanded="true">
-                        <i class="bi bi-calendar-check"></i> Attendance ▾
-                    </a>
-
-                    <ul class="collapse show nav flex-column submenu" id="attendanceMenu">
-
+                    <a class="nav-link menu-toggle" href="#attendanceMenu"><i class="bi bi-calendar-check"></i> Attendance ▾</a>
+                    <ul class="nav flex-column submenu" id="attendanceMenu">
                         <li><a href="/attendance/students/" class="nav-link">Student Attendance</a></li>
                         <li><a href="/attendance/students/daily-report/" class="nav-link">Student Daily Report</a></li>
                         <li><a href="/attendance/students/percentage-report/" class="nav-link">Percentage Report</a></li>
                         <li><a href="/attendance/students/monthly-report/" class="nav-link">Monthly Report</a></li>
-
                         {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin %}
-                            <li><a href="/attendance/graph/" class="nav-link">Attendance Graph</a></li>
                             <li><a href="/attendance/register/" class="nav-link">Attendance Register</a></li>
+                            <li><a href="/attendance/graph/" class="nav-link">Attendance Graph</a></li>
                             <li><a href="/attendance/teachers/" class="nav-link">Teacher Attendance</a></li>
                             <li><a href="/attendance/teachers/daily-report/" class="nav-link">Teacher Attendance Report</a></li>
+                            <li><a href="/attendance/holidays/" class="nav-link">Holiday List</a></li>
+                            <li><a href="/attendance/holidays/add/" class="nav-link">Add Holiday</a></li>
+                            <li><a href="/attendance/reset/" class="nav-link">Attendance Reset</a></li>
+                            <li><a href="/attendance/holidays/reset/" class="nav-link">Holiday Reset</a></li>
                         {% endif %}
-
+                        <li><a href="/attendance/teachers/mobile/" class="nav-link">📍 My Mobile Attendance</a></li>
                     </ul>
                 </li>
             {% endif %}
 
             {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_payroll %}
                 <div class="menu-title">Salary</div>
-
-                <li>
-                    <a href="{% url 'payroll_dashboard' %}" class="nav-link">
-                        <i class="bi bi-wallet2"></i> Salary / Payroll
-                    </a>
-                </li>
+                <li><a href="{% url 'payroll_dashboard' %}" class="nav-link"><i class="bi bi-wallet2"></i> Salary / Payroll</a></li>
+                <li><a href="/payroll/salary/recycle-bin/">🗑 Salary Recycle Bin</a></li>
             {% endif %}
 
             {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_expenses %}
-                <li>
-                    <a href="/expenses/" class="nav-link">
-                        <i class="bi bi-cash-stack"></i> Expenses
-                    </a>
-                </li>
+                <li><a href="/expenses/" class="nav-link"><i class="bi bi-cash-stack"></i> Expenses</a></li>
             {% endif %}
 
             {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_exams %}
-            <div class="menu-title">Exams</div>
-            
-            <li>
-                <a class="nav-link" data-bs-toggle="collapse" href="#examsMenu" role="button" aria-expanded="true">
-                    <i class="bi bi-pencil-square"></i> Exams ▾
-                </a>
-            </li>
+                <div class="menu-title">Exams</div>
+                <li>
+                    <a class="nav-link menu-toggle" href="#examsMenu"><i class="bi bi-pencil-square"></i> Exams ▾</a>
+                    <ul class="nav flex-column submenu" id="examsMenu">
+                        <li><a href="{% url 'exam_dashboard' %}" class="nav-link">📊 Exam Dashboard</a></li>
+                        <li><a href="{% url 'exam_add' %}" class="nav-link">➕ Exam Setup</a></li>
+                        <li><a href="{% url 'exam_routine' %}" class="nav-link">📅 Exam Routine</a></li>
+                        <li><a href="{% url 'exam_routine_select_print' %}" class="nav-link">🖨 Exam Routine Print</a></li>
+                        <li><a href="{% url 'result_add' %}" class="nav-link">✍️ Add Marks</a></li>
+                        <li><a href="{% url 'bulk_result_entry' %}" class="nav-link">🧾 Bulk Marks Entry</a></li>
+                        <li><a href="{% url 'popup_result_entry' %}" class="nav-link">⚡ Popup Marks Entry</a></li>
+                        <li><a href="{% url 'result_sheet_select' %}" class="nav-link">📋 Result Sheet</a></li>
+                        <li><a href="{% url 'report_card_select' %}" class="nav-link">🎓 Report Card</a></li>
+                        <li><a href="{% url 'report_card_bulk_select' %}" class="nav-link">🖨 Bulk Report Card Print</a></li>
+                        <li><a href="{% url 'merit_list' %}" class="nav-link">🏆 Merit List / Topper</a></li>
+                        <li><a href="{% url 'topper_result' %}" class="nav-link">🏆 Top 10 / Topper</a></li>
+                    </ul>
+                </li>
 
-                <ul class="collapse show nav flex-column submenu" id="examsMenu">
-                    <li><a href="{% url 'exam_dashboard' %}" class="nav-link">📊 Exam Dashboard</a></li>
-                    <li><a href="{% url 'exam_add' %}" class="nav-link">➕ Exam Setup</a></li>
-                    <li><a href="{% url 'exam_routine' %}" class="nav-link">📅 Exam Routine</a></li>
-
-                    <li><a href="{% url 'result_add' %}" class="nav-link">✍️ Add Marks</a></li>
-                    <li><a href="{% url 'bulk_result_entry' %}" class="nav-link">🧾 Bulk Marks Entry</a></li>
-                    <li><a href="{% url 'popup_result_entry' %}" class="nav-link">⚡ Popup Marks Entry</a></li>
-                    <li><a href="{% url 'result_sheet_select' %}" class="nav-link">📋 Result Sheet</a></li>
-                    <li><a href="{% url 'report_card_select' %}" class="nav-link">🎓 Report Card</a></li>
-                    <li><a href="{% url 'report_card_bulk_select' %}" class="nav-link">🖨 Bulk Report Card Print</a></li>
-                    </li> <a href="{% url 'merit_list' %}" class="nav-link">🏆 Merit List / Topper</a>
-
-                    <li><a href="{% url 'topper_result' %}" class="nav-link">🏆 Top 10 / Topper</a></li>
-                </ul>
-            </li>
+                <li>
+                    <a class="nav-link menu-toggle" href="#classTestMenu"><i class="bi bi-clipboard-check"></i> Class Tests ▾</a>
+                    <ul class="nav flex-column submenu" id="classTestMenu">
+                        <li><a href="{% url 'class_test_dashboard' %}" class="nav-link">📊 Dashboard</a></li>
+                        <li><a href="{% url 'class_test_list' %}" class="nav-link">📋 Test List</a></li>
+                        <li><a href="{% url 'add_class_test' %}" class="nav-link">➕ Add Test</a></li>
+                        <li><a href="{% url 'class_test_result_list' %}" class="nav-link">🏆 Result List</a></li>
+                        <li><a href="{% url 'add_class_test_result' %}" class="nav-link">✍️ Add Result</a></li>
+                    </ul>
+                </li>
             {% endif %}
 
             {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_reports %}
                 <div class="menu-title">Reports</div>
-
-                <li>
-                    <a href="/reports/" class="nav-link">
-                        <i class="bi bi-file-bar-graph"></i> Reports
-                    </a>
-                </li>
+                <li><a href="/reports/" class="nav-link"><i class="bi bi-file-bar-graph"></i> Reports</a></li>
             {% endif %}
 
             {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_communications %}
                 <div class="menu-title">Communication</div>
-
                 <li>
-                    <a class="nav-link" data-bs-toggle="collapse" href="#smsMenu" role="button" aria-expanded="true">
-                        <i class="bi bi-whatsapp"></i> SMS / WhatsApp ▾
-                    </a>
-                    <ul class="collapse show nav flex-column submenu" id="smsMenu">
+                    <a class="nav-link menu-toggle" href="#smsMenu"><i class="bi bi-whatsapp"></i> SMS / WhatsApp ▾</a>
+                    <ul class="nav flex-column submenu" id="smsMenu">
                         <li><a href="{% url 'attendance_alert_list' %}" class="nav-link">🔔 Attendance Alerts</a></li>
                         <li><a href="{% url 'attendance_alert_list' %}" class="nav-link">📲 WhatsApp Send</a></li>
                         <li><a href="{% url 'attendance_alert_list' %}" class="nav-link">📩 SMS Send</a></li>
@@ -449,60 +648,91 @@
                 </li>
             {% endif %}
 
+            <div class="menu-title">Complaints</div>
+            <li>
+                <a class="nav-link menu-toggle" href="#complaintMenu"><i class="bi bi-exclamation-diamond"></i> Complaints ▾</a>
+                <ul class="nav flex-column submenu" id="complaintMenu">
+                    {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin %}
+                        <li><a href="{% url 'complaint_list' %}" class="nav-link">📋 All Complaints</a></li>
+                        <li><a href="{% url 'admin_complaint_approval' %}" class="nav-link">✅ Admin Approval</a></li>
+                    {% endif %}
+                    <li><a href="{% url 'teacher_complaint_dashboard' %}" class="nav-link">👨‍🏫 Teacher Complaint Dashboard</a></li>
+                </ul>
+            </li>
+
             {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin %}
                 <div class="menu-title">Extra Modules</div>
-
                 <li><a href="#" class="nav-link"><i class="bi bi-bank"></i> Accounts</a></li>
-                <li><a href="#" class="nav-link"><i class="bi bi-clock"></i> Timetable</a></li>
-                <li><a href="#" class="nav-link"><i class="bi bi-journal-text"></i> Homework</a></li>
-                <li><a href="#" class="nav-link"><i class="bi bi-stars"></i> Behaviour & Skills</a></li>
-                <li><a href="#" class="nav-link"><i class="bi bi-shop"></i> Online Store & POS</a></li>
-                <li><a href="#" class="nav-link"><i class="bi bi-camera-video"></i> Live Class</a></li>
-                <li><a href="#" class="nav-link"><i class="bi bi-question-circle"></i> Question Paper</a></li>
-                <li><a href="#" class="nav-link"><i class="bi bi-clipboard-check"></i> Class Tests</a></li>
-                <li><a href="#" class="nav-link"><i class="bi bi-award"></i> Certificates</a></li>
+                <li><a href="/timetable/" class="nav-link"><i class="bi bi-clock"></i> Timetable</a></li>
+                <li><a href="/homework/" class="nav-link"><i class="bi bi-journal-text"></i> Homework</a></li>
+                <li>
+                    <a class="nav-link menu-toggle" href="#behaviourMenu"><i class="bi bi-stars"></i> Behaviour & Skills ▾</a>
+                    <ul class="nav flex-column submenu" id="behaviourMenu">
+                        <li><a href="{% url 'behaviour_dashboard' %}" class="nav-link">📊 Behaviour Dashboard</a></li>
+                        <li><a href="{% url 'behaviour_record_list' %}" class="nav-link">📋 Behaviour Records</a></li>
+                        <li><a href="{% url 'behaviour_record_add' %}" class="nav-link">➕ Add Behaviour</a></li>
+                        <li><a href="{% url 'skill_evaluation_list' %}" class="nav-link">🌟 Skill Evaluations</a></li>
+                        <li><a href="{% url 'skill_evaluation_add' %}" class="nav-link">✍️ Add Skill Evaluation</a></li>
+                    </ul>
+                </li>
+                <li><a href="/online-store/" class="nav-link"><i class="bi bi-shop"></i> Online Store & POS</a></li>
+                <li><a href="/assets/" class="nav-link"><i class="bi bi-box-seam"></i> Assets / Room Monitor</a></li>
+                <li><a href="/live-classes/" class="nav-link"><i class="bi bi-camera-video"></i> Live Class</a></li>
+                <li><a href="/question-answers/" class="nav-link"><i class="bi bi-question-circle"></i> Question Answer</a></li>
+                <li><a href="{% url 'certificate_dashboard' %}" class="nav-link"><i class="bi bi-award"></i> Certificates</a></li>
             {% endif %}
 
             {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin or emp.can_access_backup %}
-                <li>
-                    <a href="/backup/" class="nav-link">
-                        <i class="bi bi-cloud-arrow-down"></i> Backup
-                    </a>
-                </li>
+                <li><a href="{% url 'manual_backup' %}" class="nav-link"><i class="bi bi-cloud-arrow-down"></i> Backup</a></li>
+                <li><a href="/recycle-bin/">🗑 Recycle Bin Dashboard</a></li>
             {% endif %}
 
             <div class="menu-title">Account</div>
-
             <li>
                 <form method="post" action="{% url 'logout' %}">
                     {% csrf_token %}
-                    <button type="submit" class="nav-link border-0 bg-transparent w-100 text-start">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </button>
+                    <button type="submit" class="nav-link border-0"><i class="bi bi-box-arrow-right"></i> Logout</button>
                 </form>
             </li>
-
         </ul>
     </div>
-    {% endwith %}
 
     <div class="main-area">
         <div class="topbar no-print">
-            <div class="topbar-card d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <div>
-                    <div class="topbar-title">AL RAHMAN MISSION ERP</div>
-                    <div class="topbar-sub">Bangla + English Medium | Complete School Management System</div>
+            <div class="topbar-card d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="d-flex align-items-center gap-3">
+                    <button type="button" class="mobile-menu-btn" onclick="toggleSidebar()"><i class="bi bi-list"></i> Menu</button>
+                    <button type="button" class="sidebar-toggle-btn" id="desktopSidebarToggle"><i class="bi bi-layout-sidebar-inset"></i> Sidebar</button>
+                    <div>
+                        <div class="topbar-title">AL RAHMAN MISSION ERP</div>
+                        <div class="topbar-sub">Bangla + English Medium | Complete School Management System</div>
+                    </div>
                 </div>
 
-                <div class="text-end">
-                    {% if request.user.is_authenticated %}
-                        <div class="topbar-title">
-                            <i class="bi bi-person-check"></i> {{ request.user.username }}
+                <div class="d-flex align-items-center gap-3 flex-wrap">
+                    <form method="GET" action="{% url 'set_global_session' %}"
+                          style="background:rgba(255,255,255,.20);border:1px solid rgba(255,255,255,.28);padding:8px 12px;border-radius:16px;">
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="color:white;font-size:13px;font-weight:900;white-space:nowrap;">🎓 Session</div>
+                            <select name="session" onchange="this.form.submit()" class="form-select form-select-sm"
+                                    style="min-width:150px;border-radius:10px;border:none;font-weight:900;color:#0f172a;">
+                                {% for session in sessions %}
+                                    <option value="{{ session }}" {% if session == selected_session %}selected{% endif %}>{{ session }}</option>
+                                {% empty %}
+                                    <option value="{{ selected_session|default:'2025-2026' }}">{{ selected_session|default:'2025-2026' }}</option>
+                                {% endfor %}
+                            </select>
                         </div>
-                        <div class="topbar-sub">Logged In</div>
-                    {% else %}
-                        <div class="topbar-title">Guest</div>
-                    {% endif %}
+                    </form>
+
+                    <div class="text-end">
+                        {% if request.user.is_authenticated %}
+                            <div class="topbar-title"><i class="bi bi-person-check"></i> {{ request.user.username }}</div>
+                            <div class="topbar-sub">Logged In | Active Session: {{ selected_session|default:"2025-2026" }}</div>
+                        {% else %}
+                            <div class="topbar-title">Guest</div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
@@ -510,17 +740,165 @@
         <div class="content-area">
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-success no-print">{{ message }}</div>
+                    <div class="alert alert-{{ message.tags|default:'success' }} no-print">{{ message }}</div>
                 {% endfor %}
             {% endif %}
 
             {% block content %}{% endblock %}
         </div>
     </div>
-
 </div>
 
+{% endwith %}
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById("erpSidebar");
+        if (sidebar) sidebar.classList.toggle("show-mobile");
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const body = document.body;
+        const currentPath = window.location.pathname;
+        const searchInput = document.getElementById("sidebarSearch");
+        const noResult = document.getElementById("sidebarNoResult");
+        const desktopSidebarToggle = document.getElementById("desktopSidebarToggle");
+        const links = document.querySelectorAll(".sidebar .nav-link[href]");
+        const togglers = document.querySelectorAll(".sidebar .menu-toggle");
+
+        // Theme
+        const themes = ["green", "royal", "gold", "purple", "black"];
+        const savedTheme = localStorage.getItem("erpSidebarTheme") || "green";
+        body.classList.add("sidebar-theme-" + savedTheme);
+
+        document.querySelectorAll(".theme-dot").forEach(function (btn) {
+            const theme = btn.getAttribute("data-theme");
+            if (theme === savedTheme) btn.classList.add("active-theme");
+
+            btn.addEventListener("click", function () {
+                themes.forEach(function (t) { body.classList.remove("sidebar-theme-" + t); });
+                body.classList.add("sidebar-theme-" + theme);
+                localStorage.setItem("erpSidebarTheme", theme);
+
+                document.querySelectorAll(".theme-dot").forEach(function (x) { x.classList.remove("active-theme"); });
+                btn.classList.add("active-theme");
+            });
+        });
+
+        // Sidebar hide/show
+        if (localStorage.getItem("erpSidebarHidden") === "yes") {
+            body.classList.add("sidebar-hidden");
+        }
+
+        if (desktopSidebarToggle) {
+            desktopSidebarToggle.addEventListener("click", function () {
+                body.classList.toggle("sidebar-hidden");
+                localStorage.setItem("erpSidebarHidden", body.classList.contains("sidebar-hidden") ? "yes" : "no");
+            });
+        }
+
+        // Restore open menus
+        const openMenus = JSON.parse(localStorage.getItem("erpOpenMenus") || "[]");
+        openMenus.forEach(function (id) {
+            const menu = document.getElementById(id);
+            const toggle = document.querySelector('.menu-toggle[href="#' + id + '"]');
+            if (menu && toggle) {
+                menu.classList.add("show");
+                toggle.classList.add("erp-parent-active");
+            }
+        });
+
+        function saveOpenMenus() {
+            const ids = Array.from(document.querySelectorAll(".sidebar .submenu.show"))
+                .map(function (menu) { return menu.id; })
+                .filter(Boolean);
+            localStorage.setItem("erpOpenMenus", JSON.stringify(ids));
+        }
+
+        // Active menu
+        links.forEach(function (link) {
+            const href = link.getAttribute("href");
+            if (!href || href === "#" || href.startsWith("#")) return;
+
+            const active = currentPath === href || (href !== "/" && href.length > 2 && currentPath.startsWith(href));
+            if (active) {
+                link.classList.add("active");
+                const submenu = link.closest(".submenu");
+                if (submenu) {
+                    submenu.classList.add("show");
+                    const parentToggle = document.querySelector('.menu-toggle[href="#' + submenu.id + '"]');
+                    if (parentToggle) parentToggle.classList.add("erp-parent-active");
+                }
+            }
+        });
+
+        // Fast menu toggle
+        togglers.forEach(function (toggle) {
+            toggle.addEventListener("click", function (event) {
+                event.preventDefault();
+                const target = document.querySelector(toggle.getAttribute("href"));
+                if (!target) return;
+
+                target.classList.toggle("show");
+                toggle.classList.toggle("erp-parent-active", target.classList.contains("show"));
+                saveOpenMenus();
+            });
+        });
+
+        // Search menu
+        if (searchInput) {
+            searchInput.addEventListener("input", function () {
+                const term = searchInput.value.toLowerCase().trim();
+                let matchCount = 0;
+
+                document.querySelectorAll("#sidebarMenuList li, #sidebarMenuList .menu-title").forEach(function (item) {
+                    item.classList.remove("menu-search-hidden");
+                });
+
+                if (!term) {
+                    if (noResult) noResult.classList.remove("show");
+                    return;
+                }
+
+                document.querySelectorAll("#sidebarMenuList .menu-title").forEach(function (title) {
+                    title.classList.add("menu-search-hidden");
+                });
+
+                document.querySelectorAll(".sidebar .nav-link").forEach(function (link) {
+                    const text = link.innerText.toLowerCase();
+                    const li = link.closest("li");
+                    const matched = text.includes(term);
+
+                    if (li && !matched) li.classList.add("menu-search-hidden");
+
+                    if (matched) {
+                        matchCount += 1;
+                        const submenu = link.closest(".submenu");
+                        if (submenu) {
+                            submenu.classList.add("show");
+                            const parentToggle = document.querySelector('.menu-toggle[href="#' + submenu.id + '"]');
+                            const parentLi = parentToggle ? parentToggle.closest("li") : null;
+                            if (parentToggle) parentToggle.classList.remove("menu-search-hidden");
+                            if (parentLi) parentLi.classList.remove("menu-search-hidden");
+                        }
+                    }
+                });
+
+                if (noResult) noResult.classList.toggle("show", matchCount === 0);
+            });
+        }
+
+        // Select2
+        if (window.jQuery && $.fn.select2) {
+            $(".select2").select2({ width: "100%" });
+        }
+    });
+</script>
 
 </body>
 </html>

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+@media print {
+    .no-print { display:none!important; }
+    table { font-size:11px; }
+}
+</style>
+
+<div class="no-print mb-3 d-flex justify-content-between">
+    <h4 class="fw-bold">🖨 Maintenance Print Report</h4>
+    <button onclick="window.print()" class="btn btn-success">Print</button>
+</div>
+
+<div class="text-center mb-3">
+    <h3 class="fw-bold">AL RAHMAN MISSION</h3>
+    <h5>Asset Repair / Maintenance Report</h5>
+    <div>Date: {{ print_date|date:"d-m-Y h:i A" }} {% if status %}| Status: {{ status }}{% endif %}</div>
+</div>
+
+<table class="table table-bordered align-middle">
+    <thead>
+        <tr>
+            <th>SL</th>
+            <th>Date</th>
+            <th>Room</th>
+            <th>Asset</th>
+            <th>Issue</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Completed Date</th>
+            <th>Cost</th>
+            <th>Remarks</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for r in records %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ r.reported_date }}</td>
+            <td>{{ r.asset.room.room_no|default:"-" }}</td>
+            <td>{{ r.asset.item_name }}</td>
+            <td>{{ r.issue_title }}</td>
+            <td>{{ r.get_priority_display }}</td>
+            <td>{{ r.get_status_display }}</td>
+            <td>{{ r.assigned_to|default:r.vendor_or_mechanic|default:"-" }}</td>
+            <td>{{ r.completed_date|default:"-" }}</td>
+            <td>₹{{ r.repair_cost }}</td>
+            <td>{{ r.remarks|default:"" }}</td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="11" class="text-center">No maintenance records found.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="card shadow border-0 rounded-4">
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">📝 Submit Complaint</h4>
+        </div>
+
+        <div class="card-body">
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Student</label>
+                    <input type="text" class="form-control" value="{{ student.student_name }}" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Complaint Title</label>
+                    <input type="text" name="title" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Complaint Details</label>
+                    <textarea name="complaint_text" class="form-control" rows="5" required></textarea>
+                </div>
+
+                <button class="btn btn-primary">Submit Complaint</button>
+
+                {% if portal_type == 'student' %}
+                    <a href="{% url 'student_complaint_list' %}" class="btn btn-secondary">Back</a>
+                {% else %}
+                    <a href="{% url 'parent_complaint_list' %}" class="btn btn-secondary">Back</a>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+.weekly-hero{background:linear-gradient(135deg,#0f766e,#2563eb,#7c3aed);color:white;border-radius:22px;padding:18px;box-shadow:0 12px 30px rgba(15,23,42,.16)}
+.weekly-table-wrap{overflow:auto;max-height:75vh;background:white;border-radius:18px;box-shadow:0 8px 22px rgba(15,23,42,.08)}
+.weekly-table{min-width:1200px;margin:0;font-size:12px}
+.weekly-table th{position:sticky;top:0;z-index:2;background:#eff6ff!important;color:#0f172a;vertical-align:middle}
+.weekly-day{position:sticky;left:0;z-index:3;background:#ecfeff!important;min-width:110px;font-weight:900}
+.weekly-period{position:sticky;left:110px;z-index:3;background:#f8fafc!important;min-width:135px}
+.weekly-cell{min-width:230px;background:#fff}
+.weekly-select{font-size:11px;padding:4px 6px;border-radius:8px}
+.teacher-warning{display:none;margin-top:4px;font-size:10px;font-weight:800;color:#b91c1c}
+.teacher-warning.show{display:block}
+.break-row td{background:#f1f5f9!important;color:#64748b;font-weight:900;text-align:center}
+.holiday-row td{background:#fee2e2!important;color:#991b1b;font-weight:900;text-align:center}
+@media print{
+    .no-print,.sidebar,.topbar,.sticky-bottom{display:none!important}
+    @page{size:A4 landscape;margin:8mm}
+    .content-area{padding:0!important}
+    .weekly-table-wrap{max-height:none!important;overflow:visible!important;box-shadow:none!important}
+    .weekly-table{font-size:9px;min-width:auto!important}
+    .weekly-cell{min-width:120px!important}
+}
+</style>
+
+<div class="weekly-hero mb-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <div>
+            <h4 class="fw-bold mb-1">📅 Weekly Timetable Setup V3</h4>
+            <div>Tiffin/Break, Holiday, Subject, Teacher, Room dropdown. Same day + same period teacher conflict warning.</div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'timetable_dashboard' %}" class="btn btn-light">Dashboard</a>
+            <a href="{% url 'period_list' %}" class="btn btn-warning">Tiffin / Period</a>
+            <a href="{% url 'timetable_holiday_list' %}" class="btn btn-danger">Holiday</a>
+            <button type="button" onclick="window.print()" class="btn btn-success">🖨 Print This Page</button>
+            <a target="_blank" href="{% url 'timetable_print' %}?type=all_weekly" class="btn btn-light">A4 Weekly All</a>
+        </div>
+    </div>
+</div>
+
+<form method="get" class="card card-body mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-8">
+            <label class="form-label fw-bold">Sections</label>
+            <input type="text" name="sections" value="{{ sections_text }}" class="form-control" placeholder="Example: A,B,Girls,Boys">
+        </div>
+        <div class="col-md-4"><button class="btn btn-primary w-100">Apply Sections</button></div>
+    </div>
+</form>
+
+<form method="post" id="weeklyForm">
+    {% csrf_token %}
+    <input type="hidden" name="sections" value="{{ sections_text }}">
+    <div class="weekly-table-wrap">
+        <table class="table table-bordered weekly-table align-middle">
+            <thead>
+                <tr>
+                    <th class="weekly-day">Day</th>
+                    <th class="weekly-period">Period</th>
+                    {% for cls in classes %}
+                        {% for section in sections %}
+                            <th>{{ cls }} {% if section %}<span class="badge bg-primary">{{ section }}</span>{% endif %}</th>
+                        {% endfor %}
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for day_code, day_label in days %}
+                {% if day_code in holiday_map %}
+                    <tr class="holiday-row">
+                        <td class="weekly-day">{{ day_label }}</td>
+                        <td class="weekly-period">Holiday</td>
+                        <td colspan="999">Holiday / Off Day</td>
+                    </tr>
+                {% else %}
+                    {% for period in periods %}
+                        {% if period.is_break %}
+                            <tr class="break-row">
+                                <td class="weekly-day">{{ day_label }}</td>
+                                <td class="weekly-period">{{ period.name }}<br><small>{{ period.start_time }} - {{ period.end_time }}</small></td>
+                                <td colspan="999">Tiffin / Break Time</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td class="weekly-day">{{ day_label }}</td>
+                                <td class="weekly-period"><b>{{ period.name }}</b><br><small>{{ period.start_time }} - {{ period.end_time }}</small></td>
+                                {% for cls in classes %}
+                                    {% for section in sections %}
+                                    <td class="weekly-cell">
+                                        <div class="mb-1">
+                                            <select name="cell_{{ day_code }}_{{ period.id }}_{{ cls.id }}_{{ section }}_subject" class="form-select weekly-select subject-select" data-day="{{ day_code }}" data-period="{{ period.id }}" data-class="{{ cls.id }}" data-section="{{ section }}">
+                                                <option value="">Subject</option>
+                                                {% for subject in subjects %}<option value="{{ subject.id }}">{{ subject }}</option>{% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="mb-1">
+                                            <select name="cell_{{ day_code }}_{{ period.id }}_{{ cls.id }}_{{ section }}_teacher" class="form-select weekly-select teacher-select" data-day="{{ day_code }}" data-period="{{ period.id }}" data-class="{{ cls.id }}" data-section="{{ section }}">
+                                                <option value="">Teacher</option>
+                                                {% for teacher in teachers %}<option value="{{ teacher.id }}">{{ teacher }}</option>{% endfor %}
+                                            </select>
+                                            <div class="teacher-warning">⚠ এই teacher same day + same period-এ already selected আছে।</div>
+                                        </div>
+                                        <input type="text" name="cell_{{ day_code }}_{{ period.id }}_{{ cls.id }}_{{ section }}_room" class="form-control weekly-select room-input" data-day="{{ day_code }}" data-period="{{ period.id }}" data-class="{{ cls.id }}" data-section="{{ section }}" placeholder="Room">
+                                    </td>
+                                    {% endfor %}
+                                {% endfor %}
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if can_manage_timetable %}
+    <div class="sticky-bottom bg-white p-3 mt-3 rounded shadow-sm text-end">
+        <button class="btn btn-success btn-lg">💾 Save Weekly Timetable</button>
+    </div>
+    {% endif %}
+</form>
+
+<script id="weeklySavedData" type="application/json">{{ weekly_saved_data_json|safe }}</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    function makeCellKey(day, period, cls, section) {
+        return String(day) + "_" + String(period) + "_" + String(cls) + "_" + String(section || "");
+    }
+
+    function loadSavedWeeklyData() {
+        let saved = [];
+        const dataTag = document.getElementById("weeklySavedData");
+
+        try {
+            saved = JSON.parse(dataTag ? dataTag.textContent : "[]");
+        } catch (e) {
+            saved = [];
+        }
+
+        saved.forEach(function (item) {
+            const key = makeCellKey(item.day, item.period_id, item.class_id, item.section);
+
+            const subject = document.querySelector(
+                '.subject-select[data-day="' + item.day + '"][data-period="' + item.period_id + '"][data-class="' + item.class_id + '"][data-section="' + item.section + '"]'
+            );
+            const teacher = document.querySelector(
+                '.teacher-select[data-day="' + item.day + '"][data-period="' + item.period_id + '"][data-class="' + item.class_id + '"][data-section="' + item.section + '"]'
+            );
+            const room = document.querySelector(
+                '.room-input[data-day="' + item.day + '"][data-period="' + item.period_id + '"][data-class="' + item.class_id + '"][data-section="' + item.section + '"]'
+            );
+
+            if (subject && item.subject_id) subject.value = String(item.subject_id);
+            if (teacher && item.teacher_id) teacher.value = String(item.teacher_id);
+            if (room && item.room_no) room.value = item.room_no;
+        });
+    }
+
+    function updateTeacherWarnings() {
+        const selects = document.querySelectorAll(".teacher-select");
+        const used = {};
+
+        selects.forEach(function (select) {
+            select.classList.remove("is-invalid");
+            const cell = select.closest("td");
+            if (cell) cell.classList.remove("table-danger");
+
+            const warning = select.parentElement.querySelector(".teacher-warning");
+            if (warning) warning.classList.remove("show");
+        });
+
+        selects.forEach(function (select) {
+            const teacher = select.value;
+            if (!teacher) return;
+
+            const key = select.dataset.day + "_" + select.dataset.period + "_" + teacher;
+
+            if (!used[key]) {
+                used[key] = [];
+            }
+            used[key].push(select);
+        });
+
+        Object.keys(used).forEach(function (key) {
+            if (used[key].length > 1) {
+                used[key].forEach(function (select) {
+                    select.classList.add("is-invalid");
+
+                    const cell = select.closest("td");
+                    if (cell) cell.classList.add("table-danger");
+
+                    const warning = select.parentElement.querySelector(".teacher-warning");
+                    if (warning) warning.classList.add("show");
+                });
+            }
+        });
+    }
+
+    loadSavedWeeklyData();
+    updateTeacherWarnings();
+
+    document.querySelectorAll(".teacher-select").forEach(function (select) {
+        select.addEventListener("change", function () {
+            updateTeacherWarnings();
+        });
+    });
+
+    const form = document.getElementById("weeklyForm");
+    if (form) {
+        form.addEventListener("submit", function (e) {
+            updateTeacherWarnings();
+
+            if (document.querySelector(".teacher-select.is-invalid")) {
+                const ok = confirm("Same day + same period এ একই teacher একাধিক class এ selected আছে। Duplicate teacher save হবে না। Continue?");
+                if (!ok) {
+                    e.preventDefault();
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

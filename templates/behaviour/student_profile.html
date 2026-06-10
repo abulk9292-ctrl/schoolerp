@@ -1,0 +1,454 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.profile-head{
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    color:white;
+    padding:28px;
+    border-radius:26px;
+    box-shadow:0 16px 35px rgba(37,99,235,.25);
+}
+.profile-card{
+    border:none;
+    border-radius:24px;
+    background:white;
+    box-shadow:0 12px 30px rgba(0,0,0,.08);
+    overflow:hidden;
+}
+.info-box{
+    padding:22px;
+}
+.student-photo{
+    width:110px;
+    height:110px;
+    border-radius:50%;
+    object-fit:cover;
+    border:5px solid white;
+    box-shadow:0 12px 28px rgba(0,0,0,.18);
+}
+.stat-box{
+    border-radius:18px;
+    padding:20px;
+    color:white;
+    text-align:center;
+    height:100%;
+}
+.bg-positive{
+    background:linear-gradient(135deg,#16a34a,#22c55e);
+}
+.bg-negative{
+    background:linear-gradient(135deg,#dc2626,#ef4444);
+}
+.bg-skill{
+    background:linear-gradient(135deg,#2563eb,#3b82f6);
+}
+.stat-value{
+    font-size:32px;
+    font-weight:900;
+}
+.table thead th{
+    background:#0f172a;
+    color:white;
+    border:none;
+    padding:14px;
+}
+.table tbody td{
+    padding:14px;
+    vertical-align:middle;
+}
+.skill-badge{
+    display:inline-block;
+    padding:7px 14px;
+    border-radius:30px;
+    background:#ede9fe;
+    color:#6d28d9;
+    font-size:12px;
+    font-weight:900;
+}
+</style>
+
+<div class="profile-head mb-4">
+
+    <div class="d-flex align-items-center gap-4 flex-wrap">
+
+        {% if student.photo %}
+            <img src="{{ student.photo.url }}" class="student-photo">
+        {% else %}
+            <div class="student-photo bg-light text-dark d-flex align-items-center justify-content-center fw-bold fs-1">
+                {{ student.student_name|slice:":1" }}
+            </div>
+        {% endif %}
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                {{ student.student_name }}
+            </h2>
+
+            <div class="mb-2">
+
+                <span class="badge bg-light text-dark px-3 py-2">
+                    {{ student.student_id }}
+                </span>
+
+                <span class="badge bg-warning text-dark px-3 py-2">
+                    {{ student.class_assigned }}
+
+                    {% if student.section %}
+                        - {{ student.section }}
+                    {% endif %}
+                </span>
+
+            </div>
+
+            <div>
+                Roll No:
+                <strong>{{ student.roll_no }}</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+
+        <div class="stat-box bg-positive">
+
+            <div class="stat-value">
+                {{ positive_points }}
+            </div>
+
+            <div class="fw-bold">
+                Positive Records
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="stat-box bg-negative">
+
+            <div class="stat-value">
+                {{ negative_points }}
+            </div>
+
+            <div class="fw-bold">
+                Negative Records
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="col-md-4">
+
+        <div class="stat-box bg-skill">
+
+            <div class="stat-value">
+                {{ skill_evaluations.count }}
+            </div>
+
+            <div class="fw-bold">
+                Skill Evaluations
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="profile-card mb-4">
+
+    <div class="info-box">
+
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+
+            <h4 class="fw-bold mb-2">
+                📋 Behaviour Records
+            </h4>
+
+            <a href="{% url 'behaviour_record_add' %}"
+               class="btn btn-primary rounded-4 px-4">
+                ➕ Add Record
+            </a>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>#</th>
+
+                        <th>Date</th>
+
+                        <th>Type</th>
+
+                        <th>Title</th>
+
+                        <th>Points</th>
+
+                        <th>Teacher</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for record in behaviour_records %}
+
+                    <tr>
+
+                        <td>
+                            {{ forloop.counter }}
+                        </td>
+
+                        <td>
+                            {{ record.date }}
+                        </td>
+
+                        <td>
+
+                            {% if record.behaviour_type == 'Positive' %}
+
+                                <span class="badge bg-success px-3 py-2">
+                                    Positive
+                                </span>
+
+                            {% elif record.behaviour_type == 'Negative' %}
+
+                                <span class="badge bg-danger px-3 py-2">
+                                    Negative
+                                </span>
+
+                            {% else %}
+
+                                <span class="badge bg-secondary px-3 py-2">
+                                    Neutral
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            <div class="fw-bold">
+                                {{ record.title }}
+                            </div>
+
+                            <small class="text-muted">
+                                {{ record.description|truncatechars:50 }}
+                            </small>
+
+                        </td>
+
+                        <td>
+
+                            {% if record.points > 0 %}
+
+                                <span class="fw-bold text-success">
+                                    +{{ record.points }}
+                                </span>
+
+                            {% elif record.points < 0 %}
+
+                                <span class="fw-bold text-danger">
+                                    {{ record.points }}
+                                </span>
+
+                            {% else %}
+
+                                0
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+
+                            {% if record.teacher %}
+                                {{ record.teacher.name }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="6">
+
+                            <div class="alert alert-info m-3">
+                                No behaviour records found.
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="profile-card">
+
+    <div class="info-box">
+
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+
+            <h4 class="fw-bold mb-2">
+                🌟 Skill Evaluations
+            </h4>
+
+            <a href="{% url 'skill_evaluation_add' %}"
+               class="btn btn-success rounded-4 px-4">
+                ✍️ Add Evaluation
+            </a>
+
+        </div>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>#</th>
+
+                        <th>Month</th>
+
+                        <th>Discipline</th>
+
+                        <th>Communication</th>
+
+                        <th>Leadership</th>
+
+                        <th>Participation</th>
+
+                        <th>Teacher</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    {% for evaluation in skill_evaluations %}
+
+                    <tr>
+
+                        <td>
+                            {{ forloop.counter }}
+                        </td>
+
+                        <td>
+
+                            <div class="fw-bold">
+                                {{ evaluation.month }}
+                            </div>
+
+                            <small class="text-muted">
+                                {{ evaluation.year }}
+                            </small>
+
+                        </td>
+
+                        <td>
+
+                            <span class="skill-badge">
+                                {{ evaluation.discipline }}
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <span class="skill-badge">
+                                {{ evaluation.communication }}
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <span class="skill-badge">
+                                {{ evaluation.leadership }}
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            <span class="skill-badge">
+                                {{ evaluation.class_participation }}
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            {% if evaluation.teacher %}
+                                {{ evaluation.teacher.name }}
+                            {% else %}
+                                —
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="7">
+
+                            <div class="alert alert-info m-3">
+                                No skill evaluations found.
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

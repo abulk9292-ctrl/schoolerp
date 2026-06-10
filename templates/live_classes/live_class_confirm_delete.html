@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .page-wrap{padding:18px}
+    .glass-card{background:#fff;border-radius:18px;box-shadow:0 12px 35px rgba(15,23,42,.08);border:1px solid rgba(15,23,42,.08)}
+    .stat-card{border-radius:18px;padding:18px;background:linear-gradient(135deg,#0f172a,#2563eb);color:white;box-shadow:0 12px 30px rgba(37,99,235,.22)}
+    .btn-soft{border-radius:12px;font-weight:700}
+    .table thead th{background:#f8fafc;font-size:13px;text-transform:uppercase}
+    .badge-soft{border-radius:30px;padding:7px 12px;font-weight:700}
+</style>
+
+<div class="page-wrap">
+    <div class="glass-card p-4">
+        <h3 class="fw-bold text-danger">Delete Live Class?</h3>
+        <p>Are you sure you want to delete <b>{{ live_class.title }}</b>?</p>
+        <form method="post">
+            {% csrf_token %}
+            <button class="btn btn-danger btn-soft">Yes, Delete</button>
+            <a href="{% url 'live_classes:live_class_list' %}" class="btn btn-secondary btn-soft">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

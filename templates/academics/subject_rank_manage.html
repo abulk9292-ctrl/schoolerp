@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    .rank-head{
+        background:linear-gradient(135deg,#111827,#f59e0b);
+        color:white;
+        border-radius:22px;
+        padding:22px;
+        box-shadow:0 12px 30px rgba(245,158,11,.18);
+    }
+
+    .card-box{
+        border:none;
+        border-radius:22px;
+        box-shadow:0 10px 28px rgba(0,0,0,0.08);
+    }
+
+    .rank-input{
+        width:90px;
+        margin:auto;
+        text-align:center;
+        font-weight:800;
+    }
+</style>
+
+<div class="container mt-4">
+
+    <div class="rank-head mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h3 class="fw-bold mb-1">🔢 Subject Rank Management</h3>
+                <div>Control subject display order for marks entry, report card, blank sheet and result pages.</div>
+            </div>
+
+            <a href="{% url 'class_subject_assign' %}" class="btn btn-light fw-bold">
+                ✅ Back to Subject Assign
+            </a>
+        </div>
+    </div>
+
+    <div class="card card-box p-4 mb-4">
+        <form method="get" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Select Class</label>
+                <select name="class" class="form-select" onchange="this.form.submit()">
+                    <option value="">Select Class</option>
+                    {% for c in classes %}
+                        <option value="{{ c.id }}" {% if selected_class and selected_class.id == c.id %}selected{% endif %}>
+                            {{ c.class_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+
+    {% if selected_class %}
+    <div class="card card-box p-4">
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="class" value="{{ selected_class.id }}">
+
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <h5 class="fw-bold mb-0">
+                    📚 {{ selected_class.class_name }} — Assigned Subject Order
+                </h5>
+
+                <button class="btn btn-success fw-bold">
+                    💾 Save Rank
+                </button>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped align-middle text-center">
+                    <thead class="table-dark">
+                        <tr>
+                            <th width="100">Rank</th>
+                            <th class="text-start">Subject</th>
+                            <th>Full</th>
+                            <th>Pass</th>
+                            <th>Written</th>
+                            <th>Oral</th>
+                            <th>Practical</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for cs in class_subjects %}
+                        <tr>
+                            <td>
+                                <input type="number"
+                                       name="rank_{{ cs.id }}"
+                                       value="{{ cs.subject_rank }}"
+                                       min="0"
+                                       class="form-control rank-input">
+                            </td>
+                            <td class="text-start fw-bold">{{ cs.subject.subject_name }}</td>
+                            <td>{{ cs.full_marks }}</td>
+                            <td>{{ cs.pass_marks }}</td>
+                            <td>{{ cs.written_marks }}</td>
+                            <td>{{ cs.oral_marks }}</td>
+                            <td>{{ cs.practical_marks }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-muted py-4">
+                                No assigned subject found for this class.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        Please select a class to manage subject rank.
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

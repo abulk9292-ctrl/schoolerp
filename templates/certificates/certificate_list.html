@@ -1,0 +1,271 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+
+.page-header{
+    background: linear-gradient(135deg,#0f766e,#0891b2);
+    padding: 25px;
+    border-radius: 18px;
+    color: white;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.page-header h2{
+    font-weight: 800;
+    margin: 0;
+}
+
+.card-box{
+    border: none;
+    border-radius: 18px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.table thead{
+    background: #0f172a;
+    color: white;
+}
+
+.table td,
+.table th{
+    vertical-align: middle;
+}
+
+.badge-type{
+    padding: 8px 14px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.bg-tc{
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.bg-character{
+    background: #dcfce7;
+    color: #166534;
+}
+
+.bg-bonafide{
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.action-btn{
+    border-radius: 10px;
+    font-size: 13px;
+    padding: 6px 12px;
+    font-weight: 700;
+}
+
+</style>
+
+
+<div class="container-fluid">
+
+    <!-- HEADER -->
+
+    <div class="page-header d-flex justify-content-between align-items-center">
+
+        <div>
+            <h2>Certificate List</h2>
+            <p class="mb-0">
+                Manage all generated certificates
+            </p>
+        </div>
+
+        <div>
+            <a href="{% url 'certificate_create' %}"
+               class="btn btn-light fw-bold rounded-pill px-4">
+                + Create Certificate
+            </a>
+        </div>
+
+    </div>
+
+
+    <!-- TABLE -->
+
+    <div class="card card-box">
+
+        <div class="card-body">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Certificate No</th>
+                            <th>Photo</th>
+                            <th>Student</th>
+                            <th>Class</th>
+                            <th>Section</th>
+                            <th>Type</th>
+                            <th>Issue Date</th>
+                            <th width="180">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for certificate in certificates %}
+
+                        <tr>
+
+                            <td>
+                                {{ forloop.counter }}
+                            </td>
+
+                            <td>
+                                <strong>
+                                    {{ certificate.certificate_no }}
+                                </strong>
+                            </td>
+
+                            <td>
+
+                                {% if certificate.student.photo %}
+
+                                    <img src="{{ certificate.student.photo.url }}"
+                                         width="55"
+                                         height="55"
+                                         style="object-fit:cover;border-radius:10px;">
+
+                                {% else %}
+
+                                    <img src="{% static 'images/logo.png' %}"
+                                         width="55"
+                                         height="55"
+                                         style="object-fit:cover;border-radius:10px;">
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                <strong>
+                                    {{ certificate.student.student_name }}
+                                </strong>
+
+                                <br>
+
+                                <small class="text-muted">
+                                    {{ certificate.student.student_id }}
+                                </small>
+
+                            </td>
+
+                            <td>
+                                {{ certificate.student.class_assigned }}
+                            </td>
+
+                            <td>
+                                {{ certificate.student.section }}
+                            </td>
+
+                            <td>
+
+                                {% if certificate.certificate_type == 'TC' %}
+
+                                    <span class="badge-type bg-tc">
+                                        Transfer
+                                    </span>
+
+                                {% elif certificate.certificate_type == 'CHARACTER' %}
+
+                                    <span class="badge-type bg-character">
+                                        Character
+                                    </span>
+
+                                {% elif certificate.certificate_type == 'BONAFIDE' %}
+
+                                    <span class="badge-type bg-bonafide">
+                                        Bonafide
+                                    </span>
+
+                                {% else %}
+
+                                    <span class="badge bg-dark">
+                                        {{ certificate.get_certificate_type_display }}
+                                    </span>
+
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+                                {{ certificate.issue_date }}
+                            </td>
+
+                            <td>
+
+                                <a href="{% url 'certificate_detail' certificate.id %}"
+                                   class="btn btn-primary btn-sm action-btn">
+                                    View
+                                </a>
+
+                                <a href="{% url 'certificate_detail' certificate.id %}"
+                                   target="_blank"
+                                   class="btn btn-success btn-sm action-btn">
+                                    Print
+                                </a>
+
+                                <a href="{% url 'certificate_delete' certificate.id %}"
+                                   class="btn btn-danger btn-sm action-btn"
+                                   onclick="return confirm('Delete Certificate?')">
+                                    Delete
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+
+                            <td colspan="9" class="text-center py-5">
+
+                                <img src="{% static 'images/logo.png' %}"
+                                     width="70"
+                                     class="mb-3">
+
+                                <h5>No Certificates Found</h5>
+
+                                <p class="text-muted">
+                                    Create your first certificate
+                                </p>
+
+                                <a href="{% url 'certificate_create' %}"
+                                   class="btn btn-primary rounded-pill px-4">
+                                    Create Certificate
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

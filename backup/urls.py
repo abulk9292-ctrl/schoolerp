@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('', views.manual_backup, name='backup_home'),
     # ✅ Existing (same রাখা হয়েছে)
     path('manual/', views.manual_backup, name='manual_backup'),
 

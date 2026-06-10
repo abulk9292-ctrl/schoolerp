@@ -1,35 +1,28 @@
 {% extends 'base.html' %}
 {% block content %}
-
 <div class="container mt-4">
-    <div class="card shadow">
-        <div class="card-header bg-success text-white">
-            Solve Complaint
-        </div>
-
-        <div class="card-body">
-
-            <p><b>Student:</b> {{ complaint.student.student_name }}</p>
-            <p><b>Title:</b> {{ complaint.title }}</p>
-            <p><b>Description:</b> {{ complaint.description }}</p>
-
-            <hr>
-
-            <form method="post">
-                {% csrf_token %}
-
-                <div class="mb-3">
-                    <label>Solution</label>
-                    <textarea name="solution" class="form-control" rows="4" required></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Mark as Solved</button>
-                <a href="{% url 'complaint_list' %}" class="btn btn-secondary">Back</a>
-
-            </form>
-
-        </div>
-    </div>
+<div class="card shadow border-0 rounded-4">
+<div class="card-header bg-success text-white"><h4 class="mb-0">✅ Admin Solve Complaint</h4></div>
+<div class="card-body">
+<p><b>Student:</b> {{ complaint.student.student_name }}</p>
+<p><b>Title:</b> {{ complaint.title }}</p>
+<div class="alert alert-light border" style="white-space:pre-line;"><b>Teacher Remark:</b><br>{{ complaint.teacher_solution|default:"-" }}</div>
+<form method="post">{% csrf_token %}
+<label class="fw-bold">Admin Final Status</label>
+<select name="admin_status" class="form-control mb-3" required>
+<option value="">Select Admin Status</option>
+<option value="Approved and Solved">Approved and Solved</option>
+<option value="Parent Meeting Scheduled">Parent Meeting Scheduled</option>
+<option value="Warning Issued">Warning Issued</option>
+<option value="Counselling Required">Counselling Required</option>
+<option value="Management Decision Required">Management Decision Required</option>
+</select>
+<label class="fw-bold">Admin Remark</label>
+<textarea name="solution" class="form-control mb-3" rows="5" required>{{ complaint.admin_solution|default:'' }}</textarea>
+<button class="btn btn-primary">Mark as Solved</button>
+<a href="{% url 'complaint_list' %}" class="btn btn-secondary">Back</a>
+</form>
 </div>
-
+</div>
+</div>
 {% endblock %}

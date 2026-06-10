@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card p-4 shadow-sm border-0 rounded-4 mb-4">
+        <h3 class="fw-bold text-danger">♻ Holiday Reset</h3>
+        <p class="text-muted mb-0">Date range দিয়ে old holiday records delete করুন</p>
+    </div>
+
+    <div class="card p-4 shadow-sm border-0 rounded-4 mb-4">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-bold">From Date</label>
+                <input type="date" name="from_date" value="{{ from_date }}" class="form-control" required>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label fw-bold">To Date</label>
+                <input type="date" name="to_date" value="{{ to_date }}" class="form-control" required>
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button class="btn btn-primary w-100">Show Holidays</button>
+            </div>
+        </form>
+    </div>
+
+    {% if from_date and to_date %}
+    <div class="card p-4 shadow-sm border-0 rounded-4">
+        <h5 class="fw-bold text-danger">⚠ Reset Preview</h5>
+
+        <p>
+            Found Holiday Records:
+            <strong class="text-danger">{{ reset_count }}</strong>
+        </p>
+
+        <form method="post"
+              onsubmit="return confirm('Are you sure? Selected holiday records will be deleted.');">
+            {% csrf_token %}
+
+            <input type="hidden" name="from_date" value="{{ from_date }}">
+            <input type="hidden" name="to_date" value="{{ to_date }}">
+            <input type="hidden" name="confirm_reset" value="YES">
+
+            <button class="btn btn-danger">
+                🗑 Confirm Reset Holidays
+            </button>
+
+            <a href="{% url 'holiday_reset' %}" class="btn btn-secondary">
+                Cancel
+            </a>
+        </form>
+
+        <hr>
+
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Half Day</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for h in holidays %}
+                <tr>
+                    <td>{{ h.date }}</td>
+                    <td>{{ h.title }}</td>
+                    <td>{{ h.holiday_type }}</td>
+                    <td>{% if h.is_half_day %}Yes{% else %}No{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">
+                        No holiday found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

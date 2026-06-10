@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+            <h2 class="fw-bold text-danger mb-1">
+                🗑 Salary Recycle Bin
+            </h2>
+
+            <small class="text-muted">
+                Deleted Salary Records
+            </small>
+        </div>
+
+        <div>
+            <a href="{% url 'salary_list' %}"
+               class="btn btn-primary">
+
+                ← Back To Salary List
+
+            </a>
+        </div>
+
+    </div>
+
+    <div class="card shadow-sm border-0">
+
+        <div class="card-header bg-danger text-white">
+
+            <div class="row">
+
+                <div class="col-md-6">
+                    <h5 class="mb-0">
+                        Deleted Salary Records
+                    </h5>
+                </div>
+
+                <div class="col-md-6 text-end">
+
+                    <span class="badge bg-light text-dark">
+                        Total Deleted :
+                        {{ records.count }}
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card-body">
+
+            {% if records %}
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover">
+
+                    <thead class="table-dark">
+
+                        <tr>
+
+                            <th>#</th>
+                            <th>Employee</th>
+                            <th>Month</th>
+                            <th>Year</th>
+                            <th>Payable</th>
+                            <th>Paid</th>
+                            <th>Due</th>
+                            <th>Status</th>
+                            <th>Deleted By</th>
+                            <th>Deleted Date</th>
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        {% for salary in records %}
+
+                        <tr>
+
+                            <td>
+                                {{ forloop.counter }}
+                            </td>
+
+                            <td>
+                                {{ salary.employee.name }}
+                            </td>
+
+                            <td>
+                                {{ salary.month }}
+                            </td>
+
+                            <td>
+                                {{ salary.year }}
+                            </td>
+
+                            <td>
+                                ₹ {{ salary.payable_amount }}
+                            </td>
+
+                            <td>
+                                ₹ {{ salary.paid_amount }}
+                            </td>
+
+                            <td>
+                                ₹ {{ salary.due_amount }}
+                            </td>
+
+                            <td>
+
+                                <span class="badge bg-warning">
+                                    {{ salary.status }}
+                                </span>
+
+                            </td>
+
+                            <td>
+
+                                {% if salary.deleted_by %}
+                                    {{ salary.deleted_by.username }}
+                                {% else %}
+                                    -
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if salary.deleted_at %}
+                                    {{ salary.deleted_at|date:"d M Y" }}
+                                    <br>
+                                    <small>
+                                        {{ salary.deleted_at|time:"h:i A" }}
+                                    </small>
+                                {% else %}
+                                    -
+                                {% endif %}
+
+                            </td>
+
+                            <td>
+
+                                {% if request.user.is_superuser %}
+
+                                <a href="{% url 'salary_restore' salary.id %}"
+                                   class="btn btn-success btn-sm">
+
+                                    ♻ Restore
+
+                                </a>
+
+                                <form method="post"
+                                      action="{% url 'salary_permanent_delete' salary.id %}"
+                                      style="display:inline;">
+
+                                    {% csrf_token %}
+
+                                    <button type="submit"
+                                            class="btn btn-danger btn-sm"
+                                            onclick="return confirm('Permanently delete this salary record?')">
+
+                                        ❌ Delete
+
+                                    </button>
+
+                                </form>
+
+                                {% else %}
+
+                                <span class="badge bg-secondary">
+                                    Super Admin Only
+                                </span>
+
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {% else %}
+
+            <div class="text-center py-5">
+
+                <h2 class="text-success">
+                    🎉 Recycle Bin Empty
+                </h2>
+
+                <p class="text-muted">
+                    No deleted salary records found.
+                </p>
+
+                <a href="{% url 'salary_list' %}"
+                   class="btn btn-primary">
+
+                    Go To Salary List
+
+                </a>
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -29,6 +29,20 @@
                     {{ form.class_assigned }}
                 </div>
 
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">
+                        Section
+                    </label>
+
+                    {{ form.section }}
+
+                    {% if form.section.errors %}
+                        <div class="text-danger">
+                            {{ form.section.errors }}
+                        </div>
+                    {% endif %}
+                </div>
+
                 <div class="col-md-4">
                     <label class="form-label">Roll No</label>
                     {{ form.roll_no }}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .page-wrap{padding:18px}
+    .glass-card{background:#fff;border-radius:18px;box-shadow:0 12px 35px rgba(15,23,42,.08);border:1px solid rgba(15,23,42,.08)}
+    .stat-card{border-radius:18px;padding:18px;background:linear-gradient(135deg,#111827,#7c3aed);color:white;box-shadow:0 12px 30px rgba(124,58,237,.22)}
+    .btn-soft{border-radius:12px;font-weight:700}
+    .table thead th{background:#f8fafc;font-size:13px;text-transform:uppercase}
+</style>
+
+<div class="page-wrap">
+    <div class="glass-card p-4">
+        <h3 class="fw-bold mb-3">{{ title }}</h3>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3">
+                {% for field in form %}
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}<small class="text-danger">{{ field.errors|striptags }}</small>{% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            <button class="btn btn-primary mt-4 btn-soft">Submit Question</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

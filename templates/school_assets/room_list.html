@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h4 class="fw-bold mb-0">🏫 Room List</h4>
+    <div class="d-flex gap-2">
+        <a href="{% url 'asset_dashboard' %}" class="btn btn-secondary">Dashboard</a>
+        {% if can_manage_assets %}<a href="{% url 'asset_room_add' %}" class="btn btn-primary">➕ Add Room</a>{% endif %}
+    </div>
+</div>
+
+<form method="get" class="card card-body mb-3">
+    <div class="row g-2">
+        <div class="col-md-5"><input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search room no/name/building"></div>
+        <div class="col-md-4">
+            <select name="room_type" class="form-select">
+                <option value="">All Room Type</option>
+                {% for k,v in room_type_choices %}
+                <option value="{{ k }}" {% if room_type == k %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3"><button class="btn btn-success w-100">Search</button></div>
+    </div>
+</form>
+
+<div class="table-responsive">
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-light">
+        <tr><th>Room No</th><th>Name</th><th>Type</th><th>Floor</th><th>Building</th><th>Capacity</th><th>Total Assets</th><th>Status</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+    {% for r in rooms %}
+    <tr>
+        <td class="fw-bold">{{ r.room_no }}</td>
+        <td>{{ r.room_name|default:"-" }}</td>
+        <td>{{ r.get_room_type_display }}</td>
+        <td>{{ r.floor|default:"-" }}</td>
+        <td>{{ r.building|default:"-" }}</td>
+        <td>{{ r.capacity }}</td>
+        <td class="fw-bold">{{ r.total_assets|default:0 }}</td>
+        <td>{% if r.is_active %}<span class="badge bg-success">Active</span>{% else %}<span class="badge bg-danger">Inactive</span>{% endif %}</td>
+        <td>
+            <a href="{% url 'asset_room_details' r.id %}" class="btn btn-sm btn-info">View</a>
+            {% if can_manage_assets %}
+            <a href="{% url 'asset_room_edit' r.id %}" class="btn btn-sm btn-warning">Edit</a>
+            <a href="{% url 'asset_room_delete' r.id %}" class="btn btn-sm btn-danger">Delete</a>
+            {% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="9" class="text-center text-muted">No room found.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

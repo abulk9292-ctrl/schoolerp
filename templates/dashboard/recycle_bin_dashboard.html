@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <h2 class="mb-4 text-danger fw-bold">
+        🗑 Universal Recycle Bin Dashboard
+    </h2>
+
+    <div class="row">
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow border-danger">
+
+                <div class="card-body text-center">
+
+                    <h1>{{ deleted_students }}</h1>
+
+                    <h5>Students</h5>
+
+                    <a href="/students/recycle-bin/"
+                       class="btn btn-danger btn-sm">
+
+                        Open
+
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow border-warning">
+
+                <div class="card-body text-center">
+
+                    <h1>{{ deleted_employees }}</h1>
+
+                    <h5>Employees</h5>
+
+                    <a href="/teachers/recycle-bin/"
+                       class="btn btn-warning btn-sm">
+
+                        Open
+
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow border-primary">
+
+                <div class="card-body text-center">
+
+                    <h1>{{ deleted_fees }}</h1>
+
+                    <h5>Fees</h5>
+
+                    <a href="/fees/recycle-bin/"
+                       class="btn btn-primary btn-sm">
+
+                        Open
+
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <div class="card shadow border-success">
+
+                <div class="card-body text-center">
+
+                    <h1>{{ deleted_salary }}</h1>
+
+                    <h5>Salary</h5>
+
+                    <a href="/payroll/salary/recycle-bin/"
+                       class="btn btn-success btn-sm">
+
+                        Open
+
+                    </a>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -9,7 +9,8 @@
 <div class="card card-box mb-4 no-print">
     <div class="card-body">
         <form method="get" class="row g-3">
-            <div class="col-md-4">
+
+            <div class="col-md-3">
                 <label class="form-label">Class</label>
                 <select name="class_id" class="form-select">
                     <option value="">All Classes</option>
@@ -21,7 +22,18 @@
                 </select>
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-2">
+                <label class="form-label">Section</label>
+                <select name="section" class="form-select">
+                    <option value="">All Sections</option>
+                    <option value="A" {% if selected_section == "A" %}selected{% endif %}>A</option>
+                    <option value="B" {% if selected_section == "B" %}selected{% endif %}>B</option>
+                    <option value="C" {% if selected_section == "C" %}selected{% endif %}>C</option>
+                    <option value="D" {% if selected_section == "D" %}selected{% endif %}>D</option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
                 <label class="form-label">Fees Month</label>
                 <select name="fees_month" class="form-select">
                     <option value="">All Months</option>
@@ -37,6 +49,7 @@
                 <button type="submit" class="btn btn-primary me-2">Filter</button>
                 <a href="/fees/defaulters/" class="btn btn-secondary">Reset</a>
             </div>
+
         </form>
     </div>
 </div>
@@ -48,6 +61,7 @@
             <h4>{{ total_students }}</h4>
         </div>
     </div>
+
     <div class="col-md-6">
         <div class="card card-box p-3 text-center">
             <h6>Total Due Amount</h6>
@@ -68,13 +82,16 @@
                 <th>Father</th>
                 <th>Guardian</th>
                 <th>Class</th>
+                <th>Section</th>
                 <th>Phone</th>
                 <th>Total Fee</th>
                 <th>Paid</th>
                 <th>Due</th>
                 <th class="no-print">Receipt</th>
+                <th class="no-print">Promise</th>
             </tr>
         </thead>
+
         <tbody>
             {% for item in defaulters %}
             <tr>
@@ -86,17 +103,23 @@
                 <td>{{ item.student.father_name }}</td>
                 <td>{{ item.student.guardian_name }}</td>
                 <td>{{ item.student.class_assigned }}</td>
+                <td>{{ item.section|default:item.student.section|default:"-" }}</td>
                 <td>{{ item.student.phone }}</td>
                 <td>{{ item.total_amount }}</td>
                 <td>{{ item.deposit_amount }}</td>
-                <td><span class="badge bg-danger">{{ item.due_balance }}</span></td>
-                <td class="no-print">
-                    <a href="/fees/receipt/{{ item.id }}/" class="btn btn-sm btn-info text-white">Receipt</a>
+                <td>
+                    <span class="badge bg-danger">{{ item.due_balance }}</span>
                 </td>
+                <td class="no-print">
+                    <a href="/fees/receipt/{{ item.id }}/" class="btn btn-sm btn-info text-white">
+                        Receipt
+                    </a>
+                </td>
+                <td class="no-print"><a href="{% url 'fee_followup_add_student' item.student.id %}" class="btn btn-sm btn-danger">Promise</a></td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="13" class="text-center">No defaulters found.</td>
+                <td colspan="14" class="text-center">No defaulters found.</td>
             </tr>
             {% endfor %}
         </tbody>

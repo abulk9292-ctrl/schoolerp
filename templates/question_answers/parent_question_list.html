@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .page-wrap{padding:18px}
+    .glass-card{background:#fff;border-radius:18px;box-shadow:0 12px 35px rgba(15,23,42,.08);border:1px solid rgba(15,23,42,.08)}
+    .stat-card{border-radius:18px;padding:18px;background:linear-gradient(135deg,#111827,#7c3aed);color:white;box-shadow:0 12px 30px rgba(124,58,237,.22)}
+    .btn-soft{border-radius:12px;font-weight:700}
+    .table thead th{background:#f8fafc;font-size:13px;text-transform:uppercase}
+</style>
+
+<div class="page-wrap">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="fw-bold">❓ Student Questions</h3>
+        <a href="{% url 'question_answers:question_ask' %}" class="btn btn-primary btn-soft"></a>
+    </div>
+    <div class="glass-card p-3 table-responsive">
+        <table class="table table-hover align-middle">
+            <thead><tr><th>Subject</th><th>Question</th><th>Status</th><th>Asked</th><th>Action</th></tr></thead>
+            <tbody>
+            {% for q in questions %}
+                <tr>
+                    <td>{{ q.subject|default:"-" }}</td>
+                    <td class="fw-bold">{{ q.title }}</td>
+                    <td><span class="badge bg-info">{{ q.status }}</span></td>
+                    <td>{{ q.asked_at|date:"d M Y" }}</td>
+                    <td><a href="{% url 'question_answers:question_detail' q.id %}" class="btn btn-sm btn-secondary">View</a></td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5" class="text-center text-muted">No question submitted.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

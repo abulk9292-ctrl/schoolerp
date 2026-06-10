@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+    .page-wrap{padding:18px}
+    .glass-card{background:#fff;border-radius:18px;box-shadow:0 12px 35px rgba(15,23,42,.08);border:1px solid rgba(15,23,42,.08)}
+    .stat-card{border-radius:18px;padding:18px;background:linear-gradient(135deg,#111827,#7c3aed);color:white;box-shadow:0 12px 30px rgba(124,58,237,.22)}
+    .btn-soft{border-radius:12px;font-weight:700}
+    .table thead th{background:#f8fafc;font-size:13px;text-transform:uppercase}
+</style>
+
+<div class="page-wrap">
+    <div class="glass-card p-4">
+        <h3 class="fw-bold">{{ question.title }}</h3>
+        <p class="text-muted">Student: <b>{{ question.student }}</b> | Status: <b>{{ question.status }}</b></p>
+        <hr>
+        <h5>Question</h5>
+        <p>{{ question.question_text }}</p>
+        {% if question.attachment %}<a href="{{ question.attachment.url }}" target="_blank" class="btn btn-outline-primary btn-sm">Question File</a>{% endif %}
+        <hr>
+        <h5>Answer</h5>
+        <p>{{ question.answer_text|default:"Not answered yet." }}</p>
+        {% if question.answer_file %}<a href="{{ question.answer_file.url }}" target="_blank" class="btn btn-outline-success btn-sm">Answer File</a>{% endif %}
+    </div>
+</div>
+{% endblock %}

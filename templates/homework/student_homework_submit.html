@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.submit-wrap{min-height:100vh;background:linear-gradient(135deg,#ecfeff,#eff6ff);padding:24px;border-radius:18px}
+.submit-hero{background:linear-gradient(135deg,#111827,#2563eb);color:white;border-radius:28px;padding:24px;box-shadow:0 18px 45px rgba(37,99,235,.25)}
+.submit-card{background:white;border-radius:24px;padding:24px;box-shadow:0 14px 35px rgba(15,23,42,.10);border:1px solid #e5e7eb}
+.info-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:18px;padding:16px}
+.form-control{border-radius:14px}
+label{font-weight:800}
+</style>
+
+<div class="submit-wrap">
+    <div class="submit-hero mb-4">
+        <h2 class="fw-bold mb-1">📝 Submit Homework</h2>
+        <div>{{ homework.title }} · {{ homework.subject }}</div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} rounded-4 fw-bold">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="submit-card">
+                <h4 class="fw-bold mb-3">📚 Homework Details</h4>
+                <div class="info-box mb-2"><b>Title:</b> {{ homework.title }}</div>
+                <div class="info-box mb-2"><b>Class:</b> {{ homework.school_class|default:"-" }}</div>
+                <div class="info-box mb-2"><b>Subject:</b> {{ homework.subject }}</div>
+                <div class="info-box mb-2"><b>Due Date:</b> {{ homework.due_date|default:"-" }}</div>
+                <div class="info-box"><b>Description:</b><br>{{ homework.description }}</div>
+                {% if homework.attachment %}
+                    <a href="{{ homework.attachment.url }}" target="_blank" class="btn btn-info fw-bold rounded-pill mt-3">📎 View Attachment</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="submit-card">
+                <h4 class="fw-bold mb-3">✍️ Your Answer</h4>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Answer Text</label>
+                        {{ form.answer_text }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Upload File / Image / PDF</label>
+                        {{ form.submitted_file }}
+                    </div>
+
+                    <button class="btn btn-primary fw-bold rounded-pill px-4">✅ Submit Homework</button>
+                    <a href="{% url 'student_homework_list' %}" class="btn btn-secondary fw-bold rounded-pill px-4">Back</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

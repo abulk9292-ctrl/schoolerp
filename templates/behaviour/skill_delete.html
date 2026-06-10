@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.delete-card{
+    max-width:760px;
+    margin:auto;
+    border:none;
+    border-radius:28px;
+    overflow:hidden;
+    box-shadow:0 18px 45px rgba(0,0,0,.12);
+}
+.delete-head{
+    background:linear-gradient(135deg,#dc2626,#7f1d1d);
+    color:white;
+    padding:28px;
+    text-align:center;
+}
+.delete-body{
+    background:white;
+    padding:35px;
+}
+.info-box{
+    background:#f8fafc;
+    border:1px solid #e5e7eb;
+    border-radius:20px;
+    padding:20px;
+}
+.info-title{
+    font-weight:900;
+    color:#0f172a;
+    margin-bottom:4px;
+}
+.grade-pill{
+    display:inline-block;
+    padding:7px 14px;
+    border-radius:30px;
+    background:#dbeafe;
+    color:#1d4ed8;
+    font-size:12px;
+    font-weight:900;
+}
+</style>
+
+<div class="card delete-card mt-4">
+
+    <div class="delete-head">
+
+        <h2 class="fw-bold mb-2">
+            🗑 Delete Skill Evaluation
+        </h2>
+
+        <div>
+            This evaluation record will be permanently deleted
+        </div>
+
+    </div>
+
+    <div class="delete-body">
+
+        <div class="info-box mb-4">
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+
+                    <div class="info-title">
+                        Student
+                    </div>
+
+                    <div>
+                        {{ evaluation.student.student_name }}
+                    </div>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <div class="info-title">
+                        Month
+                    </div>
+
+                    <div>
+                        {{ evaluation.month }}
+                    </div>
+
+                </div>
+
+                <div class="col-md-3">
+
+                    <div class="info-title">
+                        Year
+                    </div>
+
+                    <div>
+                        {{ evaluation.year }}
+                    </div>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="info-title">
+                        Discipline
+                    </div>
+
+                    <span class="grade-pill">
+                        {{ evaluation.discipline }}
+                    </span>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="info-title">
+                        Communication
+                    </div>
+
+                    <span class="grade-pill">
+                        {{ evaluation.communication }}
+                    </span>
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <div class="info-title">
+                        Leadership
+                    </div>
+
+                    <span class="grade-pill">
+                        {{ evaluation.leadership }}
+                    </span>
+
+                </div>
+
+                <div class="col-md-12">
+
+                    <div class="info-title">
+                        Teacher Remarks
+                    </div>
+
+                    <div>
+                        {{ evaluation.teacher_remarks|default:"No remarks" }}
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <form method="POST">
+
+            {% csrf_token %}
+
+            <div class="d-flex gap-3 flex-wrap justify-content-center">
+
+                <button type="submit"
+                        class="btn btn-danger px-5 py-2 fw-bold">
+
+                    🗑 Confirm Delete
+
+                </button>
+
+                <a href="{% url 'skill_evaluation_list' %}"
+                   class="btn btn-secondary px-5 py-2 fw-bold">
+
+                    ← Cancel
+
+                </a>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

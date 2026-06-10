@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h4 class="fw-bold">🛠 Maintenance / Repair List</h4>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'asset_maintenance_print_report' %}{% if status %}?status={{ status }}{% endif %}" class="btn btn-success">🖨 Print</a>
+        {% if can_manage_assets %}<a href="{% url 'asset_maintenance_add' %}" class="btn btn-primary">➕ Add Maintenance</a>{% endif %}
+    </div>
+</div>
+
+<div class="row g-2 mb-3">
+    <div class="col-md-3 col-6"><a href="{% url 'asset_maintenance_list' %}?status=PENDING" class="btn btn-outline-danger w-100">🛠 Pending Repair</a></div>
+    <div class="col-md-3 col-6"><a href="{% url 'asset_maintenance_list' %}?status=UNDER_REPAIR" class="btn btn-outline-warning w-100">⏳ Under Repair</a></div>
+    <div class="col-md-3 col-6"><a href="{% url 'asset_maintenance_list' %}?status=COMPLETED" class="btn btn-outline-success w-100">✔ Completed</a></div>
+    <div class="col-md-3 col-6"><a href="{% url 'asset_maintenance_list' %}" class="btn btn-outline-primary w-100">📋 All</a></div>
+</div>
+
+<form method="get" class="card card-body mb-3">
+    <div class="row g-2">
+        <div class="col-md-4">
+            <select name="status" class="form-select">
+                <option value="">All Status</option>
+                {% for k,v in status_choices %}
+                <option value="{{ k }}" {% if status == k %}selected{% endif %}>{{ v }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2"><button class="btn btn-success w-100">Filter</button></div>
+    </div>
+</form>
+
+<div class="table-responsive">
+<table class="table table-bordered align-middle">
+    <thead class="table-light"><tr><th>Date</th><th>Room</th><th>Asset</th><th>Issue</th><th>Priority</th><th>Status</th><th>Assigned To</th><th>Completed</th><th>Cost</th><th>Action</th></tr></thead>
+    <tbody>
+    {% for r in records %}
+    <tr>
+        <td>{{ r.reported_date }}</td>
+        <td>{{ r.asset.room.room_no|default:"-" }}</td>
+        <td>{{ r.asset.item_name }}</td>
+        <td>{{ r.issue_title }}</td>
+        <td>{{ r.get_priority_display }}</td>
+        <td>
+            {% if r.status == "COMPLETED" %}<span class="badge bg-success">{{ r.get_status_display }}</span>
+            {% elif r.status == "UNDER_REPAIR" %}<span class="badge bg-warning text-dark">{{ r.get_status_display }}</span>
+            {% elif r.status == "PENDING" %}<span class="badge bg-danger">{{ r.get_status_display }}</span>
+            {% else %}<span class="badge bg-secondary">{{ r.get_status_display }}</span>{% endif %}
+        </td>
+        <td>{{ r.assigned_to|default:r.vendor_or_mechanic|default:"-" }}</td>
+        <td>{{ r.completed_date|default:"-" }}</td>
+        <td>₹{{ r.repair_cost }}</td>
+        <td>
+            {% if can_manage_assets %}
+            <a href="{% url 'asset_maintenance_edit' r.id %}" class="btn btn-sm btn-warning">Edit</a>
+            <a href="{% url 'asset_maintenance_delete' r.id %}" class="btn btn-sm btn-danger">Delete</a>
+            {% endif %}
+        </td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="10" class="text-center text-muted">No maintenance record.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

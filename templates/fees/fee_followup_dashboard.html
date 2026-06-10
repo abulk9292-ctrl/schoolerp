@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.follow-card{border:0;border-radius:18px;color:#fff;box-shadow:0 10px 25px rgba(0,0,0,.15)}
+.f1{background:linear-gradient(135deg,#0d6efd,#003b8e)}
+.f2{background:linear-gradient(135deg,#dc3545,#7a0612)}
+.f3{background:linear-gradient(135deg,#198754,#064d2b)}
+.f4{background:linear-gradient(135deg,#6f42c1,#2b0b63)}
+.amount{font-size:26px;font-weight:900}
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0">Fee Follow-up Dashboard</h2>
+        <small class="text-muted">Today call / home visit / overdue promise tracking</small>
+    </div>
+    <div>
+        <a href="{% url 'fee_followup_add' %}" class="btn btn-success">+ Add Promise</a>
+        <a href="{% url 'fee_followup_list' %}" class="btn btn-primary">All Follow-ups</a>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card follow-card f1 p-3"><h6>Today Follow-up</h6><div class="amount">{{ cards.today_count }}</div><small>₹{{ cards.today_amount }}</small></div></div>
+    <div class="col-md-3"><div class="card follow-card f2 p-3"><h6>Overdue Promise</h6><div class="amount">{{ cards.overdue_count }}</div><small>₹{{ cards.overdue_amount }}</small></div></div>
+    <div class="col-md-3"><div class="card follow-card f3 p-3"><h6>Call Today</h6><div class="amount">{{ cards.call_count }}</div><small>Call parents now</small></div></div>
+    <div class="col-md-3"><div class="card follow-card f4 p-3"><h6>Home Visit Today</h6><div class="amount">{{ cards.visit_count }}</div><small>Visit guardian home</small></div></div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card card-box mb-4">
+            <div class="card-header fw-bold bg-danger text-white">Overdue Follow-ups</div>
+            <div class="card-body p-0">
+                <table class="table table-bordered mb-0">
+                    <tr><th>Student</th><th>Mobile</th><th>Promise</th><th>Action</th></tr>
+                    {% for item in overdue_followups %}
+                    <tr>
+                        <td>{{ item.student.student_name }}<br><small>{{ item.student.student_id }}</small></td>
+                        <td>{{ item.mobile }}</td>
+                        <td>{{ item.promise_date }}<br>₹{{ item.promise_amount }}</td>
+                        <td><a href="{% url 'fee_followup_edit' item.id %}" class="btn btn-sm btn-warning">Update</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center">No overdue follow-up.</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card card-box mb-4">
+            <div class="card-header fw-bold bg-primary text-white">Today Follow-ups</div>
+            <div class="card-body p-0">
+                <table class="table table-bordered mb-0">
+                    <tr><th>Student</th><th>Mobile</th><th>Type</th><th>Action</th></tr>
+                    {% for item in today_followups %}
+                    <tr>
+                        <td>{{ item.student.student_name }}<br><small>{{ item.student.student_id }}</small></td>
+                        <td>{{ item.mobile }}</td>
+                        <td>{{ item.get_followup_type_display }}<br>₹{{ item.promise_amount }}</td>
+                        <td><a href="{% url 'fee_followup_edit' item.id %}" class="btn btn-sm btn-warning">Update</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4" class="text-center">No follow-up today.</td></tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

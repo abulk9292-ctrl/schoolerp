@@ -55,6 +55,13 @@ INSTALLED_APPS = [
     'website',
     'homework',
     'notices',
+    'certificates',
+    'behaviour',
+    'live_classes',
+    'question_answers',
+    'timetable',
+    'online_store',
+    'school_assets',
 ]
 
 MIDDLEWARE = [
@@ -90,6 +97,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.global_session',
             ],
         },
     },
@@ -151,9 +159,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/admin-login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
-LOGOUT_REDIRECT_URL = '/login/'
+LOGOUT_REDIRECT_URL = '/admin-login/'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

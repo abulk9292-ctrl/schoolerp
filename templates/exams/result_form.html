@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load exam_extras %}
 {% block content %}
 
 <div class="container mt-4">
 
-    <div class="card shadow-lg border-0">
+    <div class="card shadow-lg border-0 rounded-4">
         <div class="card-body p-4">
 
             <h3 class="fw-bold mb-4 text-primary">
@@ -18,18 +19,11 @@
                 {% endfor %}
             {% endif %}
 
-            {% if form.errors %}
-                <div class="alert alert-danger">
-                    ⚠️ Please fix the errors below.
-                    {{ form.errors }}
-                </div>
-            {% endif %}
-
-            <!-- ✅ CLASS FILTER -->
             <form method="get" class="row g-3 mb-4">
-                <div class="col-md-6">
+
+                <div class="col-md-4">
                     <label class="form-label fw-bold">Select Class</label>
-                    <select name="class" class="form-select" onchange="this.form.submit()">
+                    <select name="class" class="form-select" onchange="this.form.submit()" required>
                         <option value="">Select Class</option>
                         {% for c in classes %}
                             <option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>
@@ -38,65 +32,142 @@
                         {% endfor %}
                     </select>
                 </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Select Student</label>
+                    <select name="student" class="form-select" onchange="this.form.submit()" required>
+                        <option value="">Select Student</option>
+                        {% for s in students %}
+                            <option value="{{ s.id }}" {% if selected_student_id|stringformat:"s" == s.id|stringformat:"s" %}selected{% endif %}>
+                                {{ s.student_name }} ({{ s.student_id }}) | Roll: {{ s.roll_no|default:"-" }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Select Exam</label>
+                    <select name="exam" class="form-select" onchange="this.form.submit()" required>
+                        <option value="">Select Exam</option>
+                        {% for e in exams %}
+                            <option value="{{ e.id }}" {% if selected_exam_id|stringformat:"s" == e.id|stringformat:"s" %}selected{% endif %}>
+                                {{ e.name }} {{ e.academic_session }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
             </form>
+
+            {% if selected_class and selected_student and selected_exam %}
+
+            <div class="alert alert-info">
+                <b>Class:</b> {{ selected_class }}
+                |
+                <b>Student:</b> {{ selected_student.student_name }}
+                |
+                <b>Exam:</b> {{ selected_exam.name }}
+            </div>
 
             <form method="post">
                 {% csrf_token %}
 
                 <input type="hidden" name="class" value="{{ selected_class }}">
+                <input type="hidden" name="student" value="{{ selected_student.id }}">
+                <input type="hidden" name="exam" value="{{ selected_exam.id }}">
 
-                <div class="row g-3">
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle text-center">
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Student</label>
-                        {{ form.student }}
-                    </div>
+                        <thead class="table-dark">
+                            <tr>
+                                <th width="5%">#</th>
+                                <th class="text-start">Subject</th>
+                                <th width="18%">Written</th>
+                                <th width="18%">Oral</th>
+                                <th width="18%">Max Marks</th>
+                                <th width="12%">Absent</th>
+                            </tr>
+                        </thead>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Exam</label>
-                        {{ form.exam }}
-                    </div>
+                        <tbody>
+                            {% for cs in subjects %}
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Subject</label>
-                        {{ form.subject }}
-                    </div>
+                                {% with subject_name=cs.subject.subject_name %}
+                                {% with old=saved_marks|get_item:subject_name %}
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Max Marks</label>
-                        {{ form.max_marks }}
-                    </div>
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Written Marks</label>
-                        {{ form.written_marks }}
-                    </div>
+                                    <td class="text-start fw-bold">
+                                        {{ subject_name }}
+                                    </td>
 
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold">Oral Marks</label>
-                        {{ form.oral_marks }}
-                    </div>
+                                    <td>
+                                        <input type="number"
+                                               name="written_{{ cs.subject.id }}"
+                                               class="form-control"
+                                               min="0"
+                                               value="{% if old %}{{ old.written_marks }}{% else %}0{% endif %}">
+                                    </td>
 
-                    <div class="col-md-12">
-                        <label class="form-label fw-bold">Remarks</label>
-                        {{ form.remarks }}
-                    </div>
+                                    <td>
+                                        <input type="number"
+                                               name="oral_{{ cs.subject.id }}"
+                                               class="form-control"
+                                               min="0"
+                                               value="{% if old %}{{ old.oral_marks }}{% else %}0{% endif %}">
+                                    </td>
 
+                                    <td>
+                                        <input type="number"
+                                               name="max_{{ cs.subject.id }}"
+                                               class="form-control"
+                                               min="1"
+                                               value="{% if old %}{{ old.max_marks }}{% else %}{{ cs.full_marks|default:100 }}{% endif %}">
+                                    </td>
+
+                                    <td>
+                                        <input type="checkbox"
+                                               name="absent_{{ cs.subject.id }}"
+                                               {% if old and old.remarks == "Absent" %}checked{% endif %}>
+                                    </td>
+                                </tr>
+
+                                {% endwith %}
+                                {% endwith %}
+
+                            {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-danger fw-bold py-4">
+                                        No subjects assigned for this class.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+
+                    </table>
                 </div>
 
-                <hr class="my-4">
-
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-success px-4">
-                        💾 Save Marks
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-success px-4 fw-bold">
+                        💾 Save All Marks
                     </button>
 
-                    <a href="{% url 'result_list' %}" class="btn btn-secondary px-4">
-                        ⬅ Back
+                    <a href="{% url 'exam_dashboard' %}" class="btn btn-secondary px-4">
+                        ← Back
                     </a>
                 </div>
 
             </form>
+
+            {% else %}
+
+                <div class="alert alert-warning">
+                    First select Class, Student and Exam.
+                </div>
+
+            {% endif %}
 
         </div>
     </div>

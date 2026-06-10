@@ -113,7 +113,7 @@
                         <td>{{ item.student.roll_no|default:"-" }}</td>
 
                         <td class="fw-semibold">
-                            {{ item.student.name|default:item.student.student_name|default:item.student }}
+                            {{ item.student.student_name|default:item.student }}
                         </td>
 
                         <td>
@@ -204,7 +204,7 @@
                                             <label class="form-label fw-bold">Student</label>
                                             <input type="text"
                                                    class="form-control"
-                                                   value="{{ item.student.name|default:item.student.student_name|default:item.student }}"
+                                                   value="{{ item.student.student_name|default:item.student }}"
                                                    readonly>
                                         </div>
 

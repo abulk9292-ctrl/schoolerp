@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold">📋 Unit Test Subject-wise Results</h2>
+            <p class="text-muted mb-0">All saved subject marks and performance</p>
+        </div>
+
+        <a href="{% url 'add_class_test_result' %}" class="btn btn-success rounded-pill px-4">
+            + Add Result
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-lg rounded-4">
+        <div class="card-header bg-dark text-white py-3 rounded-top-4">
+            <h5 class="mb-0">Saved Results</h5>
+        </div>
+
+        <div class="card-body table-responsive">
+            <table class="table table-bordered table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Unit Test</th>
+                        <th>Class</th>
+                        <th>Section</th>
+                        <th>Student</th>
+                        <th>Subject</th>
+                        <th>Marks</th>
+                        <th>%</th>
+                        <th>Performance</th>
+                        <th>Remarks</th>
+                        <th width="170">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for r in results %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ r.class_test.test_name }}</td>
+                        <td>{{ r.class_test.class_name }}</td>
+                        <td>{{ r.class_test.section }}</td>
+                        <td class="fw-semibold">{{ r.student.student_name }}</td>
+                        <td>{{ r.subject }}</td>
+                        <td>{{ r.marks }}/{{ r.total_marks }}</td>
+                        <td>{{ r.percentage }}%</td>
+
+                        <td>
+                            {% if r.performance == "Excellent" %}
+                                <span class="badge bg-primary px-3 py-2">Excellent</span>
+                            {% elif r.performance == "Best" %}
+                                <span class="badge bg-success px-3 py-2">Best</span>
+                            {% elif r.performance == "Better" %}
+                                <span class="badge bg-info px-3 py-2">Better</span>
+                            {% elif r.performance == "Average" %}
+                                <span class="badge bg-warning text-dark px-3 py-2">Average</span>
+                            {% else %}
+                                <span class="badge bg-danger px-3 py-2">Low</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ r.remarks|default:"-" }}</td>
+
+                        <td>
+                            <a href="{% url 'edit_class_test_result' r.id %}"
+                               class="btn btn-warning btn-sm rounded-pill">
+                                Edit
+                            </a>
+
+                            <a href="{% url 'delete_class_test_result' r.id %}"
+                               class="btn btn-danger btn-sm rounded-pill">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+                    <tr>
+                        <td colspan="11" class="text-center text-muted py-5">
+                            No Result Found
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

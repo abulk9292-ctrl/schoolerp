@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.hw-page{background:linear-gradient(135deg,#eef6ff,#f8fafc);min-height:100vh;padding:22px;border-radius:18px}
+.hw-hero{background:linear-gradient(135deg,#0f172a,#2563eb,#06b6d4);color:white;border-radius:28px;padding:24px;box-shadow:0 18px 45px rgba(37,99,235,.25)}
+.hw-card{background:white;border:1px solid #e5e7eb;border-radius:24px;box-shadow:0 12px 30px rgba(15,23,42,.08);overflow:hidden}
+.hw-title{font-weight:900;color:#0f172a}
+.hw-badge{border-radius:999px;padding:7px 13px;font-weight:800}
+.hw-table th{background:#0f172a!important;color:white!important;font-size:12px;text-transform:uppercase}
+.hw-table td{vertical-align:middle}
+.hw-action{border-radius:12px;font-weight:800}
+.hw-empty{padding:35px;text-align:center;color:#64748b;font-weight:700}
+</style>
+
+<div class="hw-page">
+    <div class="hw-hero mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2 class="mb-1 fw-bold">📚 My Homework</h2>
+                <div>AL RAHMAN MISSION · Student Portal</div>
+            </div>
+            <a href="{% url 'student_dashboard' %}" class="btn btn-light fw-bold rounded-pill">🏠 Dashboard</a>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} rounded-4 fw-bold">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="hw-card">
+        <div class="table-responsive">
+            <table class="table table-hover hw-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Homework</th>
+                        <th>Subject</th>
+                        <th>Given By</th>
+                        <th>Assigned</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Attachment</th>
+                        <th width="170">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for h in homeworks %}
+                    <tr>
+                        <td>
+                            <div class="hw-title">{{ h.title }}</div>
+                            <small class="text-muted">{{ h.description|truncatechars:70 }}</small>
+                        </td>
+                        <td><span class="badge bg-primary hw-badge">{{ h.subject }}</span></td>
+                        <td>{{ h.given_by|default:"-" }}</td>
+                        <td>{{ h.assigned_date|default:"-" }}</td>
+                        <td>{{ h.due_date|default:"-" }}</td>
+                        <td>
+                            {% if h.id in submitted_map %}
+                                <span class="badge bg-success hw-badge">Submitted</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark hw-badge">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if h.attachment %}
+                                <a href="{{ h.attachment.url }}" target="_blank" class="btn btn-info btn-sm hw-action">View</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if h.id in submitted_map %}
+                                <button class="btn btn-success btn-sm hw-action" disabled>Done</button>
+                            {% else %}
+                                <a href="{% url 'student_homework_submit' h.id %}" class="btn btn-primary btn-sm hw-action">Submit Now</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="8" class="hw-empty">No homework found for your class.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

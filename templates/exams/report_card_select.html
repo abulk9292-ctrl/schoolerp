@@ -6,19 +6,45 @@
     <div class="card shadow-lg border-0 rounded-4">
         <div class="card-body p-4">
 
-            <h3 class="fw-bold text-primary mb-3">
+            <h3 class="fw-bold text-primary mb-2">
                 🧾 Generate Report Card
             </h3>
 
-            <p class="text-muted">
-                Select student and exam to generate report card
+            <p class="text-muted mb-4">
+                Select class, section, student and exam to generate report card.
             </p>
 
             <form method="get">
 
                 <div class="row g-3">
 
-                    <div class="col-md-6">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Class</label>
+
+                        <select name="class" class="form-select" onchange="this.form.submit()">
+                            <option value="">All Classes</option>
+
+                            {% for c in classes %}
+                                <option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>
+                                    {{ c }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Section</label>
+
+                        <select name="section" class="form-select" onchange="this.form.submit()">
+                            <option value="">All</option>
+                            <option value="A" {% if selected_section == "A" %}selected{% endif %}>A</option>
+                            <option value="B" {% if selected_section == "B" %}selected{% endif %}>B</option>
+                            <option value="C" {% if selected_section == "C" %}selected{% endif %}>C</option>
+                            <option value="D" {% if selected_section == "D" %}selected{% endif %}>D</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
                         <label class="form-label fw-bold">Student</label>
 
                         <select name="student_id" class="form-select" required>
@@ -45,6 +71,8 @@
                                         Class: {{ selected_class|default:"-" }}
                                     {% endif %}
 
+                                    | Sec: {{ s.section|default:"-" }}
+                                    | Roll: {{ s.roll_no|default:"-" }}
                                     | ID: {{ s.student_id|default:s.id }}
 
                                 </option>
@@ -52,7 +80,7 @@
                         </select>
                     </div>
 
-                    <div class="col-md-6">
+                    <div class="col-md-3">
                         <label class="form-label fw-bold">Exam</label>
 
                         <select name="exam_id" class="form-select" required>
@@ -73,6 +101,10 @@
                     <button class="btn btn-success px-4">
                         📄 Generate Report Card
                     </button>
+
+                    <a href="{% url 'report_card_select' %}" class="btn btn-outline-secondary px-4">
+                        🔄 Reset
+                    </a>
 
                     <a href="{% url 'result_list' %}" class="btn btn-secondary px-4">
                         ⬅ Back

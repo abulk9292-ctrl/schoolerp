@@ -10,12 +10,12 @@ from .forms import ExpenseForm
 
 @login_required
 def expense_list(request):
-    expenses = Expense.objects.all().order_by('-date')
+    expenses = Expense.objects.filter(is_deleted=False).order_by('-date')
 
     total_expense = expenses.aggregate(total=Sum('amount'))['total'] or Decimal('0')
 
     # 🔥 Income from Fees
-    FeeModel = apps.get_model('fees', 'Fee')
+    FeeModel = apps.get_model('fees', 'FeeCollection')
     total_income = FeeModel.objects.aggregate(
         total=Sum('deposit_amount')
     )['total'] or Decimal('0')
@@ -63,8 +63,76 @@ def expense_edit(request, pk):
 
 
 # ✅ DELETE
+from django.utils import timezone
+
 @login_required
 def expense_delete(request, pk):
-    expense = get_object_or_404(Expense, pk=pk)
-    expense.delete()
+
+    expense = get_object_or_404(
+        Expense,
+        pk=pk
+    )
+
+    expense.is_deleted = True
+    expense.deleted_at = timezone.now()
+    expense.deleted_by = request.user
+    expense.save()
+
     return redirect('expense_list')
+
+@login_required
+def expense_recycle_bin(request):
+
+    expenses = Expense.objects.filter(
+        is_deleted=True
+    ).order_by(
+        '-deleted_at'
+    )
+
+    return render(
+        request,
+        'expenses/expense_recycle_bin.html',
+        {
+            'expenses': expenses
+        }
+    )
+
+
+@login_required
+def expense_restore(request, pk):
+
+    expense = get_object_or_404(
+        Expense,
+        pk=pk,
+        is_deleted=True
+    )
+
+    expense.is_deleted = False
+    expense.deleted_at = None
+    expense.deleted_by = None
+    expense.save()
+
+    return redirect(
+        'expense_recycle_bin'
+    )
+
+
+@login_required
+def expense_permanent_delete(request, pk):
+
+    if not request.user.is_superuser:
+        return redirect(
+            'expense_recycle_bin'
+        )
+
+    expense = get_object_or_404(
+        Expense,
+        pk=pk,
+        is_deleted=True
+    )
+
+    expense.delete()
+
+    return redirect(
+        'expense_recycle_bin'
+    )

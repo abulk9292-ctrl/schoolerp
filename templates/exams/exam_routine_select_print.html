@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+@page{
+    size:A4 portrait;
+    margin:10mm;
+}
+
+.print-box{
+    background:white;
+    padding:22px;
+    border-radius:14px;
+}
+
+.school-name{
+    text-align:center;
+    font-size:28px;
+    font-weight:900;
+    color:#0f2f66;
+}
+
+.title{
+    text-align:center;
+    font-size:18px;
+    font-weight:800;
+    margin-bottom:15px;
+}
+
+.table th{
+    background:#0f2f66!important;
+    color:white!important;
+    text-align:center;
+}
+
+.table td{
+    text-align:center;
+    vertical-align:middle;
+    font-weight:600;
+}
+
+@media print{
+    body *{
+        visibility:hidden;
+    }
+
+    .print-box, .print-box *{
+        visibility:visible;
+    }
+
+    .print-box{
+        position:absolute;
+        top:0;
+        left:0;
+        width:100%;
+        box-shadow:none!important;
+        border:none!important;
+    }
+
+    .no-print{
+        display:none!important;
+    }
+}
+</style>
+
+<div class="container-fluid mt-3">
+
+    <div class="card shadow-sm no-print mb-3">
+        <div class="card-body">
+            <form method="get" class="row g-3 align-items-end">
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Select Exam</label>
+                    <select name="exam" class="form-select" required>
+                        <option value="">-- Select Exam --</option>
+                        {% for exam in exams %}
+                            <option value="{{ exam.id }}" {% if selected_exam_id|stringformat:"s" == exam.id|stringformat:"s" %}selected{% endif %}>
+                                {{ exam.name }} - {{ exam.academic_session }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Select Class</label>
+                    <select name="class" class="form-select" required>
+                        <option value="">-- Select Class --</option>
+                        {% for cls in classes %}
+                            <option value="{{ cls }}" {% if selected_class == cls %}selected{% endif %}>
+                                {{ cls }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Section</label>
+                    <select name="section" class="form-select">
+                        <option value="">All Sections</option>
+                        <option value="A" {% if selected_section == "A" %}selected{% endif %}>A</option>
+                        <option value="B" {% if selected_section == "B" %}selected{% endif %}>B</option>
+                        <option value="C" {% if selected_section == "C" %}selected{% endif %}>C</option>
+                        <option value="D" {% if selected_section == "D" %}selected{% endif %}>D</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100">
+                        Show
+                    </button>
+                </div>
+
+                {% if selected_exam and selected_class %}
+                <div class="col-md-2">
+                    <button type="button" onclick="window.print()" class="btn btn-success w-100">
+                        Print
+                    </button>
+                </div>
+                {% endif %}
+
+            </form>
+        </div>
+    </div>
+
+    {% if selected_exam and selected_class %}
+    <div class="print-box shadow-sm">
+
+        <div class="school-name">AL RAHMAN MISSION</div>
+
+        <div class="title">
+            Exam Routine <br>
+            {{ selected_exam.name }} | Session: {{ selected_exam.academic_session }} <br>
+            Class: {{ selected_class }}
+            {% if selected_section %}
+                | Section: {{ selected_section }}
+            {% else %}
+                | Section: All
+            {% endif %}
+        </div>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Sl</th>
+                    <th>Date</th>
+                    <th>Class</th>
+                    <th>Section</th>
+                    <th>Subject</th>
+                    <th>Time</th>
+                    <th>Total Marks</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for routine in routines %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>{{ routine.date|date:"d-m-Y" }}</td>
+                    <td>{{ routine.school_class }}</td>
+                    <td>{{ routine.section|default:"-" }}</td>
+                    <td>{{ routine.subject }}</td>
+                    <td>{{ routine.start_time|time:"h:i A" }} - {{ routine.end_time|time:"h:i A" }}</td>
+                    <td>{{ routine.total_marks }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-danger fw-bold">
+                        No exam routine found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

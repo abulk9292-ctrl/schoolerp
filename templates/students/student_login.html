@@ -1,143 +1,326 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Student Login - AL RAHMAN MISSION</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Student Login | AL RAHMAN MISSION ERP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+*{box-sizing:border-box}
 
-    <style>
-        body {
-            min-height: 100vh;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #001f4d, #0d6efd, #16a085);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Segoe UI',Arial,sans-serif;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#87ceeb;
+}
 
-        .bg-circle {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.18);
-            animation: float 7s infinite ease-in-out;
-        }
+.sky-slider{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    overflow:hidden;
+    background:
+        linear-gradient(135deg,rgba(125,211,252,.88),rgba(14,165,233,.72),rgba(34,197,94,.48)),
+        url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2200&q=90");
+    background-size:cover;
+    background-position:center;
+}
 
-        .c1 { width: 180px; height: 180px; top: 8%; left: 8%; }
-        .c2 { width: 120px; height: 120px; bottom: 12%; right: 10%; animation-delay: 1.5s; }
-        .c3 { width: 90px; height: 90px; top: 18%; right: 20%; animation-delay: 2.5s; }
+.sky-slide{
+    position:absolute;
+    inset:0;
+    background-size:cover;
+    background-position:center;
+    opacity:0;
+    animation:skyFade 32s infinite;
+}
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-25px); }
-        }
+.sky-slide.s1{
+    background:
+        linear-gradient(rgba(125,211,252,.18),rgba(14,165,233,.30)),
+        url("https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2200&q=90");
+    animation-delay:0s;
+}
+.sky-slide.s2{
+    background:
+        linear-gradient(rgba(255,255,255,.08),rgba(34,197,94,.26)),
+        url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2200&q=90");
+    animation-delay:8s;
+}
+.sky-slide.s3{
+    background:
+        linear-gradient(rgba(186,230,253,.12),rgba(59,130,246,.30)),
+        url("https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2200&q=90");
+    animation-delay:16s;
+}
+.sky-slide.s4{
+    background:
+        linear-gradient(rgba(240,249,255,.15),rgba(20,184,166,.30)),
+        url("https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=2200&q=90");
+    animation-delay:24s;
+}
 
-        .login-card {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            max-width: 430px;
-            background: rgba(255,255,255,0.18);
-            backdrop-filter: blur(18px);
-            border: 1px solid rgba(255,255,255,0.35);
-            border-radius: 28px;
-            padding: 38px;
-            box-shadow: 0 25px 70px rgba(0,0,0,0.35);
-            color: white;
-        }
+.sky-slider::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(circle at 18% 18%,rgba(255,255,255,.70),transparent 18%),
+        radial-gradient(circle at 72% 24%,rgba(255,255,255,.45),transparent 21%),
+        linear-gradient(135deg,rgba(2,132,199,.25),rgba(14,165,233,.18),rgba(22,163,74,.20));
+    z-index:2;
+}
 
-        .logo-box {
-            width: 88px;
-            height: 88px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.95);
-            color: #0d6efd;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 42px;
-            margin: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-        }
+@keyframes skyFade{
+    0%{opacity:0;transform:scale(1)}
+    9%{opacity:1}
+    31%{opacity:1}
+    43%{opacity:0;transform:scale(1.08)}
+    100%{opacity:0}
+}
 
-        .form-control {
-            border-radius: 15px;
-            padding: 13px;
-            border: none;
-        }
+.cloud{
+    position:fixed;
+    z-index:2;
+    width:260px;
+    height:80px;
+    border-radius:50px;
+    background:rgba(255,255,255,.38);
+    filter:blur(1px);
+    animation:cloudMove linear infinite;
+}
+.cloud:before,.cloud:after{
+    content:"";
+    position:absolute;
+    background:rgba(255,255,255,.40);
+    border-radius:50%;
+}
+.cloud:before{width:110px;height:110px;left:35px;top:-55px}
+.cloud:after{width:140px;height:140px;right:30px;top:-75px}
+.cloud.c1{top:16%;left:-280px;animation-duration:42s}
+.cloud.c2{top:67%;left:-320px;animation-duration:58s;animation-delay:10s;transform:scale(.8)}
+.cloud.c3{top:35%;left:-260px;animation-duration:50s;animation-delay:20s;transform:scale(.65)}
+@keyframes cloudMove{
+    from{margin-left:-320px}
+    to{margin-left:140vw}
+}
 
-        label {
-            font-weight: 700;
-        }
+.bubble{
+    position:fixed;
+    bottom:-120px;
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    background:rgba(255,255,255,.24);
+    border:1px solid rgba(255,255,255,.48);
+    box-shadow:inset 0 0 18px rgba(255,255,255,.35),0 8px 30px rgba(255,255,255,.20);
+    animation:riseBubble linear infinite;
+    z-index:3;
+}
+.b1{left:7%;animation-duration:13s;width:28px;height:28px}
+.b2{left:18%;animation-duration:18s;animation-delay:2s;width:46px;height:46px}
+.b3{left:34%;animation-duration:15s;animation-delay:4s;width:22px;height:22px}
+.b4{left:52%;animation-duration:21s;animation-delay:1s;width:54px;height:54px}
+.b5{left:68%;animation-duration:16s;animation-delay:5s;width:32px;height:32px}
+.b6{left:82%;animation-duration:19s;animation-delay:3s;width:42px;height:42px}
+.b7{left:92%;animation-duration:14s;animation-delay:6s;width:25px;height:25px}
+@keyframes riseBubble{
+    0%{transform:translateY(0) translateX(0) scale(.8);opacity:0}
+    12%{opacity:1}
+    50%{transform:translateY(-52vh) translateX(30px) scale(1)}
+    100%{transform:translateY(-112vh) translateX(-35px) scale(1.2);opacity:0}
+}
 
-        .btn-login {
-            border-radius: 15px;
-            padding: 13px;
-            font-weight: 800;
-        }
+.butterfly{
+    position:fixed;
+    z-index:4;
+    font-size:38px;
+    filter:drop-shadow(0 8px 12px rgba(0,0,0,.25));
+    animation:flyButterfly linear infinite;
+}
+.bt1{top:14%;left:-8%;animation-duration:18s}
+.bt2{top:32%;left:-10%;animation-duration:24s;animation-delay:5s;font-size:30px}
+.bt3{top:62%;left:-10%;animation-duration:21s;animation-delay:9s;font-size:40px}
+.bt4{top:48%;left:-10%;animation-duration:27s;animation-delay:13s;font-size:28px}
+.bt5{top:22%;left:-10%;animation-duration:30s;animation-delay:17s;font-size:24px}
+@keyframes flyButterfly{
+    0%{transform:translateX(0) translateY(0) rotate(0deg);opacity:0}
+    8%{opacity:1}
+    25%{transform:translateX(30vw) translateY(-35px) rotate(12deg)}
+    50%{transform:translateX(58vw) translateY(45px) rotate(-10deg)}
+    75%{transform:translateX(86vw) translateY(-30px) rotate(8deg)}
+    100%{transform:translateX(115vw) translateY(20px) rotate(0deg);opacity:0}
+}
 
-        .small-link a {
-            color: white;
-            font-weight: 700;
-            text-decoration: none;
-        }
+.login-card{
+    position:relative;
+    z-index:8;
+    width:100%;
+    max-width:440px;
+    padding:38px;
+    border-radius:32px;
+    color:white;
+    background:rgba(15,23,42,.18);
+    border:1px solid rgba(255,255,255,.48);
+    box-shadow:0 30px 85px rgba(15,23,42,.42);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+}
+.logo-box{
+    width:92px;
+    height:92px;
+    border-radius:50%;
+    background:rgba(255,255,255,.96);
+    color:#2563eb;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:44px;
+    margin:auto;
+    box-shadow:0 12px 32px rgba(0,0,0,.25);
+}
+.title{
+    font-size:30px;
+    font-weight:900;
+    text-align:center;
+    margin-top:14px;
+    margin-bottom:3px;
+    text-shadow:0 2px 10px rgba(0,0,0,.35);
+}
+.sub{
+    text-align:center;
+    font-weight:800;
+    color:rgba(255,255,255,.92);
+    margin-bottom:25px;
+    text-shadow:0 2px 8px rgba(0,0,0,.28);
+}
+.form-control{
+    height:54px;
+    border-radius:16px;
+    border:0;
+    padding-left:16px;
+    font-weight:800;
+    background:rgba(255,255,255,.92);
+}
+.form-control:focus{
+    box-shadow:0 0 0 4px rgba(255,255,255,.32);
+    border:0;
+}
+label{
+    font-weight:900;
+    text-shadow:0 2px 8px rgba(0,0,0,.30);
+}
+.login-btn{
+    height:56px;
+    width:100%;
+    border:0;
+    border-radius:17px;
+    font-size:18px;
+    font-weight:900;
+    color:#0f172a;
+    background:linear-gradient(135deg,#fde68a,#facc15,#fb923c);
+    box-shadow:0 14px 30px rgba(0,0,0,.25);
+    transition:.25s;
+}
+.login-btn:hover{
+    transform:translateY(-2px);
+    box-shadow:0 18px 38px rgba(0,0,0,.32);
+}
+.alert{
+    border-radius:18px;
+    border:0;
+    font-weight:800;
+}
+.quick-links{
+    display:flex;
+    gap:8px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+.quick-links a{
+    border-radius:999px;
+    font-weight:800;
+    padding:7px 14px;
+}
+.footer-text{
+    text-align:center;
+    margin-top:18px;
+    color:rgba(255,255,255,.88);
+    font-size:13px;
+    font-weight:800;
+    text-shadow:0 2px 8px rgba(0,0,0,.25);
+}
+@media(max-width:520px){
+    body{padding:16px}
+    .login-card{padding:28px 22px;border-radius:26px}
+    .title{font-size:26px}
+}
 
-        .small-link a:hover {
-            text-decoration: underline;
-        }
-    </style>
+</style>
 </head>
-
 <body>
+<div class="sky-slider">
+    <div class="sky-slide s1"></div>
+    <div class="sky-slide s2"></div>
+    <div class="sky-slide s3"></div>
+    <div class="sky-slide s4"></div>
+</div>
 
-<div class="bg-circle c1"></div>
-<div class="bg-circle c2"></div>
-<div class="bg-circle c3"></div>
+<div class="cloud c1"></div>
+<div class="cloud c2"></div>
+<div class="cloud c3"></div>
+
+<div class="bubble b1"></div>
+<div class="bubble b2"></div>
+<div class="bubble b3"></div>
+<div class="bubble b4"></div>
+<div class="bubble b5"></div>
+<div class="bubble b6"></div>
+<div class="bubble b7"></div>
+
+<div class="butterfly bt1">🦋</div>
+<div class="butterfly bt2">🦋</div>
+<div class="butterfly bt3">🦋</div>
+<div class="butterfly bt4">🦋</div>
+<div class="butterfly bt5">🦋</div>
 
 <div class="login-card">
-
     <div class="logo-box">🎓</div>
-
-    <h3 class="text-center fw-bold mt-3 mb-1">Student Login</h3>
-    <p class="text-center mb-4">AL RAHMAN MISSION</p>
+    <div class="title">Student Login</div>
+    <div class="sub">AL RAHMAN MISSION</div>
 
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-warning text-center fw-bold">
-                {{ message }}
-            </div>
+            <div class="alert alert-warning text-center shadow-sm">{{ message }}</div>
         {% endfor %}
     {% endif %}
 
     <form method="POST">
         {% csrf_token %}
-
         <div class="mb-3">
-            <label>Username</label>
-            <input type="text" name="username" class="form-control" placeholder="Enter Student ID" required>
+            <label class="mb-2">Username</label>
+            <input type="text" name="username" class="form-control" placeholder="Enter Student ID" required autofocus>
         </div>
-
-        <div class="mb-3">
-            <label>Password</label>
-            <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+        <div class="mb-4">
+            <label class="mb-2">Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Enter Password" required>
         </div>
-
-        <button class="btn btn-warning w-100 btn-login">
-            🔐 Login Now
-        </button>
+        <button type="submit" class="login-btn">🔐 Login Now</button>
     </form>
 
-    <div class="text-center small-link mt-3">
-        <a href="/students/forgot/">Forgot Password?</a>
+    <div class="quick-links mt-3">
+        <a href="/students/forgot/" class="btn btn-light btn-sm">Forgot Password?</a>
+        <a href="/teachers/login/" class="btn btn-outline-light btn-sm">Teacher Login</a>
+        <a href="/site/" class="btn btn-outline-light btn-sm">Website</a>
     </div>
 
-    <div class="text-center mt-3">
-        <a href="/students/portal-login/" class="btn btn-light btn-sm fw-bold">Login Portal</a>
-        <a href="/site/" class="btn btn-outline-light btn-sm fw-bold">Back to Website</a>
-    </div>
-
+    <div class="footer-text">© AL RAHMAN MISSION ERP</div>
 </div>
-
 </body>
 </html>

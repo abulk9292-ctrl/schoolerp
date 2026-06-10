@@ -64,12 +64,12 @@
                         </td>
 
                         <td>
-                            {% if alert.status == 'Absent' %}
+                            {% if alert.attendance_status == 'Absent' %}
                                 <span class="badge bg-danger">Absent</span>
-                            {% elif alert.status == 'Late' %}
+                            {% elif alert.attendance_status == 'Late' %}
                                 <span class="badge bg-warning text-dark">Late</span>
                             {% else %}
-                                {{ alert.status }}
+                                {{ alert.attendance_status }}
                             {% endif %}
                         </td>
 

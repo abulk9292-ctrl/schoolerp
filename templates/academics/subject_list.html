@@ -17,6 +17,23 @@
     padding:6px 10px;
     border-radius:12px;
 }
+
+.status-badge{
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:800;
+}
+
+.status-active{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.status-inactive{
+    background:#fee2e2;
+    color:#991b1b;
+}
 </style>
 
 <div class="container mt-4">
@@ -37,9 +54,7 @@
 
             <a href="{% url 'class_subject_assign' %}"
                class="btn btn-dark">
-
                 ✅ Assign Class Subjects
-
             </a>
 
         </div>
@@ -56,20 +71,49 @@
 
             {% csrf_token %}
 
-            <div class="col-md-5">
+            {% if form.non_field_errors %}
+                <div class="col-12">
+                    <div class="alert alert-danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="col-md-4">
                 <label class="form-label fw-bold">
                     Subject Name
                 </label>
 
                 {{ form.subject_name }}
+
+                {% if form.subject_name.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.subject_name.errors }}
+                    </div>
+                {% endif %}
             </div>
 
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label class="form-label fw-bold">
                     Subject Code
                 </label>
 
                 {{ form.subject_code }}
+
+                {% if form.subject_code.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.subject_code.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+                <div class="form-check mb-2">
+                    {{ form.is_active }}
+                    <label class="form-check-label fw-bold">
+                        Active
+                    </label>
+                </div>
             </div>
 
             <div class="col-md-3 d-flex align-items-end">
@@ -85,6 +129,15 @@
                 </button>
 
             </div>
+
+            {% if edit_mode %}
+                <div class="col-12">
+                    <a href="{% url 'subject_list' %}"
+                       class="btn btn-secondary">
+                        ⬅ Cancel Edit
+                    </a>
+                </div>
+            {% endif %}
 
         </form>
 
@@ -115,7 +168,8 @@
                         <th width="70">#</th>
                         <th>Subject Name</th>
                         <th>Code</th>
-                        <th width="180">Action</th>
+                        <th width="120">Status</th>
+                        <th width="190">Action</th>
                     </tr>
 
                 </thead>
@@ -145,22 +199,34 @@
                         </td>
 
                         <td>
+                            {% if s.is_active %}
+                                <span class="status-badge status-active">
+                                    Active
+                                </span>
+                            {% else %}
+                                <span class="status-badge status-inactive">
+                                    Inactive
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
 
                             <div class="d-flex gap-2">
 
                                 <a href="{% url 'subject_edit' s.id %}"
                                    class="btn btn-warning btn-sm">
-
                                     ✏ Edit
-
                                 </a>
 
-                                <a href="{% url 'subject_delete' s.id %}"
-                                   class="btn btn-danger btn-sm">
-
-                                    🗑 Delete
-
-                                </a>
+                                <form method="post"
+                                      action="{% url 'subject_delete' s.id %}"
+                                      onsubmit="return confirm('Delete this subject?');">
+                                    {% csrf_token %}
+                                    <button class="btn btn-danger btn-sm">
+                                        🗑 Delete
+                                    </button>
+                                </form>
 
                             </div>
 
@@ -172,7 +238,7 @@
 
                     <tr>
 
-                        <td colspan="4"
+                        <td colspan="5"
                             class="text-center text-muted py-4">
 
                             No subjects added yet

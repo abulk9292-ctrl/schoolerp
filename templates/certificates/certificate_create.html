@@ -1,0 +1,320 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+
+.page-header{
+    background: linear-gradient(135deg,#1e3a8a,#0891b2);
+    padding: 28px;
+    border-radius: 20px;
+    color: white;
+    margin-bottom: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.form-card{
+    border: none;
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+.form-card .card-body{
+    padding: 35px;
+}
+
+.form-label{
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.form-control,
+.form-select{
+    border-radius: 12px;
+    min-height: 48px;
+    border: 1px solid #dbeafe;
+}
+
+textarea.form-control{
+    min-height: 120px;
+}
+
+.submit-btn{
+    border-radius: 14px;
+    padding: 12px 35px;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: .5px;
+}
+
+.info-box{
+    background: linear-gradient(135deg,#eff6ff,#f8fafc);
+    border-radius: 16px;
+    padding: 18px;
+    border: 1px dashed #93c5fd;
+}
+
+</style>
+
+
+<div class="container-fluid">
+
+    <!-- HEADER -->
+
+    <div class="page-header">
+
+        <h2 class="fw-bold">
+            Create Certificate
+        </h2>
+
+        <p class="mb-0">
+            Generate premium printable student certificates
+        </p>
+
+    </div>
+
+
+    <div class="row">
+
+        <!-- FORM -->
+
+        <div class="col-lg-8">
+
+            <div class="card form-card">
+
+                <div class="card-body">
+
+                    <form method="POST">
+
+                        {% csrf_token %}
+
+                        <div class="row">
+
+                            <!-- STUDENT -->
+
+                            <div class="col-md-6 mb-4">
+
+                                <label class="form-label">
+                                    Student
+                                </label>
+
+                                <select name="student"
+                                        class="form-select"
+                                        required>
+
+                                    <option value="">
+                                        Select Student
+                                    </option>
+
+                                    {% for student in students %}
+
+                                    <option value="{{ student.id }}">
+
+                                        {{ student.student_name }}
+                                        -
+                                        {{ student.student_id }}
+
+                                    </option>
+
+                                    {% endfor %}
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- TYPE -->
+
+                            <div class="col-md-6 mb-4">
+
+                                <label class="form-label">
+                                    Certificate Type
+                                </label>
+
+                                <select name="certificate_type"
+                                        class="form-select"
+                                        required>
+
+                                    <option value="TC">
+                                        Transfer Certificate
+                                    </option>
+
+                                    <option value="CHARACTER">
+                                        Character Certificate
+                                    </option>
+
+                                    <option value="BONAFIDE">
+                                        Bonafide Certificate
+                                    </option>
+
+                                    <option value="STUDY">
+                                        Study Certificate
+                                    </option>
+
+                                    <option value="FEE_CLEARANCE">
+                                        Fee Clearance Certificate
+                                    </option>
+
+                                    <option value="CUSTOM">
+                                        Custom Certificate
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- SESSION -->
+
+                            <div class="col-md-6 mb-4">
+
+                                <label class="form-label">
+                                    Academic Session
+                                </label>
+
+                                <input type="text"
+                                       name="session"
+                                       class="form-control"
+                                       placeholder="2025-2026">
+
+                            </div>
+
+
+                            <!-- CONDUCT -->
+
+                            <div class="col-md-6 mb-4">
+
+                                <label class="form-label">
+                                    Conduct
+                                </label>
+
+                                <input type="text"
+                                       name="conduct"
+                                       class="form-control"
+                                       value="Good">
+
+                            </div>
+
+
+                            <!-- REASON -->
+
+                            <div class="col-md-12 mb-4">
+
+                                <label class="form-label">
+                                    Reason
+                                </label>
+
+                                <input type="text"
+                                       name="reason"
+                                       class="form-control"
+                                       placeholder="Reason / Purpose">
+
+                            </div>
+
+
+                            <!-- REMARKS -->
+
+                            <div class="col-md-12 mb-4">
+
+                                <label class="form-label">
+                                    Remarks
+                                </label>
+
+                                <textarea name="remarks"
+                                          class="form-control"
+                                          placeholder="Additional remarks"></textarea>
+
+                            </div>
+
+
+                            <!-- CUSTOM BODY -->
+
+                            <div class="col-md-12 mb-4">
+
+                                <label class="form-label">
+                                    Custom Certificate Body
+                                </label>
+
+                                <textarea name="custom_body"
+                                          class="form-control"
+                                          placeholder="Write custom certificate text here..."></textarea>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- BUTTON -->
+
+                        <div class="text-end">
+
+                            <button type="submit"
+                                    class="btn btn-primary submit-btn">
+
+                                Generate Certificate
+
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- SIDE INFO -->
+
+        <div class="col-lg-4">
+
+            <div class="info-box">
+
+                <h5 class="fw-bold mb-3">
+                    Included Features
+                </h5>
+
+                <ul class="list-unstyled">
+
+                    <li class="mb-2">
+                        ✅ Auto Serial Number
+                    </li>
+
+                    <li class="mb-2">
+                        ✅ Student Photo
+                    </li>
+
+                    <li class="mb-2">
+                        ✅ QR Code Ready
+                    </li>
+
+                    <li class="mb-2">
+                        ✅ A4 Premium Print
+                    </li>
+
+                    <li class="mb-2">
+                        ✅ Watermark Logo
+                    </li>
+
+                    <li class="mb-2">
+                        ✅ Section-wise Support
+                    </li>
+
+                    <li class="mb-2">
+                        ✅ PDF Export Ready
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

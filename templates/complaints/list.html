@@ -1,56 +1,45 @@
 {% extends 'base.html' %}
 {% block content %}
-
-<div class="container mt-4">
-
-    <div class="card shadow">
-        <div class="card-header bg-dark text-white">
-            All Complaints
-        </div>
-
-        <div class="card-body">
-
-            <table class="table table-bordered">
-                <tr>
-                    <th>Student</th>
-                    <th>Title</th>
-                    <th>Parent</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-
-                {% for c in complaints %}
-                <tr>
-                    <td>{{ c.student.student_name }}</td>
-                    <td>{{ c.title }}</td>
-                    <td>{{ c.parent_name }}</td>
-
-                    <td>
-                        {% if c.status == 'Solved' %}
-                            <span class="text-success">Solved</span>
-                        {% else %}
-                            <span class="text-danger">Pending</span>
-                        {% endif %}
-                    </td>
-
-                    <td>
-                        {% if c.status == 'Pending' %}
-                            <a href="{% url 'complaint_solve' c.id %}" class="btn btn-sm btn-success">Solve</a>
-                        {% else %}
-                            ✔ Done
-                        {% endif %}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center">No complaints</td>
-                </tr>
-                {% endfor %}
-            </table>
-
-        </div>
-    </div>
-
+<div class="container-fluid mt-4">
+<div class="p-4 text-white rounded-4 mb-4" style="background:linear-gradient(135deg,#0f172a,#2563eb);">
+<h3 class="fw-bold mb-1">📝 Complaint Management</h3>
+<div>Teacher Status + Remark | Admin Status + Remark</div>
 </div>
-
+<form method="get" class="row g-2 mb-3">
+<div class="col-md-5"><input name="search" value="{{ search|default:'' }}" class="form-control" placeholder="Search student/title"></div>
+<div class="col-md-3"><select name="status" class="form-control">
+<option value="">All Status</option>
+<option value="PENDING_TEACHER" {% if selected_status == "PENDING_TEACHER" %}selected{% endif %}>Pending Teacher</option>
+<option value="PENDING_ADMIN_APPROVAL" {% if selected_status == "PENDING_ADMIN_APPROVAL" %}selected{% endif %}>Pending Admin</option>
+<option value="SOLVED" {% if selected_status == "SOLVED" %}selected{% endif %}>Solved</option>
+<option value="REJECTED" {% if selected_status == "REJECTED" %}selected{% endif %}>Rejected</option>
+</select></div>
+<div class="col-md-2"><button class="btn btn-primary w-100">Filter</button></div>
+<div class="col-md-2"><a href="{% url 'complaint_list' %}" class="btn btn-secondary w-100">Reset</a></div>
+</form>
+<div class="table-responsive">
+<table class="table table-bordered table-hover align-middle bg-white">
+<thead class="table-dark"><tr><th>#</th><th>Student</th><th>Complaint</th><th>Teacher Status + Remark</th><th>Admin Status + Remark</th><th>Status</th><th>Action</th></tr></thead>
+<tbody>
+{% for c in complaints %}
+<tr>
+<td>{{ forloop.counter }}</td>
+<td><b>{{ c.student.student_name }}</b><br><small>{{ c.student.class_assigned }} {% if c.student.section %}- {{ c.student.section }}{% endif %}</small></td>
+<td><b>{{ c.title }}</b><br><small>{{ c.description }}</small></td>
+<td style="white-space:pre-line;">{{ c.teacher_solution|default:"Waiting teacher remark" }}</td>
+<td style="white-space:pre-line;">{{ c.admin_solution|default:"No admin remark" }}</td>
+<td><span class="badge bg-primary">{{ c.status }}</span></td>
+<td>
+{% if c.status == "PENDING_ADMIN_APPROVAL" %}<a href="{% url 'complaint_solve' c.id %}" class="btn btn-success btn-sm w-100 mb-1">Admin Solve</a>{% endif %}
+<a href="{% url 'complaint_edit' c.id %}" class="btn btn-primary btn-sm w-100 mb-1">Edit</a>
+<a href="{% url 'complaint_delete' c.id %}" onclick="return confirm('Delete this complaint?')" class="btn btn-danger btn-sm w-100">Delete</a>
+</td>
+</tr>
+{% empty %}
+<tr><td colspan="7" class="text-center text-muted py-5">No complaints found</td></tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
 {% endblock %}

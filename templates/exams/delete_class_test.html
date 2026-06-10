@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card border-0 shadow-lg rounded-4">
+        <div class="card-header bg-danger text-white py-3 rounded-top-4">
+            <h4 class="mb-0">Delete Class Test</h4>
+        </div>
+
+        <div class="card-body p-4">
+            <p class="fs-5">Are you sure you want to delete this Class Test?</p>
+
+            <p><b>Test:</b> {{ class_test.test_name }}</p>
+            <p><b>Class:</b> {{ class_test.class_name }}</p>
+            <p><b>Section:</b> {{ class_test.section }}</p>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <button class="btn btn-danger rounded-pill px-4">
+                    Yes, Delete
+                </button>
+
+                <a href="{% url 'class_test_list' %}"
+                   class="btn btn-secondary rounded-pill px-4">
+                    Cancel
+                </a>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

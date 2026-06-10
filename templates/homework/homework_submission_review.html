@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+.review-page{background:linear-gradient(135deg,#fff7ed,#eff6ff);min-height:100vh;padding:24px;border-radius:18px}
+.review-card{background:white;border-radius:24px;padding:24px;box-shadow:0 14px 35px rgba(15,23,42,.10);border:1px solid #e5e7eb}
+.review-hero{background:linear-gradient(135deg,#0f172a,#f59e0b);color:white;border-radius:28px;padding:24px;box-shadow:0 18px 45px rgba(245,158,11,.25)}
+.info-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:18px;padding:14px;margin-bottom:10px}
+.form-control{border-radius:14px}
+label{font-weight:800}
+</style>
+
+<div class="review-page">
+    <div class="review-hero mb-4">
+        <h2 class="fw-bold mb-1">✅ Review Homework Submission</h2>
+        <div>{{ submission.student.student_name }} · {{ submission.homework.title }}</div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="review-card">
+                <h4 class="fw-bold mb-3">📄 Submission Details</h4>
+                <div class="info-box"><b>Student:</b> {{ submission.student.student_name }}</div>
+                <div class="info-box"><b>Student ID:</b> {{ submission.student.student_id }}</div>
+                <div class="info-box"><b>Homework:</b> {{ submission.homework.title }}</div>
+                <div class="info-box"><b>Subject:</b> {{ submission.homework.subject }}</div>
+                <div class="info-box"><b>Status:</b> {{ submission.status }}</div>
+                <div class="info-box"><b>Answer:</b><br>{{ submission.answer_text|default:"-" }}</div>
+                {% if submission.submitted_file %}
+                    <a href="{{ submission.submitted_file.url }}" target="_blank" class="btn btn-info fw-bold rounded-pill">📎 View Submitted File</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="review-card">
+                <h4 class="fw-bold mb-3">🧑‍🏫 Teacher Review</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label>Status</label>
+                        {{ form.status }}
+                    </div>
+                    <div class="mb-3">
+                        <label>Marks</label>
+                        {{ form.marks }}
+                    </div>
+                    <div class="mb-3">
+                        <label>Teacher Remarks</label>
+                        {{ form.teacher_remarks }}
+                    </div>
+                    <button class="btn btn-success fw-bold rounded-pill px-4">Save Review</button>
+                    <a href="{% url 'homework_submission_list' %}" class="btn btn-secondary fw-bold rounded-pill px-4">Back</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

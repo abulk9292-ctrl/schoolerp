@@ -11,9 +11,43 @@ from academics.models import Class
 
 @login_required
 def online_admission_list(request):
+    selected_class = request.GET.get("class")
+    selected_section = request.GET.get("section")
+    selected_status = request.GET.get("status")
+
     admissions = Admission.objects.all().order_by("-id")
+
+    if selected_class:
+        admissions = admissions.filter(student_class__iexact=selected_class)
+
+    if selected_section:
+        admissions = admissions.filter(section=selected_section)
+
+    if selected_status:
+        admissions = admissions.filter(status=selected_status)
+
+    classes = (
+        Admission.objects.exclude(student_class="")
+        .values_list("student_class", flat=True)
+        .distinct()
+        .order_by("student_class")
+    )
+
+    sections = (
+        Admission.objects.exclude(section="")
+        .exclude(section__isnull=True)
+        .values_list("section", flat=True)
+        .distinct()
+        .order_by("section")
+    )
+
     return render(request, "admissions/online_admission_list.html", {
-        "admissions": admissions
+        "admissions": admissions,
+        "classes": classes,
+        "sections": sections,
+        "selected_class": selected_class,
+        "selected_section": selected_section,
+        "selected_status": selected_status,
     })
 
 
@@ -35,7 +69,6 @@ def get_or_create_class(class_name):
 def approve_admission(request, pk):
     admission = get_object_or_404(Admission, pk=pk)
 
-    # Approved but student already created
     if admission.status == "Approved" and admission.created_student_id:
         if Student.objects.filter(id=admission.created_student_id).exists():
             messages.warning(request, "Already approved and student already added.")
@@ -54,6 +87,7 @@ def approve_admission(request, pk):
         date_of_birth=admission.date_of_birth,
         admission_date=timezone.now().date(),
         class_assigned=class_obj,
+        section=admission.section,
         phone=admission.mobile,
         gender=admission.gender,
         aadhaar_number=admission.aadhaar_no,
@@ -72,6 +106,7 @@ def approve_admission(request, pk):
         request,
         f"Approved successfully. Student added: {student.student_name} ({student.student_id})"
     )
+
     return redirect("online_admission_list")
 
 

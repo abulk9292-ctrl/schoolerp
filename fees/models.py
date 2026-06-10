@@ -1,14 +1,26 @@
 from decimal import Decimal
 from django.db import models
+from django.conf import settings
+from django.utils import timezone
 
 from students.models import Student
 from academics.models import Class, AcademicSession
 
 
 class FeeStructure(models.Model):
-    class_assigned = models.ForeignKey(Class, on_delete=models.CASCADE, related_name='fee_structures')
+    class_assigned = models.ForeignKey(
+        Class,
+        on_delete=models.CASCADE,
+        related_name='fee_structures'
+    )
 
-    # ✅ Session-wise fee structure
+    section = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        default=""
+    )
+
     session = models.ForeignKey(
         AcademicSession,
         on_delete=models.CASCADE,
@@ -24,19 +36,27 @@ class FeeStructure(models.Model):
     transport_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     books_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     uniform_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
     is_active = models.BooleanField(default=True)
 
     class Meta:
-        unique_together = ('class_assigned', 'session')
+        unique_together = (
+            'class_assigned',
+            'section',
+            'session'
+        )
 
     def save(self, *args, **kwargs):
         if not self.session:
             self.session = AcademicSession.objects.filter(is_active=True).first()
+
         super().save(*args, **kwargs)
 
     def __str__(self):
         session_name = self.session.session_name if self.session else "No Session"
-        return f"{self.class_assigned} Fee Structure - {session_name}"
+        sec = self.section if self.section else "No Section"
+
+        return f"{self.class_assigned} - {sec} Fee Structure - {session_name}"
 
 
 class FeeCollection(models.Model):
@@ -53,9 +73,19 @@ class FeeCollection(models.Model):
         ('Due', 'Due'),
     ]
 
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='fee_collections')
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='fee_collections'
+    )
 
-    # ✅ Fee payment session
+    section = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True,
+        default=""
+    )
+
     session = models.ForeignKey(
         AcademicSession,
         on_delete=models.SET_NULL,
@@ -67,7 +97,12 @@ class FeeCollection(models.Model):
     fees_month = models.CharField(max_length=50)
     payment_date = models.DateField()
 
-    receipt_no = models.CharField(max_length=30, unique=True, blank=True, null=True)
+    receipt_no = models.CharField(
+        max_length=30,
+        unique=True,
+        blank=True,
+        null=True
+    )
 
     monthly_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     admission_fee = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -87,21 +122,62 @@ class FeeCollection(models.Model):
     deposit_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     due_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0, blank=True)
 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Due')
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='Due'
+    )
 
-    payment_mode = models.CharField(max_length=20, choices=PAYMENT_MODE_CHOICES, default='Cash')
-    operator_name = models.CharField(max_length=150, blank=True, null=True)
+    payment_mode = models.CharField(
+        max_length=20,
+        choices=PAYMENT_MODE_CHOICES,
+        default='Cash'
+    )
+
+    operator_name = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True
+    )
+
+    # =========================
+    # RECYCLE BIN
+    # =========================
+    
+    is_deleted = models.BooleanField(default=False)
+    
+    deleted_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+    
+    deleted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='deleted_fee_collections'
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('student', 'session', 'fees_month')
+        unique_together = (
+            'student',
+            'session',
+            'fees_month'
+        )
 
     def get_auto_previous_balance(self):
         latest_due = FeeCollection.objects.filter(
             student=self.student,
             session=self.session
-        ).exclude(pk=self.pk).order_by('-payment_date', '-id').first()
+        ).exclude(
+            pk=self.pk
+        ).order_by(
+            '-payment_date',
+            '-id'
+        ).first()
 
         if latest_due:
             return latest_due.due_balance or Decimal('0.00')
@@ -127,9 +203,15 @@ class FeeCollection(models.Model):
             (self.previous_balance or Decimal('0.00'))
         )
 
-        self.discount_amount = (gross_total * (self.discount_percent or Decimal('0.00'))) / Decimal('100')
+        self.discount_amount = (
+            gross_total * (self.discount_percent or Decimal('0.00'))
+        ) / Decimal('100')
+
         self.total_amount = gross_total - self.discount_amount
-        self.due_balance = self.total_amount - (self.deposit_amount or Decimal('0.00'))
+
+        self.due_balance = self.total_amount - (
+            self.deposit_amount or Decimal('0.00')
+        )
 
         if self.due_balance <= 0:
             self.status = 'Paid'
@@ -139,6 +221,9 @@ class FeeCollection(models.Model):
             self.status = 'Due'
 
     def save(self, *args, **kwargs):
+        if self.student and not self.section:
+            self.section = self.student.section or ""
+
         if not self.session:
             self.session = AcademicSession.objects.filter(is_active=True).first()
 
@@ -153,4 +238,137 @@ class FeeCollection(models.Model):
 
     def __str__(self):
         session_name = self.session.session_name if self.session else "No Session"
-        return f"{self.student.student_name} - {session_name} - {self.fees_month} - {self.payment_date}"
+        sec = self.section if self.section else "No Section"
+
+        return f"{self.student.student_name} - {sec} - {session_name} - {self.fees_month}"
+
+# =========================================================
+# FEE FOLLOW-UP / PROMISE TO PAY
+# =========================================================
+
+class FeeFollowUp(models.Model):
+    FOLLOWUP_TYPE_CHOICES = [
+        ('CALL', 'Call'),
+        ('HOME_VISIT', 'Home Visit'),
+        ('SCHOOL_MEET', 'School Meeting'),
+        ('WHATSAPP', 'WhatsApp'),
+    ]
+
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('CALLED', 'Called'),
+        ('VISITED', 'Visited'),
+        ('PAID', 'Paid'),
+        ('FAILED', 'Failed'),
+        ('CANCELLED', 'Cancelled'),
+    ]
+
+    PRIORITY_CHOICES = [
+        ('NORMAL', 'Normal'),
+        ('HIGH', 'High'),
+        ('URGENT', 'Urgent'),
+    ]
+
+    student = models.ForeignKey(
+        Student,
+        on_delete=models.CASCADE,
+        related_name='fee_followups'
+    )
+
+    session = models.ForeignKey(
+        AcademicSession,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='fee_followups'
+    )
+
+    parent_name = models.CharField(max_length=150, blank=True, null=True)
+    mobile = models.CharField(max_length=30, blank=True, null=True)
+
+    due_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    promise_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    promise_date = models.DateField()
+    followup_type = models.CharField(
+        max_length=20,
+        choices=FOLLOWUP_TYPE_CHOICES,
+        default='CALL'
+    )
+
+    priority = models.CharField(
+        max_length=20,
+        choices=PRIORITY_CHOICES,
+        default='NORMAL'
+    )
+
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='PENDING'
+    )
+
+    next_action = models.CharField(
+        max_length=200,
+        blank=True,
+        null=True,
+        help_text='Example: Call father, Visit home, Send WhatsApp reminder'
+    )
+
+    remark = models.TextField(blank=True, null=True)
+    result_note = models.TextField(blank=True, null=True)
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_fee_followups'
+    )
+
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['promise_date', '-priority', '-id']
+        verbose_name = 'Fee Follow-up / Promise'
+        verbose_name_plural = 'Fee Follow-ups / Promises'
+
+    @property
+    def is_overdue(self):
+        return self.status not in ['PAID', 'CANCELLED'] and self.promise_date < timezone.now().date()
+
+    @property
+    def is_today(self):
+        return self.promise_date == timezone.now().date()
+
+    def save(self, *args, **kwargs):
+        if self.student:
+            if not self.parent_name:
+                self.parent_name = (
+                    getattr(self.student, 'guardian_name', None)
+                    or getattr(self.student, 'father_name', None)
+                    or ''
+                )
+
+            if not self.mobile:
+                self.mobile = (
+                    getattr(self.student, 'phone', None)
+                    or getattr(self.student, 'mobile', None)
+                    or ''
+                )
+
+            if not self.session:
+                self.session = (
+                    getattr(self.student, 'current_session', None)
+                    or AcademicSession.objects.filter(is_active=True).first()
+                )
+
+        if self.status in ['PAID', 'CANCELLED'] and not self.completed_at:
+            self.completed_at = timezone.now()
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.student} - Promise {self.promise_amount} on {self.promise_date}"

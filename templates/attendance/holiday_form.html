@@ -3,61 +3,96 @@
 
 <div class="container mt-4">
 
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">{{ page_title }}</h4>
+    <div class="card shadow border-0 rounded-4">
+
+        <div class="card-header bg-primary text-white rounded-top-4">
+            <h4 class="mb-0">
+                {{ page_title }}
+            </h4>
         </div>
 
-        <div class="card-body">
+        <div class="card-body p-4">
 
             <form method="post">
+
                 {% csrf_token %}
 
                 <div class="mb-3">
-                    <label class="form-label">Holiday Title</label>
+                    <label class="form-label fw-bold">
+                        Holiday Title
+                    </label>
+
                     {{ form.title }}
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Start Date</label>
-                        {{ form.start_date }}
-                    </div>
+                <div class="mb-3">
 
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">End Date</label>
-                        {{ form.end_date }}
-                        <small class="text-muted">Single day হলে End Date খালি রাখতে পারো।</small>
-                    </div>
+                    <label class="form-label fw-bold">
+                        Holiday Date
+                    </label>
+
+                    {{ form.date }}
+
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Holiday Type</label>
+
+                    <label class="form-label fw-bold">
+                        Holiday Type
+                    </label>
+
                     {{ form.holiday_type }}
+
                 </div>
 
                 <div class="form-check mb-3">
+
                     {{ form.is_half_day }}
+
                     <label class="form-check-label">
                         Half Day Holiday
                     </label>
+
+                </div>
+
+                <div class="form-check mb-3">
+
+                    {{ form.is_active }}
+
+                    <label class="form-check-label">
+                        Active Holiday
+                    </label>
+
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Note</label>
+
+                    <label class="form-label fw-bold">
+                        Note
+                    </label>
+
                     {{ form.note }}
+
                 </div>
 
-                <button type="submit" class="btn btn-success">
+                <button type="submit"
+                        class="btn btn-success">
+
                     💾 Save Holiday
+
                 </button>
 
-                <a href="{% url 'holiday_list' %}" class="btn btn-secondary">
+                <a href="{% url 'holiday_list' %}"
+                   class="btn btn-secondary">
+
                     Back
+
                 </a>
+
             </form>
 
         </div>
+
     </div>
 
 </div>

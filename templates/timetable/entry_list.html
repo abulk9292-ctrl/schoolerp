@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<style>@media print{.no-print,.sidebar,.topbar{display:none!important}@page{size:A4 landscape;margin:8mm}}</style>
+<div class="d-flex justify-content-between mb-3 flex-wrap gap-2"><h4 class="fw-bold">Timetable Entries</h4><div class="d-flex gap-2"><button onclick="window.print()" class="btn btn-success">🖨 Print</button><a href="{% url 'timetable_entry_add' %}" class="btn btn-primary">Add Entry</a></div></div>
+<form method="get" class="card card-body mb-3"><div class="row g-2"><div class="col-md-10"><input name="q" value="{{ q }}" class="form-control" placeholder="Search"></div><div class="col-md-2"><button class="btn btn-success w-100">Search</button></div></div></form>
+<div class="table-responsive"><table class="table table-bordered"><tr><th>Class</th><th>Section</th><th>Day</th><th>Period</th><th>Subject</th><th>Teacher</th><th>Room</th><th>Action</th></tr>{% for e in entries %}<tr><td>{{ e.class_assigned }}</td><td>{{ e.section|default:"-" }}</td><td>{{ e.get_day_display }}</td><td>{{ e.period.name }}</td><td>{{ e.subject|default:"-" }}</td><td>{{ e.teacher|default:"-" }}</td><td>{{ e.room_no|default:"-" }}</td><td><a href="{% url 'timetable_entry_edit' e.id %}" class="btn btn-sm btn-warning">Edit</a> <a href="{% url 'timetable_entry_delete' e.id %}" class="btn btn-sm btn-danger">Delete</a></td></tr>{% empty %}<tr><td colspan="8" class="text-center">No entry.</td></tr>{% endfor %}</table></div>
+{% endblock %}

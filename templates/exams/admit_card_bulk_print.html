@@ -3,311 +3,535 @@
 {% block content %}
 
 <style>
-@page{
-    size:A4;
-    margin:5mm;
-}
-
-*{
-    box-sizing:border-box;
-    -webkit-print-color-adjust:exact !important;
-    print-color-adjust:exact !important;
-}
+@page{size:A4 portrait;margin:5mm}
+*{box-sizing:border-box;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
 
 body{
-    background:#e5e7eb;
-    font-family:Arial,sans-serif;
+    background:radial-gradient(circle at top left,#dbeafe,#eef5ff,#dfefff);
+    font-family:'Segoe UI',Arial,Helvetica,sans-serif;
+    color:#061b45;
 }
 
-.no-print{
-    text-align:center;
-    margin-bottom:15px;
+.no-print{text-align:center;margin:8px}
+.no-print button,.no-print a{
+    background:#07306f;
+    color:#fff!important;
+    border:none;
+    padding:9px 22px;
+    border-radius:30px;
+    font-weight:900;
+    text-decoration:none;
+    display:inline-block;
 }
 
-.sheet{
-    width:200mm;
-    margin:auto;
-}
+.sheet{width:210mm;margin:auto}
+.page{width:210mm;margin:auto;page-break-after:always}
 
-.page{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:6mm;
-    margin-bottom:4mm;
-    page-break-after:always;
-}
-
-.admit-card{
-    width:100%;
+.card{
+    width:198mm;
     height:138mm;
-    background:white;
-    border:2px solid #111;
+    margin:0 auto 8mm;
+    background:
+        linear-gradient(135deg,rgba(255,255,255,.96),rgba(245,250,255,.96)),
+        radial-gradient(circle at top right,rgba(255,210,60,.20),transparent 35%);
+    border:2.5px solid #07306f;
+    border-radius:18px;
     position:relative;
     overflow:hidden;
-    padding:5mm;
+    padding:4mm;
+    box-shadow:0 15px 40px rgba(0,0,0,.22);
+}
+
+.card:before{
+    content:"";
+    position:absolute;
+    inset:2mm;
+    border:1.5px solid rgba(212,160,23,.8);
+    border-radius:14px;
+    pointer-events:none;
+    z-index:1;
+}
+
+.card:after{
+    content:"";
+    position:absolute;
+    top:-35mm;
+    right:-35mm;
+    width:95mm;
+    height:95mm;
+    background:rgba(7,48,111,.08);
+    border-radius:50%;
+}
+
+.security-text{
+    position:absolute;
+    top:54%;
+    left:50%;
+    transform:translate(-50%,-50%) rotate(-28deg);
+    font-size:42px;
+    font-weight:900;
+    color:rgba(7,48,111,.045);
+    white-space:nowrap;
+    pointer-events:none;
+    z-index:0;
+}
+
+.top{
+    position:relative;
+    z-index:3;
+    display:grid;
+    grid-template-columns:23mm 1fr 35mm 26mm;
+    gap:3mm;
+    align-items:start;
+    border-bottom:1.5px solid #b9c8e6;
+    padding-bottom:2mm;
+    min-height:31mm;
+}
+
+.logo{
+    width:25mm;
+    height:25mm;
+    object-fit:contain;
+    margin-top:1mm;
+    filter:drop-shadow(0 3px 4px rgba(0,0,0,.18));
+}
+
+.school{
+    text-align:center;
+    margin-top:0mm;
+    padding-top:0;
+}
+
+.website{
+    font-size:8px;
+    color:#078c2d;
+    font-weight:900;
+    line-height:8px;
+    margin-bottom:0;
+}
+
+.school h1{
+    margin:0;
+    font-size:32px;
+    font-weight:900;
+    background:linear-gradient(90deg,#082e72,#1e63d6,#082e72);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    letter-spacing:1.1px;
+    white-space:nowrap;
+    line-height:24px;
+}
+
+.school p{
+    margin:3px;
+    font-size:10px;
+    font-weight:900;
+    line-height:9px;
+}
+
+.right-box-area{
+    width:35mm;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+    margin-top:1mm;
+}
+
+.equal-box{
+    width:35mm;
+    height:10mm;
+    border-radius:9px;
+    text-align:center;
+    font-weight:900;
+    box-shadow:0 3px 8px rgba(0,0,0,.16);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+}
+
+.session{background:linear-gradient(145deg,#07306f,#0b4fa3);color:white}
+.session small{font-size:8px;font-weight:900;line-height:7px}
+.session .year{font-size:18px;color:#ffd23c;font-weight:900;line-height:14px}
+
+.term{
+    background:linear-gradient(90deg,#18a65b,#08713b);
+    color:white;
+    font-size:14px;
+    line-height:9px;
+    padding:1px 3px;
+}
+
+.admit-top-box{
+    border:1.5px solid #d4a017;
+    background:linear-gradient(#fff,#f7fbff);
+    color:#061b45;
+    font-size:8px;
+    line-height:7px;
+    padding:1px;
+}
+
+.admit-top-box .red{
+    color:#d90000;
+    font-size:10px;
+    line-height:11px;
+    font-weight:900;
+}
+
+.photo-box{
+    width:26mm;
+    height:30mm;
+    border:3px solid #d4a017;
+    border-radius:12px;
+    background:#eef7ff;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:7px;
+    font-weight:900;
+    color:#07306f;
+    text-align:center;
+    box-shadow:0 6px 15px rgba(0,0,0,.18);
+    margin-top:.5mm;
+}
+
+.photo-box img{width:100%;height:100%;object-fit:cover}
+
+.title{
+    position:absolute;
+    top:26mm;
+    left:38%;
+    transform:translateX(-50%);
+    background:linear-gradient(90deg,#082e72,#0b4fa3,#082e72);
+    color:white;
+    border:3px solid #ffd23c;
+    border-radius:30px;
+    padding:4px 34px;
+    font-size:20px;
+    font-weight:900;
+    box-shadow:0 5px 18px rgba(0,0,0,.28);
+    z-index:5;
+    letter-spacing:2px;
+    white-space:nowrap;
+}
+
+.main{
+    position:relative;
+    z-index:3;
+    display:grid;
+    grid-template-columns:96mm 1fr;
+    gap:2mm;
+    margin-top:1mm;
+}
+
+.info-box{
+    border:1.5px solid #9eb0cb;
+    border-radius:12px;
+    padding:4mm;
+    background:rgba(255,255,255,.96);
+    height:50mm;
+    position:relative;
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+}
+
+.head{
+    background:linear-gradient(90deg,#07306f,#0b4fa3);
+    color:white;
+    margin:-4mm -4mm 3mm;
+    padding:6px 10px;
+    border-radius:11px 11px 0 0;
+    font-size:10.5px;
+    font-weight:900;
+}
+
+.info-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:2mm 5mm;
+    font-size:9px;
+}
+
+.row{
+    display:grid;
+    grid-template-columns:25mm 3mm 1fr;
+    margin-bottom:2px;
+    font-weight:700;
+}
+
+.row b{color:#000}
+.dob-one-line b{white-space:nowrap;font-size:8px}
+
+.address{
+    margin-top:1px;
+    font-size:7px;
+    font-weight:800;
+    line-height:1.15;
 }
 
 .watermark{
     position:absolute;
-    width:220px;
-    opacity:0.07;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
+    width:43mm;
+    opacity:.055;
+    left:50mm;
+    top:54mm;
+    z-index:0;
 }
 
-.content{
-    position:relative;
-    z-index:2;
-}
-
-.header-img{
-    width:100%;
-    max-height:62px;
-    object-fit:contain;
-}
-
-.title{
+.routine-title{
+    background:linear-gradient(90deg,#159a55,#06713a);
+    color:white;
     text-align:center;
-    font-size:18px;
+    font-size:10.5px;
     font-weight:900;
-    border:1px solid #111;
-    padding:4px;
-    background:#f3f4f6;
-    margin-top:4px;
+    padding:5px;
+    border-radius:10px 10px 0 0;
+    box-shadow:0 3px 8px rgba(0,0,0,.10);
 }
 
-.exam-name{
-    color:#dc2626;
-}
-
-.top-grid{
-    display:grid;
-    grid-template-columns:1fr 80px;
-    gap:8px;
-    margin-top:5px;
-}
-
-.info-table{
-    width:100%;
-}
-
-.info-table td{
-    font-size:12px;
-    padding:1px 3px;
-    font-weight:700;
-    line-height:1.20;
-}
-
-.info-table td:first-child{
-    width:85px;
-}
-
-.photo{
-    width:76px;
-    height:86px;
-    border:2px solid #111;
-    object-fit:cover;
-}
-
-.routine{
+table{
     width:100%;
     border-collapse:collapse;
-    margin-top:5px;
-    font-size:10px;
-}
-
-.routine th,
-.routine td{
-    border:1px solid #777;
-    padding:2px;
-    text-align:center;
-}
-
-.routine th{
-    background:#16a34a;
-    color:white;
-    font-weight:800;
-}
-
-.note-box{
-    margin-top:5px;
-    border:1px solid #777;
-    padding:4px 6px;
-    font-size:9px;
-    line-height:1.25;
-    background:#fafafa;
-}
-
-.signature-table{
-    width:100%;
-    margin-top:9px;
-}
-
-.signature-table td{
-    width:50%;
-    text-align:center;
-    vertical-align:bottom;
-}
-
-.principal-sign{
-    width:70px;
-    height:24px;
-    object-fit:contain;
-    display:block;
-    margin:0 auto -2px auto;
-}
-
-.sign-line{
-    border-top:1px solid #111;
-    width:150px;
-    margin:auto;
-    padding-top:3px;
-    font-size:10px;
+    font-size:8px;
     font-weight:700;
+    background:white;
 }
 
-.footer-note{
+th{
+    background:linear-gradient(90deg,#0b3d91,#1357c5);
+    color:white;
+    border:1px solid #d7e3ff;
+    padding:3px 1px;
+}
+
+td{
+    border:1px solid #c8d1e2;
+    padding:2px 1px;
     text-align:center;
-    font-size:9px;
-    margin-top:4px;
-    color:#555;
+    color:#111;
+}
+
+tbody tr:nth-child(even){background:#f5f9ff}
+td.subject{text-align:left;font-weight:800}
+
+.day{
+    background:#e6f4ff;
+    border-radius:4px;
+    padding:1px 3px;
+    font-weight:900;
+}
+
+.bottom-left{
+    position:absolute;
+    left:4mm;
+    bottom:10mm;
+    width:96mm;
+    z-index:4;
+}
+
+.inst{
+    width:96mm;
+    height:35mm;
+    border:1.5px solid #ff5656;
+    border-radius:12px;
+    padding:4.5mm 3mm 2mm;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1mm;
+    font-size:8px;
+    font-weight:700;
+    background:white;
+    position:relative;
+    box-shadow:0 3px 10px rgba(255,0,0,.10);
+}
+
+.inst-title{
+    position:absolute;
+    top:-9px;
+    left:28mm;
+    background:linear-gradient(#e93328,#bd120a);
+    color:white;
+    border-radius:8px;
+    padding:2px 18px;
+    font-size:8.5px;
+    font-weight:900;
+}
+
+.inst p{margin:0.2px 0}
+
+
+.sign-box{
+    position:absolute;
+    right:5mm;
+    bottom:9mm;
+    width:90mm;
+    height:18mm;
+    border:1.5px solid #9eb0cb;
+    border-radius:12px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    background:linear-gradient(#fff,#f8fbff);
+    box-shadow:0 4px 12px rgba(0,0,0,.08);
+    overflow:hidden;
+    z-index:4;
+}
+
+.sign{
+    text-align:center;
+    border-right:1px solid #b8c7df;
+    font-size:7.2px;
+    font-weight:900;
+    position:relative;
+    padding-top:13mm;
+    color:#061b45;
+}
+
+.sign:last-child{border-right:none}
+
+.sign img{
+    position:absolute;
+    max-width:20mm;
+    max-height:11mm;
+    object-fit:contain;
+    top:1.5mm;
+    left:50%;
+    transform:translateX(-50%);
+}
+
+.seal-img{
+    max-width:18mm!important;
+    max-height:18mm!important;
+    top:1.2mm!important;
+}
+
+.footer-print{
+    position:absolute;
+    bottom:2mm;
+    left:3mm;
+    right:3mm;
+    background:linear-gradient(90deg,#082e72,#0b4fa3,#082e72);
+    color:white;
+    border:1px solid #d7a529;
+    text-align:center;
+    font-size:8.8px;
+    font-weight:900;
+    padding:4px;
+    border-radius:7px;
+    letter-spacing:1px;
+    z-index:4;
 }
 
 @media print{
-    body{
-        background:white !important;
-    }
-
-    .no-print,
-    .sidebar,
-    .topbar,
-    .navbar,
-    header,
-    aside,
-    footer{
-        display:none !important;
-    }
-
-    .sheet{
-        width:200mm !important;
-        margin:0 auto !important;
-    }
-
-    .page{
-        page-break-after:always !important;
-    }
-
-    .admit-card{
-        box-shadow:none !important;
-        page-break-inside:avoid !important;
-    }
+    body{background:white!important}
+    .no-print,.sidebar,.topbar,.navbar,header,aside,footer{display:none!important}
+    .sheet{width:210mm!important;margin:0!important}
+    .card{box-shadow:none!important;page-break-inside:avoid}
 }
 </style>
 
 <div class="no-print">
-    <button onclick="window.print()" class="btn btn-success">
-        🖨 Print / Save PDF
-    </button>
-
-    <a href="{% url 'admit_card_select' %}" class="btn btn-secondary">
-        ⬅ Back
-    </a>
+    <button onclick="window.print()">🖨 Print / Save PDF</button>
+    <a href="{% url 'admit_card_select' %}">⬅ Back</a>
 </div>
 
 <div class="sheet">
 
 {% for student in students %}
 
-    {% if forloop.counter0|divisibleby:2 %}
-    <div class="page">
-    {% endif %}
+<div class="page">
+<div class="card">
 
-    <div class="admit-card">
+    <div class="security-text">AL RAHMAN MISSION</div>
 
-        <img src="{{ logo_url|default:'/static/images/logo.png' }}" class="watermark">
+    <img class="watermark" src="{{ logo_url|default:'/static/images/logo.png' }}">
 
-        <div class="content">
+    <div class="top">
+        <img class="logo" src="{{ logo_url|default:'/static/images/logo.png' }}">
 
-            <img src="{{ header_url|default:'/static/images/header.jpg' }}" class="header-img">
+        <div class="school">
+            <div class="website">www.alrahmanmission.in</div>
+            <h1>AL RAHMAN MISSION</h1>
+            <p>At- Mission More Sapatbari, Po Amalia, Ps Chakulia</p>
+            <p>Dist. Uttar Dinajpur, WB, Pin 733208</p>
+        </div>
 
-            <div class="title">
-                ADMIT CARD —
-                <span class="exam-name">{{ exam.name }}</span>
+        <div class="right-box-area">
+            <div class="equal-box session">
+                <small>ACADEMIC SESSION</small>
+                <div class="year">{{ academic_session|default:"2026-27" }}</div>
             </div>
 
-            <div class="top-grid">
-
-                <div>
-                    <table class="info-table">
-                        <tr>
-                            <td>Name</td>
-                            <td>
-                                :
-                                {% if student.student_name %}
-                                    {{ student.student_name }}
-                                {% elif student.name %}
-                                    {{ student.name }}
-                                {% elif student.full_name %}
-                                    {{ student.full_name }}
-                                {% else %}
-                                    {{ student }}
-                                {% endif %}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>Father</td>
-                            <td>: {{ student.father_name|default:"-" }}</td>
-                        </tr>
-
-                        <tr>
-                            <td>Class</td>
-                            <td>
-                                :
-                                {% if student.class_assigned %}
-                                    {{ student.class_assigned.class_name }}
-                                {% else %}
-                                    {{ selected_class|default:"-" }}
-                                {% endif %}
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>Roll</td>
-                            <td>: {{ student.roll_no|default:"-" }}</td>
-                        </tr>
-
-                        <tr>
-                            <td>Student ID</td>
-                            <td>: {{ student.student_id|default:student.id }}</td>
-                        </tr>
-
-                        <tr>
-                            <td>Reg. No</td>
-                            <td>: {{ student.registration_no|default:"-" }}</td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div>
-                    {% if student.photo %}
-                        <img src="{{ student.photo.url }}" class="photo">
-                    {% else %}
-                        <img src="{% static 'images/logo.png' %}" class="photo">
-                    {% endif %}
-                </div>
-
+            <div class="equal-box term">
+                {{ exam.name|default:"First Term Exam" }}
             </div>
 
-            <table class="routine">
+            <div class="equal-box admit-top-box">
+                <div>ADMIT CARD NO</div>
+                <div class="red">ARM{{ exam.id }}-{{ student.id }}</div>
+            </div>
+        </div>
+
+        <div class="photo-box">
+            {% if student.photo %}
+                <img src="{{ student.photo.url }}">
+            {% elif student.student_photo %}
+                <img src="{{ student.student_photo.url }}">
+            {% elif student.image %}
+                <img src="{{ student.image.url }}">
+            {% else %}
+                STUDENT<br>PHOTO
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="title">★ ADMIT CARD ★</div>
+
+    <div class="main">
+        <div>
+            <div class="info-box">
+                <div class="head">👤 STUDENT INFORMATION</div>
+
+                <div class="info-grid">
+                    <div>
+                        <div class="row"><span>Student Name</span><span>:</span><b>{% if student.student_name %}{{ student.student_name }}{% elif student.name %}{{ student.name }}{% else %}-{% endif %}</b></div>
+                        <div class="row"><span>Father's Name</span><span>:</span><b>{{ student.father_name|default:"-" }}</b></div>
+                        <div class="row"><span>Mother's Name</span><span>:</span><b>{{ student.mother_name|default:"-" }}</b></div>
+                        <div class="row dob-one-line"><span>Date of Birth</span><span>:</span><b>{{ student.date_of_birth|date:"M d, Y"|default:"-" }}</b></div>
+                        <div class="row"><span>Gender</span><span>:</span><b>{{ student.gender|default:"-" }}</b></div>
+                    </div>
+
+                    <div>
+                        <div class="row">
+                            <span>Class</span><span>:</span>
+                            <b>{% if selected_class %}{{ selected_class }}{% elif student.class_assigned %}{{ student.class_assigned.name }}{% elif student.class_name %}{{ student.class_name }}{% elif student.class_assigned %}{{ student.class_assigned }}{% else %}-{% endif %}</b>
+                        </div>
+                        <div class="row"><span>Section</span><span>:</span><b>{{ student.section|default:"-" }}</b></div>
+                        <div class="row"><span>Roll No</span><span>:</span><b>{{ student.roll_no|default:"-" }}</b></div>
+                        <div class="row"><span>Student ID</span><span>:</span><b>{{ student.student_id|default:"-" }}</b></div>
+                        <div class="row"><span>Reg. No</span><span>:</span><b>{{ student.registration_no|default:"-" }}</b></div>
+                    </div>
+                </div>
+
+                <div class="address">
+                    Address : {{ student.address|default:"-" }}
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="routine-title">▣ EXAMINATION ROUTINE</div>
+
+            <table>
                 <thead>
                     <tr>
-                        <th width="35">SL</th>
-                        <th>Subject</th>
-                        <th width="80">Date</th>
-                        <th width="120">Time</th>
-                        <th width="50">Marks</th>
+                        <th>SL</th>
+                        <th>SUBJECT</th>
+                        <th>DATE</th>
+                        <th>DAY</th>
+                        <th>TIME</th>
+                        <th>ROOM</th>
+                        <th>MARKS</th>
                     </tr>
                 </thead>
 
@@ -315,67 +539,66 @@ body{
                     {% for r in routines %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ r.subject }}</td>
+                        <td class="subject">{{ r.subject|default:"-" }}</td>
                         <td>{{ r.date|date:"d M Y" }}</td>
+                        <td><span class="day">{{ r.date|date:"D" }}</span></td>
                         <td>{{ r.start_time|time:"h:i A" }} - {{ r.end_time|time:"h:i A" }}</td>
-                        <td>{{ r.total_marks }}</td>
+                        <td></td>
+                        <td>{{ r.total_marks|default:"30" }}</td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="5">No routine found</td>
+                        <td colspan="7">No Routine Found</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-
-            <div class="note-box">
-                <b>Instructions:</b><br>
-                1. Bring Admit Card compulsory. 2. No entry without Admit Card. 3. Reach 30 mins before exam. 4. Maintain discipline.<br>
-                5. Mobile prohibited. 6. Wear proper uniform. 7. Carry own stationery. 8. Follow invigilator instructions.
-                
-            </div>
-
-            <table class="signature-table">
-                <tr>
-                    <td>
-                        <div class="sign-line">
-                            Class Teacher
-                        </div>
-                    </td>
-
-                    <td>
-                        {% if settings_obj.principal_signature %}
-                            <img src="{{ settings_obj.principal_signature.url }}" class="principal-sign">
-                        {% elif principal_sign %}
-                            <img src="{{ principal_sign }}" class="principal-sign">
-                        {% else %}
-                            <img src="{% static 'images/principal_sign.png' %}" class="principal-sign">
-                        {% endif %}
-
-                        <div class="sign-line">
-                            Principal
-                        </div>
-                    </td>
-                </tr>
-            </table>
-
-            <div class="footer-note">
-                AL RAHMAN MISSION • Bangla + English Medium
-            </div>
-
         </div>
     </div>
 
-    {% if forloop.counter|divisibleby:2 or forloop.last %}
+    <div class="bottom-left">
+        <div class="inst">
+            <div class="inst-title">⚠ IMPORTANT INSTRUCTIONS</div>
+
+            <p>🪪 Student must bring Admit Card during examination.</p>
+            <p>🚫 Entry without Admit Card is strictly prohibited.</p>
+            <p>⏰ Reach exam hall 30 minutes before exam.</p>
+            <p>🤫 Maintain discipline and silence in exam hall.</p>
+            <p>📵 Mobile phone & electronic devices are prohibited.</p>
+            <p>🖊 Use only blue/black pen.</p>
+            <p>👨‍🏫 Follow invigilator instructions strictly.</p>
+            <p>👔 School uniform is mandatory.</p>
+        </div>
     </div>
-    {% endif %}
 
-{% empty %}
+    <div class="sign-box">
+        <div class="sign">Guardian Signature</div>
+        <div class="sign">Controller Signature</div>
 
-<div class="alert alert-warning">
-    No students found.
+        <div class="sign">
+            {% if settings_obj.principal_signature %}
+                <img src="{{ settings_obj.principal_signature.url }}" onerror="this.style.display='none'">
+            {% elif principal_sign %}
+                <img src="{{ principal_sign }}" onerror="this.style.display='none'">
+            {% endif %}
+            Principal Signature
+        </div>
+
+        <div class="sign">
+            <img class="seal-img" src="{% static 'images/round_seal.png' %}" onerror="this.style.display='none'">
+            School Seal
+        </div>
+    </div>
+
+    <div class="footer-print">
+        AL RAHMAN MISSION ERP • Generated by School ERP System
+    </div>
+
+</div>
 </div>
 
+{% empty %}
+<div class="alert alert-warning">No students found.</div>
 {% endfor %}
 
 </div>

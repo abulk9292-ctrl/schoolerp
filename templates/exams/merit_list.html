@@ -2,158 +2,77 @@
 {% block content %}
 
 <style>
-
 body{
     background:linear-gradient(135deg,#dbeafe,#ecfeff);
-}
-
-.card-box{
-    border:none;
-    border-radius:24px;
-    background:rgba(255,255,255,0.80);
-    backdrop-filter:blur(14px);
-    box-shadow:0 15px 40px rgba(0,0,0,0.10);
-    transition:0.35s;
-}
-
-.card-box:hover{
-    transform:translateY(-3px);
-    box-shadow:0 22px 50px rgba(0,0,0,0.16);
 }
 
 .top-box{
     background:linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb);
     color:white;
     border-radius:24px;
-    padding:28px;
-    position:relative;
-    overflow:hidden;
+    padding:26px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.14);
 }
 
-.top-box::before{
-    content:'';
-    position:absolute;
-    width:240px;
-    height:240px;
-    background:rgba(255,255,255,0.08);
-    border-radius:50%;
-    top:-120px;
-    right:-60px;
-}
-
-.rank-1{
-    background:#ffd700!important;
-    color:#111!important;
-    font-weight:900;
-}
-
-.rank-2{
-    background:#c0c0c0!important;
-    color:#111!important;
-    font-weight:900;
-}
-
-.rank-3{
-    background:#cd7f32!important;
-    color:white!important;
-    font-weight:900;
-}
-
-.topper-card{
+.card-box{
+    border:none;
     border-radius:22px;
-    padding:22px;
+    box-shadow:0 12px 30px rgba(0,0,0,0.10);
+}
+
+.stat-card{
+    border-radius:20px;
     color:white;
-    height:100%;
-    position:relative;
-    overflow:hidden;
-    transition:0.35s;
+    padding:20px;
+    min-height:120px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.12);
 }
 
-.topper-card:hover{
-    transform:scale(1.03);
-}
+.bg-blue{background:linear-gradient(135deg,#2563eb,#1d4ed8);}
+.bg-green{background:linear-gradient(135deg,#059669,#047857);}
+.bg-red{background:linear-gradient(135deg,#dc2626,#b91c1c);}
+.bg-dark2{background:linear-gradient(135deg,#111827,#374151);}
+.bg-gold{background:linear-gradient(135deg,#f59e0b,#fbbf24); color:#111;}
 
-.topper-card::before{
-    content:'';
-    position:absolute;
-    width:160px;
-    height:160px;
-    background:rgba(255,255,255,0.08);
-    border-radius:50%;
-    top:-60px;
-    right:-50px;
-}
+.rank-1{background:#fff7cc!important;}
+.rank-2{background:#eef2ff!important;}
+.rank-3{background:#ecfeff!important;}
 
-.gold-card{
-    background:linear-gradient(135deg,#f59e0b,#fbbf24);
-}
-
-.blue-card{
-    background:linear-gradient(135deg,#2563eb,#3b82f6);
-}
-
-.green-card{
-    background:linear-gradient(135deg,#059669,#10b981);
-}
-
-.red-card{
-    background:linear-gradient(135deg,#dc2626,#ef4444);
-}
-
-.purple-card{
-    background:linear-gradient(135deg,#7c3aed,#8b5cf6);
-}
-
-.dark-card{
-    background:linear-gradient(135deg,#111827,#374151);
-}
-
-.topper-big{
-    font-size:32px;
-    font-weight:900;
-    line-height:1.1;
-}
-
-.subject-card{
-    border-radius:22px;
-    overflow:hidden;
-}
-
-.analytics-chart-box{
-    background:rgba(255,255,255,0.88);
-    border-radius:24px;
-    padding:24px;
-    box-shadow:0 10px 28px rgba(0,0,0,0.10);
-}
-
-.table{
-    border-radius:18px;
-    overflow:hidden;
-}
-
-.table-dark th{
+.table th{
     background:#111827!important;
-    border:none!important;
+    color:white!important;
+    white-space:nowrap;
+    text-align:center;
 }
 
-.table tbody tr:hover{
-    background:#f8fafc;
-    transition:0.2s;
+.table td{
+    vertical-align:middle;
+    text-align:center;
 }
 
-.badge{
-    border-radius:10px;
-    padding:7px 10px;
+.student-cell{
+    text-align:left!important;
+    font-weight:800;
 }
 
-canvas{
-    max-height:320px!important;
+.subject-topper-card{
+    border:1px solid #e5e7eb;
+    border-radius:16px;
+    padding:14px;
+    background:#ffffff;
+    height:100%;
 }
 
 @media print{
-
-    .btn,
-    form{
+    .no-print,
+    .sidebar,
+    .topbar,
+    .navbar,
+    header,
+    aside,
+    footer,
+    form,
+    .btn{
         display:none!important;
     }
 
@@ -162,589 +81,602 @@ canvas{
     }
 
     .card-box,
-    .analytics-chart-box{
+    .top-box,
+    .stat-card{
         box-shadow:none!important;
     }
 }
 
+/* =====================================
+PRINT FIX
+===================================== */
+
+@page{
+    size:A4 portrait;
+    margin:6mm;
+}
+
+@media print{
+
+    html,
+    body{
+        width:210mm!important;
+        background:white!important;
+    }
+
+    .container-fluid{
+        width:100%!important;
+        padding:0!important;
+        margin:0!important;
+    }
+
+    .top-box{
+        padding:10px!important;
+        margin-bottom:8px!important;
+        page-break-after:avoid!important;
+    }
+
+    .row{
+        margin:0!important;
+    }
+
+    .stat-card{
+        min-height:auto!important;
+        padding:8px!important;
+        margin-bottom:5px!important;
+        page-break-inside:avoid!important;
+    }
+
+    .card-box{
+        box-shadow:none!important;
+        border:1px solid #ddd!important;
+        margin-bottom:8px!important;
+        page-break-inside:avoid!important;
+    }
+
+    table{
+        width:100%!important;
+        font-size:9px!important;
+    }
+
+    th,td{
+        padding:3px!important;
+    }
+
+    .subject-topper-card{
+        page-break-inside:avoid!important;
+        margin-bottom:6px!important;
+    }
+
+    h1,h2,h3,h4,h5,h6{
+        margin-bottom:4px!important;
+    }
+
+    .table{
+        margin-bottom:0!important;
+    }
+}
+/* =====================================
+FINAL MERIT PRINT FIX
+===================================== */
+
+@page{
+    size:A4 portrait;
+    margin:6mm;
+}
+
+@media print{
+
+    .no-print,
+    .sidebar,
+    .topbar,
+    .navbar,
+    header,
+    aside,
+    footer,
+    form,
+    .btn{
+        display:none!important;
+    }
+
+    html,
+    body{
+        width:210mm!important;
+        margin:0!important;
+        padding:0!important;
+        background:white!important;
+        font-size:9px!important;
+    }
+
+    .container-fluid{
+        width:198mm!important;
+        padding:0!important;
+        margin:0 auto!important;
+    }
+
+    .top-box{
+        padding:6px!important;
+        margin-bottom:4px!important;
+        border-radius:0!important;
+    }
+
+    .top-box h3{
+        font-size:13px!important;
+        margin:0!important;
+    }
+
+    .top-box small{
+        font-size:8px!important;
+    }
+
+    .stat-card{
+        padding:4px!important;
+        min-height:auto!important;
+        margin-bottom:2px!important;
+        box-shadow:none!important;
+    }
+
+    .stat-card h6{
+        font-size:8px!important;
+        margin:0!important;
+    }
+
+    .stat-card h1{
+        font-size:14px!important;
+        margin:0!important;
+    }
+
+    .stat-card small{
+        font-size:7px!important;
+    }
+
+    .card-box{
+        box-shadow:none!important;
+        border:1px solid #ccc!important;
+        margin-bottom:4px!important;
+        border-radius:6px!important;
+        page-break-inside:avoid!important;
+    }
+
+    .card-box.p-4{
+        padding:6px!important;
+    }
+
+    .card-box.p-3{
+        padding:6px!important;
+    }
+
+    .bg-gold{
+        padding:6px!important;
+        margin-bottom:4px!important;
+    }
+
+    .bg-gold h2{
+        font-size:13px!important;
+        margin:0!important;
+    }
+
+    .bg-gold h1{
+        font-size:18px!important;
+        margin:0!important;
+    }
+
+    .card-header{
+        padding:5px!important;
+        font-size:10px!important;
+    }
+
+    .card-body{
+        padding:5px!important;
+    }
+
+    table{
+        width:100%!important;
+        font-size:8px!important;
+        margin-bottom:0!important;
+    }
+
+    th,
+    td{
+        padding:2px!important;
+        font-size:8px!important;
+        line-height:1.1!important;
+    }
+
+    .student-cell small{
+        font-size:7px!important;
+    }
+
+    /* Subject toppers print compact */
+    .subject-topper-card{
+        padding:4px!important;
+        font-size:8px!important;
+        margin-bottom:3px!important;
+        page-break-inside:avoid!important;
+    }
+
+    .subject-topper-card h6{
+        font-size:9px!important;
+        margin:0 0 2px 0!important;
+    }
+
+    .subject-topper-card hr{
+        margin:3px 0!important;
+    }
+
+    .col-md-3{
+        width:25%!important;
+        float:left!important;
+        padding:2px!important;
+    }
+
+    .row{
+        display:block!important;
+        margin:0!important;
+    }
+
+    .mb-4,
+    .mb-3{
+        margin-bottom:4px!important;
+    }
+
+    h1,h2,h3,h4,h5,h6,p{
+        page-break-after:avoid!important;
+    }
+}
 </style>
 
-<div class="container mt-4">
+
+<div class="container-fluid mt-4">
 
     <div class="top-box mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h3 class="fw-bold mb-1">
+                    🏆 Section-wise Merit List & Subject Toppers
+                </h3>
+                <small>
+                    AL RAHMAN MISSION ERP | Session: {{ selected_session }}
+                </small>
+            </div>
 
-        <h3 class="fw-bold">
-            🏆 Merit List & Topper System
-        </h3>
-
-        <small>
-            AL RAHMAN MISSION ERP
-        </small>
-
+            <button onclick="window.print()" class="btn btn-light fw-bold no-print">
+                🖨 Print
+            </button>
+        </div>
     </div>
 
-    <div class="card card-box p-4 mb-4">
-
+    <div class="card card-box p-4 mb-4 no-print">
         <form method="get" class="row g-3">
 
-            <div class="col-md-5">
-
-                <label class="form-label fw-bold">
-                    Select Exam
-                </label>
-
-                <select name="exam"
-                        class="form-select"
-                        required>
-
-                    <option value="">
-                        Select Exam
-                    </option>
-
+            <div class="col-md-4">
+                <label class="form-label fw-bold">Exam</label>
+                <select name="exam" class="form-select" required>
+                    <option value="">Select Exam</option>
                     {% for e in exams %}
-                    <option value="{{ e.id }}"
-                        {% if selected_exam and selected_exam.id == e.id %}
-                            selected
-                        {% endif %}>
-
-                        {{ e.name }}
-
-                    </option>
+                        <option value="{{ e.id }}"
+                            {% if selected_exam_id|stringformat:"s" == e.id|stringformat:"s" %}selected{% endif %}>
+                            {{ e.name }} - {{ e.academic_session }}
+                        </option>
                     {% endfor %}
-
                 </select>
-
             </div>
 
-            <div class="col-md-5">
-
-                <label class="form-label fw-bold">
-                    Class
-                </label>
-
-                <select name="class"
-                        class="form-select">
-
-                    <option value="">
-                        All Classes
-                    </option>
-
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Class</label>
+                <select name="class" class="form-select">
+                    <option value="">All Classes</option>
                     {% for c in classes %}
-                    <option value="{{ c }}"
-                        {% if selected_class == c %}
-                            selected
-                        {% endif %}>
-                        {{ c }}
-                    </option>
+                        <option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>
+                            {{ c }}
+                        </option>
                     {% endfor %}
-
                 </select>
-
             </div>
 
-            <div class="col-md-2 d-grid">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Section</label>
+                <select name="section" class="form-select">
+                    <option value="">All Sections</option>
+                    <option value="A" {% if selected_section == "A" %}selected{% endif %}>A</option>
+                    <option value="B" {% if selected_section == "B" %}selected{% endif %}>B</option>
+                    <option value="C" {% if selected_section == "C" %}selected{% endif %}>C</option>
+                    <option value="D" {% if selected_section == "D" %}selected{% endif %}>D</option>
+                </select>
+            </div>
 
-                <label class="form-label fw-bold text-white">
-                    x
-                </label>
-
-                <button class="btn btn-success">
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-success w-100 fw-bold">
                     🔍 Load
                 </button>
-
             </div>
 
         </form>
-
     </div>
 
-    {% if merit_students %}
+    {% if selected_exam %}
 
-    <!-- ✅ TOPPER CARDS -->
+    <div class="row mb-2">
 
-    <div class="row mb-4">
-
-        <div class="col-md-4 mb-3">
-
-            <div class="topper-card gold-card">
-
-                <small>🥇 School Topper</small>
-
-                <div class="topper-big">
-                    {{ merit_students.0.student.name|default:merit_students.0.student.student_name|default:merit_students.0.student }}
-                </div>
-
-                <div>
-                    {{ merit_students.0.percentage }}%
-                </div>
-
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-blue">
+                <h6>Total Students</h6>
+                <h1 class="fw-bold">{{ total_students }}</h1>
+                <small>Merit counted</small>
             </div>
-
         </div>
 
-        <div class="col-md-4 mb-3">
-
-            <div class="topper-card blue-card">
-
-                <small>📊 Total Students</small>
-
-                <div class="topper-big">
-                    {{ total_students }}
-                </div>
-
-                <div>
-                    Merit Listed
-                </div>
-
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-green">
+                <h6>Passed</h6>
+                <h1 class="fw-bold">{{ pass_count }}</h1>
+                <small>Successful students</small>
             </div>
-
         </div>
 
-        <div class="col-md-4 mb-3">
-
-            <div class="topper-card purple-card">
-
-                <small>🏆 Highest Grade</small>
-
-                <div class="topper-big">
-                    {{ merit_students.0.grade }}
-                </div>
-
-                <div>
-                    Top Performance
-                </div>
-
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-red">
+                <h6>Failed</h6>
+                <h1 class="fw-bold">{{ fail_count }}</h1>
+                <small>Need improvement</small>
             </div>
+        </div>
 
+        <div class="col-md-3 mb-3">
+            <div class="stat-card bg-dark2">
+                <h6>Average %</h6>
+                <h1 class="fw-bold">{{ avg_percentage }}%</h1>
+                <small>Class average</small>
+            </div>
         </div>
 
     </div>
 
-    <!-- ✅ ANALYTICS -->
+    {% if class_topper %}
+    <div class="card card-box p-3 mb-2 bg-gold">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h5 class="fw-bold mb-1">
+                    🥇 Top Performer
+                </h5>
 
-    <div class="card card-box p-4 mb-4">
+                <h2 class="fw-bold mb-1">
+                    {{ class_topper.student.student_name }}
+                </h2>
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    Class: {{ class_topper.student.class_assigned.class_name }}
+                    |
+                    Section: {{ class_topper.student.section|default:"-" }}
+                    |
+                    Roll: {{ class_topper.student.roll_no|default:"-" }}
+                </div>
+            </div>
 
-            <h4 class="fw-bold mb-0">
-                📊 Exam Analytics
-            </h4>
+            <div class="col-md-4 text-end">
+                <h1 class="fw-bold">
+                    {{ class_topper.percentage }}%
+                </h1>
+                <h5>
+                    {{ class_topper.total_marks }}/{{ class_topper.max_total_marks }}
+                    |
+                    Grade: {{ class_topper.grade }}
+                </h5>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
-            <span class="badge bg-dark fs-6">
+    <div class="card card-box mb-4">
+        <div class="card-header bg-dark text-white py-3">
+            <h5 class="mb-0">
+                📋 Merit List
+                —
                 {{ selected_exam.name }}
-            </span>
-
+                |
+                Class: {{ selected_class|default:"All" }}
+                |
+                Section: {{ selected_section|default:"All" }}
+            </h5>
         </div>
 
-        <div class="row">
+        <div class="card-body table-responsive">
 
-            <div class="col-md-3 mb-3">
-
-                <div class="topper-card dark-card">
-
-                    <small>🏆 Highest Percentage</small>
-
-                    <div class="topper-big">
-                        {{ highest_percentage }}%
-                    </div>
-
-                    <div>
-                        Best Performance
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-3 mb-3">
-
-                <div class="topper-card green-card">
-
-                    <small>✅ Pass Rate</small>
-
-                    <div class="topper-big">
-                        {% widthratio pass_count total_students 100 %}%
-                    </div>
-
-                    <div>
-                        Students Passed
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-3 mb-3">
-
-                <div class="topper-card red-card">
-
-                    <small>❌ Fail Rate</small>
-
-                    <div class="topper-big">
-                        {% widthratio fail_count total_students 100 %}%
-                    </div>
-
-                    <div>
-                        Students Failed
-                    </div>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-3 mb-3">
-
-                <div class="topper-card blue-card">
-
-                    <small>📈 Average Marks</small>
-
-                    <div class="topper-big">
-                        {{ avg_percentage }}%
-                    </div>
-
-                    <div>
-                        Overall Average
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- ✅ CHARTS -->
-
-    <div class="analytics-chart-box mb-4">
-
-        <div class="d-flex justify-content-between align-items-center mb-4">
-
-            <h4 class="fw-bold mb-0">
-                📈 Performance Charts
-            </h4>
-
-            <span class="badge bg-primary">
-                Live Analytics
-            </span>
-
-        </div>
-
-        <div class="row">
-
-            <div class="col-md-6 mb-4">
-
-                <div class="card card-box p-3 h-100">
-
-                    <h5 class="fw-bold mb-3">
-                        📊 Pass vs Fail
-                    </h5>
-
-                    <canvas id="passFailChart"></canvas>
-
-                </div>
-
-            </div>
-
-            <div class="col-md-6 mb-4">
-
-                <div class="card card-box p-3 h-100">
-
-                    <h5 class="fw-bold mb-3">
-                        📈 Overall Performance
-                    </h5>
-
-                    <canvas id="performanceChart"></canvas>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-    <!-- ✅ MERIT TABLE -->
-
-    <div class="card card-box p-4 mb-4">
-
-        <div class="d-flex justify-content-between mb-3">
-
-            <h4 class="fw-bold">
-                🏆 Merit List
-            </h4>
-
-            <button onclick="window.print()"
-                    class="btn btn-dark">
-
-                🖨 Print
-
-            </button>
-
-        </div>
-
-        <div class="table-responsive">
-
-            <table class="table table-bordered align-middle">
-
-                <thead class="table-dark">
-
+            <table class="table table-bordered table-hover align-middle">
+                <thead>
                     <tr>
-                        <th>Rank</th>
-                        <th>Student</th>
-                        <th>Class</th>
-                        <th>Total</th>
-                        <th>%</th>
-                        <th>Grade</th>
-                        <th>Status</th>
+                        <th>
+                            <a href="?exam={{ selected_exam_id }}&class={{ selected_class }}&section={{ selected_section }}&sort=rank"
+                                   class="text-white text-decoration-none">
+                                   Rank ↕
+                                </a>
+                            </th>
+                            
+                            <th>
+                                <a href="?exam={{ selected_exam_id }}&class={{ selected_class }}&section={{ selected_section }}&sort=roll"
+                                   class="text-white text-decoration-none">
+                                   Roll ↕
+                                </a>
+                            </th>
+                            
+                            <th>
+                                <a href="?exam={{ selected_exam_id }}&class={{ selected_class }}&section={{ selected_section }}&sort=name"
+                                   class="text-white text-decoration-none">
+                                   Student ↕
+                                </a>
+                            </th>
+                            
+                            <th>
+                                <a href="?exam={{ selected_exam_id }}&class={{ selected_class }}&section={{ selected_section }}&sort=sid"
+                                   class="text-white text-decoration-none">
+                                   SID ↕
+                                </a>
+                            </th>
+                            
+                            <th>
+                                <a href="?exam={{ selected_exam_id }}&class={{ selected_class }}&section={{ selected_section }}&sort=class"
+                                   class="text-white text-decoration-none">
+                                   Class ↕
+                                </a>
+                            </th>
+                            
+                            <th>
+                                <a href="?exam={{ selected_exam_id }}&class={{ selected_class }}&section={{ selected_section }}&sort=section"
+                                   class="text-white text-decoration-none">
+                                   Section ↕
+                                </a>
+                            </th>
+                            
+                            <th>
+                                <a href="?exam={{ selected_exam_id }}&class={{ selected_class }}&section={{ selected_section }}&sort=total"
+                                   class="text-white text-decoration-none">
+                                   Total ↕
+                                </a>
+                            </th>
+                            
+                            <th>
+                                <a href="?exam={{ selected_exam_id }}&class={{ selected_class }}&section={{ selected_section }}&sort=percentage"
+                                   class="text-white text-decoration-none">
+                                   % ↕
+                                </a>
+                            </th>
+                            
+                            <th>
+                                <a href="?exam={{ selected_exam_id }}&class={{ selected_class }}&section={{ selected_section }}&sort=grade"
+                                   class="text-white text-decoration-none">
+                                   Grade ↕
+                                </a>
+                            </th>
+                            
+                            <th>
+                                <a href="?exam={{ selected_exam_id }}&class={{ selected_class }}&section={{ selected_section }}&sort=status"
+                                   class="text-white text-decoration-none">
+                                   Status ↕
+                                </a>
+                            </th>
                     </tr>
-
                 </thead>
 
                 <tbody>
-
                     {% for item in merit_students %}
 
-                    <tr>
-
+                    <tr class="{% if item.rank == 1 %}rank-1{% elif item.rank == 2 %}rank-2{% elif item.rank == 3 %}rank-3{% endif %}">
                         <td>
-
-                            <span class="badge
                             {% if item.rank == 1 %}
-                                rank-1
+                                🥇 {{ item.rank }}
                             {% elif item.rank == 2 %}
-                                rank-2
+                                🥈 {{ item.rank }}
                             {% elif item.rank == 3 %}
-                                rank-3
+                                🥉 {{ item.rank }}
                             {% else %}
-                                bg-dark
+                                {{ item.rank }}
                             {% endif %}
-                            ">
+                        </td>
 
-                                #{{ item.rank }}
+                        <td>{{ item.student.roll_no|default:"-" }}</td>
 
+                        <td class="student-cell">
+                            {{ item.student.student_name }}
+                            <br>
+                            <small class="text-muted">
+                                Father: {{ item.student.father_name|default:"-" }}
+                            </small>
+                        </td>
+
+                        <td>{{ item.student.student_id }}</td>
+                        <td>{{ item.class_name }}</td>
+                        <td>{{ item.section }}</td>
+
+                        <td>
+                            <b>{{ item.total }}</b>/{{ item.max_total }}
+                        </td>
+
+                        <td>
+                            <b>{{ item.percentage }}%</b>
+                        </td>
+
+                        <td>
+                            <span class="badge bg-primary">
+                                {{ item.grade }}
                             </span>
-
-                        </td>
-
-                        <td class="fw-bold">
-                            {{ item.student.name|default:item.student.student_name|default:item.student }}
                         </td>
 
                         <td>
-                            {{ item.student.class_assigned }}
-                        </td>
-
-                        <td>
-                            {{ item.total }}
-                        </td>
-
-                        <td>
-                            {{ item.percentage }}%
-                        </td>
-
-                        <td>
-                            {{ item.grade }}
-                        </td>
-
-                        <td>
-
                             {% if item.status == "Pass" %}
-                                <span class="badge bg-success">
-                                    PASS
-                                </span>
+                                <span class="badge bg-success">Pass</span>
                             {% else %}
-                                <span class="badge bg-danger">
-                                    FAIL
-                                </span>
+                                <span class="badge bg-danger">Fail</span>
                             {% endif %}
-
                         </td>
+                    </tr>
 
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="10" class="text-center text-muted py-5">
+                            No merit data found.
+                        </td>
                     </tr>
 
                     {% endfor %}
-
                 </tbody>
-
             </table>
 
         </div>
-
     </div>
 
-    <!-- ✅ SUBJECT TOPPERS -->
+    <div class="card card-box p-4 mb-4">
+        <h5 class="fw-bold mb-3">
+            📚 Subject-wise Toppers
+        </h5>
 
-    {% if subject_toppers %}
+        <div class="row">
+            {% for t in subject_toppers %}
+            <div class="col-md-3 mb-3">
+                <div class="subject-topper-card">
+                    <h6 class="fw-bold text-primary">
+                        {{ t.subject }}
+                    </h6>
 
-    <div class="card card-box p-4 subject-card">
+                    <div class="fw-bold">
+                        🏆 {{ t.student.student_name }}
+                    </div>
 
-        <h4 class="fw-bold mb-4">
-            📚 Subject Highest Marks
-        </h4>
+                    <small>
+                        Class: {{ t.class_name }} |
+                        Sec: {{ t.section }} |
+                        Roll: {{ t.student.roll_no|default:"-" }}
+                    </small>
 
-        <div class="table-responsive">
+                    <hr>
 
-            <table class="table table-bordered align-middle">
-
-                <thead class="table-dark">
-
-                    <tr>
-                        <th>#</th>
-                        <th>Subject</th>
-                        <th>Highest Marks</th>
-                        <th>Top Student</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    {% for item in subject_toppers %}
-
-                    <tr>
-
-                        <td>
-                            {{ forloop.counter }}
-                        </td>
-
-                        <td class="fw-bold">
-                            {{ item.subject }}
-                        </td>
-
-                        <td>
-
-                            <span class="badge bg-success">
-                                {{ item.marks }}
-                            </span>
-
-                        </td>
-
-                        <td class="fw-bold">
-
-                            {{ item.student.name|default:item.student.student_name|default:item.student }}
-
-                        </td>
-
-                    </tr>
-
-                    {% endfor %}
-
-                </tbody>
-
-            </table>
-
+                    <div>
+                        <b>{{ t.marks }}/{{ t.max_marks }}</b>
+                        |
+                        {{ t.percentage }}%
+                        |
+                        Grade: {{ t.grade }}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    No subject topper data found.
+                </div>
+            </div>
+            {% endfor %}
         </div>
-
     </div>
 
-    {% endif %}
+    {% else %}
+
+    <div class="alert alert-warning">
+        Please select exam to view merit list.
+    </div>
 
     {% endif %}
 
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-
-const passFailCtx = document.getElementById('passFailChart');
-
-if(passFailCtx){
-
-new Chart(passFailCtx, {
-
-    type: 'doughnut',
-
-    data: {
-
-        labels: ['Pass','Fail'],
-
-        datasets: [{
-
-            data: [{{ pass_count }}, {{ fail_count }}],
-
-            backgroundColor: [
-                '#10b981',
-                '#ef4444'
-            ],
-
-            borderWidth:0
-
-        }]
-
-    },
-
-    options: {
-
-        responsive:true,
-
-        plugins:{
-            legend:{
-                position:'bottom'
-            }
-        }
-
-    }
-
-});
-
-}
-
-const performanceCtx = document.getElementById('performanceChart');
-
-if(performanceCtx){
-
-new Chart(performanceCtx, {
-
-    type: 'bar',
-
-    data: {
-
-        labels: [
-            'Highest %',
-            'Average %'
-        ],
-
-        datasets: [{
-
-            label:'Performance',
-
-            data:[
-                {{ highest_percentage|default:0 }},
-                {{ avg_percentage|default:0 }}
-            ],
-
-            backgroundColor:[
-                '#3b82f6',
-                '#8b5cf6'
-            ],
-
-            borderRadius:14
-
-        }]
-
-    },
-
-    options:{
-
-        responsive:true,
-
-        scales:{
-
-            y:{
-                beginAtZero:true,
-                max:100
-            }
-
-        }
-
-    }
-
-});
-
-}
-
-</script>
 
 {% endblock %}

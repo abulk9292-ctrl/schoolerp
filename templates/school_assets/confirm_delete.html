@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card border-danger">
+    <div class="card-header bg-danger text-white fw-bold">Confirm Delete</div>
+    <div class="card-body">
+        <h5>Are you sure you want to delete?</h5>
+        <p class="fw-bold">{{ object }}</p>
+        <form method="post">
+            {% csrf_token %}
+            <button class="btn btn-danger">Yes, Delete</button>
+            <a href="{% url back_url %}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

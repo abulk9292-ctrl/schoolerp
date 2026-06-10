@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from teachers.models import Employee
 from .models import Salary
 from .forms import SalaryForm
+from core.context_processors import get_current_session
 
 
 MONTH_NUMBER = {
@@ -27,18 +28,34 @@ MONTH_NUMBER = {
 }
 
 
-def get_teacher_absent_count(employee, month, year):
+def get_selected_session(request):
+    selected_session = request.session.get("selected_session")
+
+    if not selected_session:
+        selected_session = get_current_session()
+        request.session["selected_session"] = selected_session
+
+    return selected_session
+
+
+def get_teacher_absent_count(employee, month, year, selected_session=None):
     month_number = MONTH_NUMBER.get(month, 1)
 
     try:
         from attendance.models import TeacherAttendance
+        from django.db.models import Q
 
-        return TeacherAttendance.objects.filter(
+        records = TeacherAttendance.objects.filter(
             employee=employee,
             date__year=year,
             date__month=month_number,
-            status='Absent'
-        ).count()
+        ).filter(
+            Q(status__iexact="Absent") |
+            Q(status__iexact="A") |
+            Q(status__icontains="absent")
+        )
+
+        return records.count()
 
     except Exception:
         return 0
@@ -46,14 +63,14 @@ def get_teacher_absent_count(employee, month, year):
 
 @login_required
 def get_employee_absent_days(request):
+    selected_session = get_selected_session(request)
+
     employee_id = request.GET.get('employee_id')
     month = request.GET.get('month')
     year = request.GET.get('year')
 
     if not employee_id or not month or not year:
-        return JsonResponse({
-            'absent_days': 0
-        })
+        return JsonResponse({'absent_days': 0})
 
     try:
         employee = Employee.objects.get(id=employee_id)
@@ -61,25 +78,28 @@ def get_employee_absent_days(request):
         absent_days = get_teacher_absent_count(
             employee=employee,
             month=month,
-            year=int(year)
+            year=int(year),
+            selected_session=selected_session
         )
 
     except Exception:
         absent_days = 0
 
-    return JsonResponse({
-        'absent_days': absent_days
-    })
+    return JsonResponse({'absent_days': absent_days})
 
 
 @login_required
 def payroll_dashboard(request):
+    selected_session = get_selected_session(request)
+
     current_month = timezone.now().strftime('%B')
     current_year = timezone.now().year
 
     total_employees = Employee.objects.filter(is_active=True).count()
 
-    salaries = Salary.objects.select_related('employee').all()
+    salaries = Salary.objects.select_related('employee').filter(
+        academic_session=selected_session
+    )
 
     total_paid = sum(s.paid_amount or Decimal('0.00') for s in salaries)
     total_due = sum(s.due_amount or Decimal('0.00') for s in salaries)
@@ -97,15 +117,20 @@ def payroll_dashboard(request):
         'total_unpaid': total_due,
         'total_advance': total_advance,
         'this_month_expense': this_month_expense,
+        'selected_session': selected_session,
     })
 
 
 @login_required
 def salary_list(request):
+    selected_session = get_selected_session(request)
 
     records = Salary.objects.select_related(
         'employee'
-    ).all().order_by(
+    ).filter(
+        academic_session=selected_session,
+        is_deleted=False
+    ).order_by(
         '-year',
         '-created_at'
     )
@@ -114,9 +139,6 @@ def salary_list(request):
     month = request.GET.get('month')
     year = request.GET.get('year')
 
-    # =========================
-    # FILTERS
-    # =========================
     if status:
         records = records.filter(status=status)
 
@@ -126,80 +148,49 @@ def salary_list(request):
     if year:
         records = records.filter(year=year)
 
-    # =========================
-    # TOTAL SUMMARY
-    # =========================
     total_paid = Decimal('0.00')
     total_due = Decimal('0.00')
     total_advance = Decimal('0.00')
     total_payable = Decimal('0.00')
 
     for r in records:
+        total_paid += r.paid_amount or Decimal('0.00')
+        total_due += r.due_amount or Decimal('0.00')
+        total_advance += r.advance_amount or Decimal('0.00')
+        total_payable += r.payable_amount or Decimal('0.00')
 
-        total_paid += (
-            r.paid_amount or Decimal('0.00')
-        )
-
-        total_due += (
-            r.due_amount or Decimal('0.00')
-        )
-
-        total_advance += (
-            r.advance_amount or Decimal('0.00')
-        )
-
-        total_payable += (
-            r.payable_amount or Decimal('0.00')
-        )
-
-    # =========================
-    # STATUS COUNT
-    # =========================
-    paid_count = records.filter(
-        status='Paid'
-    ).count()
-
-    partial_count = records.filter(
-        status='Partial'
-    ).count()
-
-    unpaid_count = records.filter(
-        status='Unpaid'
-    ).count()
-
-    advance_count = records.filter(
-        status='Advance'
-    ).count()
+    paid_count = records.filter(status='Paid').count()
+    partial_count = records.filter(status='Partial').count()
+    unpaid_count = records.filter(status='Unpaid').count()
+    advance_count = records.filter(status='Advance').count()
 
     return render(request, 'payroll/salary_list.html', {
-
         'records': records,
-
         'selected_status': status,
         'selected_month': month,
         'selected_year': year,
-
         'months': Salary.MONTH_CHOICES,
-
-        # SUMMARY
         'total_paid': total_paid,
         'total_due': total_due,
         'total_advance': total_advance,
         'total_payable': total_payable,
-
-        # COUNT
         'paid_count': paid_count,
         'partial_count': partial_count,
         'unpaid_count': unpaid_count,
         'advance_count': advance_count,
-
+        'selected_session': selected_session,
     })
 
 
 @login_required
 def salary_add(request):
+    selected_session = get_selected_session(request)
+
     employees = Employee.objects.filter(is_active=True).order_by('name')
-    salary_records = Salary.objects.select_related('employee').all().order_by('-year', '-created_at')
+
+    salary_records = Salary.objects.select_related('employee').filter(
+        academic_session=selected_session
+    ).order_by('-year', '-created_at')
 
     if request.method == 'POST':
         form = SalaryForm(request.POST)
@@ -214,19 +205,16 @@ def salary_add(request):
             existing = Salary.objects.filter(
                 employee=employee,
                 month=month,
-                year=year
+                year=year,
+                academic_session=selected_session
             ).first()
 
-            # ==============================
-            # SECOND PAYMENT LOGIC
-            # No salary recalculation here
-            # only paid/due/status update
-            # ==============================
             if existing:
                 old_paid = existing.paid_amount or Decimal('0.00')
 
                 existing.paid_amount = old_paid + new_paid
                 existing.payment_date = payment_date
+                existing.academic_session = selected_session
 
                 existing.payment_only_update = True
                 existing.save()
@@ -240,13 +228,8 @@ def salary_add(request):
 
                 return redirect('salary_print', pk=existing.pk)
 
-            # ==============================
-            # FIRST TIME CREATE
-            # Model will auto calculate:
-            # absent, deduction, bonus,
-            # previous due, payable, status
-            # ==============================
             salary = form.save(commit=False)
+            salary.academic_session = selected_session
             salary.payment_date = payment_date
             salary.save()
 
@@ -267,26 +250,34 @@ def salary_add(request):
         'title': 'Add Salary',
         'employees': employees,
         'salary_records': salary_records,
+        'selected_session': selected_session,
     })
 
 
 @login_required
 def salary_detail(request, pk):
+    selected_session = get_selected_session(request)
+
     salary = get_object_or_404(
         Salary.objects.select_related('employee'),
-        pk=pk
+        pk=pk,
+        academic_session=selected_session
     )
 
     return render(request, 'payroll/salary_detail.html', {
-        'salary': salary
+        'salary': salary,
+        'selected_session': selected_session,
     })
 
 
 @login_required
 def salary_edit(request, pk):
+    selected_session = get_selected_session(request)
+
     salary = get_object_or_404(
         Salary.objects.select_related('employee'),
-        pk=pk
+        pk=pk,
+        academic_session=selected_session
     )
 
     if request.method == 'POST':
@@ -294,9 +285,7 @@ def salary_edit(request, pk):
 
         if form.is_valid():
             salary = form.save(commit=False)
-
-            # Edit করলে salary আবার calculate হবে,
-            # কারণ basic/bonus/extra deduction change হতে পারে.
+            salary.academic_session = selected_session
             salary.save()
 
             messages.success(
@@ -313,34 +302,52 @@ def salary_edit(request, pk):
         'form': form,
         'title': 'Edit Salary',
         'employees': Employee.objects.filter(is_active=True).order_by('name'),
-        'salary_records': Salary.objects.select_related('employee').all().order_by('-year', '-created_at'),
+        'salary_records': Salary.objects.select_related('employee').filter(
+            academic_session=selected_session
+        ).order_by('-year', '-created_at'),
+        'selected_session': selected_session,
     })
 
 
 @login_required
 def salary_delete(request, pk):
+
+    selected_session = get_selected_session(request)
+
     salary = get_object_or_404(
         Salary.objects.select_related('employee'),
-        pk=pk
+        pk=pk,
+        academic_session=selected_session,
+        is_deleted=False
     )
 
     if request.method == 'POST':
-        salary.delete()
+
+        salary.is_deleted = True
+        salary.deleted_at = timezone.now()
+        salary.deleted_by = request.user
+        salary.save()
 
         messages.success(
             request,
-            '✅ Salary deleted successfully.'
+            '🗑 Salary moved to recycle bin.'
         )
 
         return redirect('salary_list')
 
-    return render(request, 'payroll/salary_confirm_delete.html', {
-        'salary': salary
-    })
-
+    return render(
+        request,
+        'payroll/salary_confirm_delete.html',
+        {
+            'salary': salary,
+            'selected_session': selected_session,
+        }
+    )
 
 @login_required
 def auto_generate_salary(request):
+    selected_session = get_selected_session(request)
+
     if request.method == 'POST':
         month = request.POST.get('month')
         year = request.POST.get('year')
@@ -366,6 +373,7 @@ def auto_generate_salary(request):
                 employee=employee,
                 month=month,
                 year=year,
+                academic_session=selected_session,
                 defaults={
                     'basic_salary': employee.salary or Decimal('0.00'),
                     'bonus': Decimal('0.00'),
@@ -376,6 +384,7 @@ def auto_generate_salary(request):
             )
 
             if is_created:
+                salary.academic_session = selected_session
                 salary.save()
                 created += 1
             else:
@@ -395,16 +404,102 @@ def auto_generate_salary(request):
         'current_year': current_year,
         'current_month': current_month,
         'months': Salary.MONTH_CHOICES,
+        'selected_session': selected_session,
     })
 
 
 @login_required
 def salary_print(request, pk):
+    selected_session = get_selected_session(request)
+
     salary = get_object_or_404(
         Salary.objects.select_related('employee'),
-        pk=pk
+        pk=pk,
+        academic_session=selected_session
     )
 
     return render(request, 'payroll/salary_print.html', {
-        'salary': salary
+        'salary': salary,
+        'selected_session': selected_session,
     })
+
+@login_required
+def salary_recycle_bin(request):
+
+    records = Salary.objects.select_related(
+        'employee'
+    ).filter(
+        is_deleted=True
+    ).order_by(
+        '-deleted_at'
+    )
+
+    return render(
+        request,
+        'payroll/salary_recycle_bin.html',
+        {
+            'records': records
+        }
+    )
+
+
+@login_required
+def salary_restore(request, pk):
+
+    if not request.user.is_superuser:
+        messages.error(
+            request,
+            "Only Super Admin can restore salary records."
+        )
+        return redirect('salary_recycle_bin')
+
+    salary = get_object_or_404(
+        Salary,
+        pk=pk,
+        is_deleted=True
+    )
+
+    salary.is_deleted = False
+    salary.deleted_at = None
+    salary.deleted_by = None
+    salary.save()
+
+    messages.success(
+        request,
+        "Salary restored successfully."
+    )
+
+    return redirect('salary_recycle_bin')
+
+
+@login_required
+def salary_permanent_delete(request, pk):
+
+    if not request.user.is_superuser:
+        messages.error(
+            request,
+            "Only Super Admin can permanently delete salary records."
+        )
+        return redirect('salary_recycle_bin')
+
+    salary = get_object_or_404(
+        Salary,
+        pk=pk,
+        is_deleted=True
+    )
+
+    if request.method != "POST":
+        messages.error(
+            request,
+            "Invalid request."
+        )
+        return redirect('salary_recycle_bin')
+
+    salary.delete()
+
+    messages.success(
+        request,
+        "Salary permanently deleted."
+    )
+
+    return redirect('salary_recycle_bin')

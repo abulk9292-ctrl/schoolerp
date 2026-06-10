@@ -35,7 +35,19 @@ class Salary(models.Model):
         related_name='salary_records'
     )
 
-    month = models.CharField(max_length=20, choices=MONTH_CHOICES)
+    # ==================================
+    # SESSION
+    # ==================================
+    academic_session = models.CharField(
+        max_length=20,
+        default="2025-2026"
+    )
+
+    month = models.CharField(
+        max_length=20,
+        choices=MONTH_CHOICES
+    )
+
     year = models.IntegerField()
 
     basic_salary = models.DecimalField(
@@ -118,14 +130,47 @@ class Salary(models.Model):
         default='Unpaid'
     )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    # =========================
+    # RECYCLE BIN
+    # =========================
+
+    is_deleted = models.BooleanField(default=False)
+
+    deleted_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    deleted_by = models.ForeignKey(
+        'auth.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='deleted_salary_records'
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
 
     class Meta:
-        unique_together = ('employee', 'month', 'year')
+
+        unique_together = (
+            'employee',
+            'academic_session',
+            'month',
+            'year'
+        )
+
         ordering = ['-year', '-id']
 
     def __str__(self):
-        return f"{self.employee.name} - {self.month} {self.year}"
+
+        return (
+            f"{self.employee.name} - "
+            f"{self.month} {self.year} "
+            f"({self.academic_session})"
+        )
 
     # ==========================
     # MONTH NUMBER
@@ -157,7 +202,8 @@ class Salary(models.Model):
         current_month_no = self.get_month_number()
 
         previous_records = Salary.objects.filter(
-            employee=self.employee
+            employee=self.employee,
+            academic_session=self.academic_session
         ).exclude(pk=self.pk)
 
         latest_record = None
@@ -226,7 +272,6 @@ class Salary(models.Model):
             self.advance_amount = Decimal('0.00')
             self.status = 'Unpaid'
 
-        # Safety
         if self.due_amount < 0:
             self.due_amount = Decimal('0.00')
 
@@ -235,21 +280,20 @@ class Salary(models.Model):
     # ==========================
     def calculate_salary(self):
 
-        # Auto basic salary
         if not self.basic_salary:
+
             self.basic_salary = (
-                self.employee.salary or Decimal('0.00')
+                self.employee.salary
+                or Decimal('0.00')
             )
 
         month_number = self.get_month_number()
 
-        # Month days
         self.month_days = calendar.monthrange(
             self.year,
             month_number
         )[1]
 
-        # Per day salary
         if self.basic_salary:
 
             self.per_day_salary = (
@@ -260,30 +304,33 @@ class Salary(models.Model):
             )
 
         else:
+
             self.per_day_salary = Decimal('0.00')
 
         # ==========================
         # ATTENDANCE CHECK
         # ==========================
         try:
-
             from attendance.models import TeacherAttendance
+            from django.db.models import Q
 
-            self.absent_days = TeacherAttendance.objects.filter(
+            attendance_qs = TeacherAttendance.objects.filter(
                 employee=self.employee,
                 date__year=self.year,
                 date__month=month_number,
-                status='Absent'
-            ).count()
+            ).filter(
+                Q(status__iexact='Absent') |
+                Q(status__iexact='A') |
+                Q(status__icontains='absent')
+            )
+
+            self.absent_days = attendance_qs.count()
 
         except Exception:
             self.absent_days = 0
 
         # ==========================
         # RULES
-        # absent 0  = 1 day bonus
-        # absent 1  = no deduction
-        # absent >1 = absent-1 deduction
         # ==========================
 
         auto_bonus = Decimal('0.00')
@@ -291,7 +338,6 @@ class Salary(models.Model):
         if self.absent_days == 0:
 
             self.payable_absent_days = 0
-
             auto_bonus = self.per_day_salary
 
         elif self.absent_days == 1:
@@ -304,11 +350,9 @@ class Salary(models.Model):
                 self.absent_days - 1
             )
 
-        # Only auto bonus if no manual bonus
         if self.bonus <= 0:
             self.bonus = auto_bonus
 
-        # Deduction
         self.attendance_deduction = (
             self.per_day_salary
             * Decimal(self.payable_absent_days)
@@ -317,7 +361,6 @@ class Salary(models.Model):
             rounding=ROUND_HALF_UP
         )
 
-        # Net Salary
         self.net_salary = (
 
             self.basic_salary
@@ -330,14 +373,13 @@ class Salary(models.Model):
             rounding=ROUND_HALF_UP
         )
 
-        # Safety
         if self.net_salary < 0:
             self.net_salary = Decimal('0.00')
 
-        # Previous Due
-        self.previous_due = self.get_previous_due_amount()
+        self.previous_due = (
+            self.get_previous_due_amount()
+        )
 
-        # Final Payable
         self.payable_amount = (
             self.net_salary + self.previous_due
         ).quantize(
