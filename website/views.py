@@ -13,6 +13,12 @@ from .models import (
     Infrastructure,
     WhyChoose,
     DownloadFile,
+    WebsiteSetting,
+    WebsiteTeacher,
+    WebsiteTopper,
+    WebsiteCounter,
+    Testimonial,
+    PopupNotice,
 )
 
 from students.models import Student
@@ -20,31 +26,96 @@ from academics.models import Class, AcademicSession
 
 
 def website_home(request):
-    sliders = HomeSlider.objects.filter(is_active=True).order_by('order', '-id')
-    notices = Notice.objects.filter(is_active=True).order_by('order', '-created_at')
-    important_notices = notices.filter(is_important=True)
+    sliders = HomeSlider.objects.filter(
+        is_active=True
+    ).order_by('order', '-id')
 
-    galleries = Gallery.objects.filter(is_active=True).order_by('order', '-id')[:8]
-    events = SchoolEvent.objects.filter(is_active=True).order_by('order', '-event_date', '-id')[:3]
-    infrastructures = Infrastructure.objects.filter(is_active=True).order_by('order', '-id')[:6]
-    why_choose_items = WhyChoose.objects.filter(is_active=True).order_by('order', '-id')[:6]
+    notices = Notice.objects.filter(
+        is_active=True
+    ).order_by('order', '-created_at')
 
-    return render(request, 'website/home.html', {
-        'sliders': sliders,
-        'notices': notices,
-        'important_notices': important_notices,
-        'galleries': galleries,
-        'events': events,
-        'infrastructures': infrastructures,
-        'why_choose_items': why_choose_items,
-    })
+    important_notices = notices.filter(
+        is_important=True
+    )
+
+    galleries = Gallery.objects.filter(
+        is_active=True
+    ).order_by('order', '-id')[:8]
+
+    events = SchoolEvent.objects.filter(
+        is_active=True
+    ).order_by('order', '-event_date', '-id')[:3]
+
+    infrastructures = Infrastructure.objects.filter(
+        is_active=True
+    ).order_by('order', '-id')[:6]
+
+    why_choose_items = WhyChoose.objects.filter(
+        is_active=True
+    ).order_by('order', '-id')[:6]
+
+    downloads = DownloadFile.objects.filter(
+        is_active=True
+    ).order_by('order', '-created_at')[:6]
+
+    teachers = WebsiteTeacher.objects.filter(
+        is_active=True
+    ).order_by('order')
+
+    toppers = WebsiteTopper.objects.filter(
+        is_active=True
+    ).order_by('order')
+
+    counters = WebsiteCounter.objects.all().order_by('order')
+
+    testimonials = Testimonial.objects.filter(
+        is_active=True
+    )
+
+    popup_notice = PopupNotice.objects.filter(
+        is_active=True
+    ).first()
+
+    settings_obj = WebsiteSetting.objects.first()
+
+    return render(
+        request,
+        'website/home.html',
+        {
+            'sliders': sliders,
+            'notices': notices,
+            'important_notices': important_notices,
+            'galleries': galleries,
+            'events': events,
+            'infrastructures': infrastructures,
+            'why_choose_items': why_choose_items,
+            'downloads': downloads,
+            'teachers': teachers,
+            'toppers': toppers,
+            'counters': counters,
+            'testimonials': testimonials,
+            'popup_notice': popup_notice,
+
+            'settings': settings_obj,
+        }
+    )
 
 
 def website_about(request):
-    return render(request, 'website/about.html')
+    settings_obj = WebsiteSetting.objects.first()
+
+    return render(
+        request,
+        'website/about.html',
+        {
+            'settings': settings_obj
+        }
+    )
 
 
 def website_admission(request):
+    settings_obj = WebsiteSetting.objects.first()
+
     if request.method == 'POST':
         form = AdmissionForm(request.POST, request.FILES)
 
@@ -54,16 +125,32 @@ def website_admission(request):
             return redirect('admission_print', pk=admission.pk)
 
         if hasattr(form, 'existing_admission'):
-            messages.warning(request, "You have already applied. Showing previous application.")
-            return redirect('admission_print', pk=form.existing_admission.pk)
+            messages.warning(
+                request,
+                "You have already applied. Showing previous application."
+            )
+            return redirect(
+                'admission_print',
+                pk=form.existing_admission.pk
+            )
 
-        messages.error(request, "Form submission failed. Please check the details.")
-        print(form.errors)
+        messages.error(
+            request,
+            "Form submission failed. Please check the details."
+        )
 
     else:
         form = AdmissionForm()
 
-    return render(request, 'website/admission.html', {'form': form})
+    return render(
+        request,
+        'website/admission.html',
+        {
+            'form': form,
+            'settings': settings_obj,
+        }
+    )
+
 
 
 def admission_list(request):
@@ -130,23 +217,36 @@ def admission_approve(request, pk):
 
 
 def website_contact(request):
+    settings_obj = WebsiteSetting.objects.first()
+
     if request.method == 'POST':
         form = ContactMessageForm(request.POST)
 
         if form.is_valid():
             form.save()
-            messages.success(request, "Your message has been submitted successfully!")
+            messages.success(
+                request,
+                "Your message has been submitted successfully!"
+            )
             return redirect('website_contact')
 
-        messages.error(request, "Message submission failed. Please check the form.")
-        print(form.errors)
+        messages.error(
+            request,
+            "Message submission failed. Please check the form."
+        )
 
     else:
         form = ContactMessageForm()
 
-    return render(request, 'website/contact.html', {
-        'form': form
-    })
+    return render(
+        request,
+        'website/contact.html',
+        {
+            'form': form,
+            'settings': settings_obj,
+        }
+    )
+
 
 
 def contact_message_list(request):
@@ -179,17 +279,33 @@ def contact_delete(request, pk):
 
 
 def gallery_page(request):
-    galleries = Gallery.objects.filter(is_active=True).order_by('order', '-id')
-    return render(request, 'website/gallery.html', {
-        'galleries': galleries
-    })
+    galleries = Gallery.objects.filter(
+        is_active=True
+    ).order_by('order', '-id')
+
+    return render(
+        request,
+        'website/gallery.html',
+        {
+            'galleries': galleries,
+            'settings': WebsiteSetting.objects.first(),
+        }
+    )
 
 
 def download_list(request):
-    downloads = DownloadFile.objects.filter(is_active=True).order_by('order', '-created_at')
-    return render(request, 'website/download_list.html', {
-        'downloads': downloads
-    })
+    downloads = DownloadFile.objects.filter(
+        is_active=True
+    ).order_by('order', '-created_at')
+
+    return render(
+        request,
+        'website/download_list.html',
+        {
+            'downloads': downloads,
+            'settings': WebsiteSetting.objects.first(),
+        }
+    )
 
 
 def gallery_list(request):

@@ -42,6 +42,42 @@ class Class(models.Model):
     def __str__(self):
         return self.class_name
 
+    def save(self, *args, **kwargs):
+
+        old_teacher = None
+
+        if self.pk:
+            try:
+                old_teacher = Class.objects.get(
+                    pk=self.pk
+                ).class_teacher
+            except Class.DoesNotExist:
+                pass
+
+        super().save(*args, **kwargs)
+
+        # Remove old teacher assignment
+        if (
+            old_teacher and
+            old_teacher != self.class_teacher
+        ):
+            old_teacher.assigned_class = None
+            old_teacher.assigned_section = ""
+            old_teacher.save(
+                update_fields=[
+                    "assigned_class",
+                    "assigned_section"
+                ]
+            )
+
+        # Assign new teacher
+        if self.class_teacher:
+            self.class_teacher.assigned_class = self
+            self.class_teacher.save(
+                update_fields=[
+                    "assigned_class"
+                ]
+            )
 
 class Section(models.Model):
     school_class = models.ForeignKey(

@@ -1,39 +1,161 @@
 {% extends 'base.html' %}
 {% block content %}
 
-<h2 class="mb-3">Teacher Daily Attendance Report</h2>
+<style>
+.card-stat{
+    border:none;
+    border-radius:15px;
+    color:white;
+    box-shadow:0 4px 15px rgba(0,0,0,.15);
+}
+@media print{
+    .no-print,
+    .sidebar,
+    .navbar,
+    .topbar{
+        display:none !important;
+    }
+}
+</style>
+
+<h2 class="mb-3">
+    👨‍🏫 Teacher Daily Attendance Report
+</h2>
 
 {% if holiday_info.is_holiday %}
 <div class="alert {% if holiday_info.is_half_day %}alert-warning{% else %}alert-info{% endif %} shadow-sm mb-3">
 
-    📅 <strong>{{ selected_date }}</strong> —
-    {{ holiday_info.title }} / {{ holiday_info.status }}
+    📅 <strong>{{ selected_date }}</strong>
+
+    — {{ holiday_info.title }}
+
+    / {{ holiday_info.status }}
 
     {% if not holiday_info.is_half_day %}
-        <br>No absent count today because this is a full holiday.
+        <br>
+        No absent count today because this is a full holiday.
     {% endif %}
 
 </div>
 {% endif %}
 
-<div class="card card-box mb-4">
+<div class="row mb-4">
+
+    <div class="col-md-3">
+        <div class="card card-stat bg-primary">
+            <div class="card-body text-center">
+                <h6>Total Records</h6>
+                <h2>{{ total_count }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-stat bg-success">
+            <div class="card-body text-center">
+                <h6>Present</h6>
+                <h2>{{ present_count }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-stat bg-danger">
+            <div class="card-body text-center">
+                <h6>Absent</h6>
+                <h2>{{ absent_count }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card card-stat bg-warning text-dark">
+            <div class="card-body text-center">
+                <h6>Late</h6>
+                <h2>{{ late_count }}</h2>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="card mb-4 no-print">
     <div class="card-body">
 
         <form method="get" class="row g-3">
 
-            <div class="col-md-4">
-                <label class="form-label">Date</label>
-
-                <input type="date"
-                       name="date"
-                       value="{{ selected_date }}"
-                       class="form-control">
+            <div class="col-md-3">
+                <label>Date</label>
+                <input
+                    type="date"
+                    name="date"
+                    value="{{ selected_date }}"
+                    class="form-control">
             </div>
 
-            <div class="col-md-4 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary">
+            <div class="col-md-3">
+                <label>Search</label>
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ search }}"
+                    placeholder="Employee Name / ID"
+                    class="form-control">
+            </div>
+
+            <div class="col-md-3">
+                <label>Status</label>
+
+                <select name="status" class="form-select">
+
+                    <option value="">
+                        All Status
+                    </option>
+
+                    <option value="Present"
+                    {% if selected_status == 'Present' %}
+                    selected
+                    {% endif %}>
+                        Present
+                    </option>
+
+                    <option value="Absent"
+                    {% if selected_status == 'Absent' %}
+                    selected
+                    {% endif %}>
+                        Absent
+                    </option>
+
+                    <option value="Late"
+                    {% if selected_status == 'Late' %}
+                    selected
+                    {% endif %}>
+                        Late
+                    </option>
+
+                </select>
+
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end gap-2">
+
+                <button
+                    type="submit"
+                    class="btn btn-primary">
+
                     Filter
+
                 </button>
+
+                <button
+                    type="button"
+                    onclick="window.print()"
+                    class="btn btn-success">
+
+                    Print
+
+                </button>
+
             </div>
 
         </form>
@@ -43,110 +165,101 @@
 
 <div class="table-responsive">
 
-    <table class="table table-bordered table-hover align-middle">
+<table class="table table-bordered table-hover align-middle">
 
-        <thead class="table-light">
-            <tr>
-                <th>#</th>
-                <th>Photo</th>
-                <th>Employee ID</th>
-                <th>Name</th>
-                <th>Designation</th>
-                <th>Status</th>
-            </tr>
-        </thead>
+    <thead class="table-dark">
 
-        <tbody>
+        <tr>
+            <th>#</th>
+            <th>Photo</th>
+            <th>Employee ID</th>
+            <th>Name</th>
+            <th>Designation</th>
+            <th>Status</th>
+        </tr>
 
-            {% if records %}
+    </thead>
 
-                {% for item in records %}
-                <tr>
+    <tbody>
 
-                    <td>{{ forloop.counter }}</td>
+    {% if records %}
 
-                    <td>
-                        {% if item.employee.photo %}
-                            <img src="{{ item.employee.photo.url }}"
-                                 width="45"
-                                 height="45"
-                                 style="object-fit: cover; border-radius: 6px;">
-                        {% else %}
-                            No Photo
-                        {% endif %}
-                    </td>
+        {% for item in records %}
 
-                    <td>{{ item.employee.employee_id }}</td>
-                    <td>{{ item.employee.name }}</td>
-                    <td>{{ item.employee.designation }}</td>
+        <tr>
 
-                    <td>
+            <td>{{ forloop.counter }}</td>
 
-                        {% if item.status == 'Present' %}
-                            <span class="badge bg-success">
-                                Present
-                            </span>
+            <td>
 
-                        {% elif item.status == 'Late' %}
-                            <span class="badge bg-warning text-dark">
-                                Late
-                            </span>
+                {% if item.employee.photo %}
 
-                        {% elif item.status == 'Absent' %}
-                            <span class="badge bg-danger">
-                                Absent
-                            </span>
-
-                        {% else %}
-                            <span class="badge bg-secondary">
-                                {{ item.status }}
-                            </span>
-                        {% endif %}
-
-                    </td>
-
-                </tr>
-                {% endfor %}
-
-            {% else %}
-
-                {% if holiday_info.is_holiday %}
-                <tr>
-                    <td colspan="6" class="text-center">
-
-                        {% if holiday_info.is_half_day %}
-                            <span class="badge bg-warning text-dark">
-                                Half Day
-                            </span>
-                        {% else %}
-                            <span class="badge bg-info text-dark">
-                                Holiday
-                            </span>
-                        {% endif %}
-
-                        <br>
-
-                        {{ holiday_info.title }}
-                        — No teacher attendance records required.
-
-                    </td>
-                </tr>
+                <img
+                    src="{{ item.employee.photo.url }}"
+                    width="45"
+                    height="45"
+                    style="border-radius:8px;object-fit:cover;">
 
                 {% else %}
 
-                <tr>
-                    <td colspan="6" class="text-center">
-                        No attendance records found.
-                    </td>
-                </tr>
+                No Photo
 
                 {% endif %}
 
-            {% endif %}
+            </td>
 
-        </tbody>
+            <td>{{ item.employee.employee_id }}</td>
 
-    </table>
+            <td>{{ item.employee.name }}</td>
+
+            <td>{{ item.employee.designation }}</td>
+
+            <td>
+
+                {% if item.status == 'Present' %}
+                    <span class="badge bg-success">
+                        Present
+                    </span>
+
+                {% elif item.status == 'Absent' %}
+                    <span class="badge bg-danger">
+                        Absent
+                    </span>
+
+                {% elif item.status == 'Late' %}
+                    <span class="badge bg-warning text-dark">
+                        Late
+                    </span>
+
+                {% else %}
+                    <span class="badge bg-secondary">
+                        {{ item.status }}
+                    </span>
+                {% endif %}
+
+            </td>
+
+        </tr>
+
+        {% endfor %}
+
+    {% else %}
+
+        <tr>
+
+            <td colspan="6" class="text-center">
+
+                No attendance records found.
+
+            </td>
+
+        </tr>
+
+    {% endif %}
+
+    </tbody>
+
+</table>
 
 </div>
 

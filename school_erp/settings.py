@@ -16,7 +16,7 @@ ALLOWED_HOSTS = [
 ]
 
 CSRF_TRUSTED_ORIGINS = [
-    'https://alrahman-erp.onrender.com',
+    'https://schoolerp-hk4n.onrender.com',
     'https://alrahmanmission.in',
     'https://www.alrahmanmission.in',
 ]

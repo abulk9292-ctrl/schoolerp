@@ -202,14 +202,30 @@ def dashboard(request):
 
     try:
         from complaints.models import Complaint
-
-        complaint_qs = Complaint.objects.filter(status="Pending")
-        complaint_qs = apply_session_filter(complaint_qs, selected_session)
-
+    
+        complaint_qs = Complaint.objects.filter(
+            status__in=[
+                "PENDING_TEACHER",
+                "PENDING_ADMIN_APPROVAL"
+            ]
+        )
+    
+        complaint_qs = apply_session_filter(
+            complaint_qs,
+            selected_session
+        )
+    
         pending_complaints = complaint_qs.count()
-
-        recent_complaints = Complaint.objects.select_related("student").order_by("-created_at")
-        recent_complaints = apply_session_filter(recent_complaints, selected_session)[:5]
+    
+        recent_complaints = Complaint.objects.select_related(
+            "student"
+        ).order_by("-created_at")
+    
+        recent_complaints = apply_session_filter(
+            recent_complaints,
+            selected_session
+        )[:5]
+    
     except Exception:
         pass
 

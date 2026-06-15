@@ -256,19 +256,34 @@ def salary_add(request):
 
 @login_required
 def salary_detail(request, pk):
+
     selected_session = get_selected_session(request)
 
-    salary = get_object_or_404(
-        Salary.objects.select_related('employee'),
+    salary = Salary.objects.select_related(
+        'employee'
+    ).filter(
         pk=pk,
-        academic_session=selected_session
+        academic_session=selected_session,
+        is_deleted=False
+    ).first()
+
+    if not salary:
+
+        messages.warning(
+            request,
+            "Salary record not found in the selected academic session."
+        )
+
+        return redirect("salary_list")
+
+    return render(
+        request,
+        'payroll/salary_detail.html',
+        {
+            'salary': salary,
+            'selected_session': selected_session,
+        }
     )
-
-    return render(request, 'payroll/salary_detail.html', {
-        'salary': salary,
-        'selected_session': selected_session,
-    })
-
 
 @login_required
 def salary_edit(request, pk):
@@ -410,18 +425,34 @@ def auto_generate_salary(request):
 
 @login_required
 def salary_print(request, pk):
+
     selected_session = get_selected_session(request)
 
-    salary = get_object_or_404(
-        Salary.objects.select_related('employee'),
+    salary = Salary.objects.select_related(
+        'employee'
+    ).filter(
         pk=pk,
-        academic_session=selected_session
-    )
+        academic_session=selected_session,
+        is_deleted=False
+    ).first()
 
-    return render(request, 'payroll/salary_print.html', {
-        'salary': salary,
-        'selected_session': selected_session,
-    })
+    if not salary:
+
+        messages.warning(
+            request,
+            "Salary record not found in the selected academic session."
+        )
+
+        return redirect("salary_list")
+
+    return render(
+        request,
+        'payroll/salary_print.html',
+        {
+            'salary': salary,
+            'selected_session': selected_session,
+        }
+    )
 
 @login_required
 def salary_recycle_bin(request):

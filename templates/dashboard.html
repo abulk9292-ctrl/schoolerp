@@ -362,19 +362,19 @@ body{
 
     <div class="row">
         <div class="col-md-3">
-            <a href="{% url 'today_attendance_report' %}" class="click-card">
+            <a href="/attendance/students/daily-report/?status=Present" class="click-card">
                 <div class="stat-card"><div class="stat-icon green">🟢</div><h6>Present Today</h6><h2>{{ present|default:0 }}</h2></div>
             </a>
         </div>
 
         <div class="col-md-3">
-            <a href="{% url 'today_attendance_report' %}" class="click-card">
+            <a href="/attendance/students/daily-report/?status=Absent" class="click-card">
                 <div class="stat-card"><div class="stat-icon red">❌</div><h6>Absent Today</h6><h2>{{ absent|default:0 }}</h2></div>
             </a>
         </div>
 
         <div class="col-md-3">
-            <a href="{% url 'today_attendance_report' %}" class="click-card">
+            <a href="/attendance/students/daily-report/?status=Late" class="click-card">
                 <div class="stat-card"><div class="stat-icon yellow">⏰</div><h6>Late Today</h6><h2>{{ late|default:0 }}</h2></div>
             </a>
         </div>

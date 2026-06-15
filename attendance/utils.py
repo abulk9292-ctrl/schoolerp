@@ -118,14 +118,12 @@ def get_school_settings():
 
 def get_holiday_status(date):
     """
-    Attendance Holiday Logic:
+    Attendance Holiday Logic
 
-    1. Database Holiday model
-    2. settings_app.GeneralSetting weekly_holiday
-    3. settings_app.GeneralSetting half_day
-    4. Safe fallback:
-       - Monday = Weekly Holiday
-       - Friday = Half Day
+    Priority:
+    1. Holiday Database
+    2. General Settings Weekly Holiday
+    3. General Settings Half Day
     """
 
     try:
@@ -137,6 +135,7 @@ def get_holiday_status(date):
         ).first()
 
         if holiday:
+
             if holiday.is_half_day:
                 return {
                     "is_holiday": True,
@@ -161,11 +160,28 @@ def get_holiday_status(date):
     settings = get_school_settings()
 
     if settings:
-        weekly_holiday = getattr(settings, "weekly_holiday", "Monday")
-        half_day_enabled = getattr(settings, "half_day_enabled", True)
-        half_day = getattr(settings, "half_day", "Friday")
 
-        if day_name == weekly_holiday:
+        weekly_holiday = getattr(
+            settings,
+            "weekly_holiday",
+            None
+        )
+
+        half_day_enabled = getattr(
+            settings,
+            "half_day_enabled",
+            False
+        )
+
+        half_day = getattr(
+            settings,
+            "half_day",
+            None
+        )
+
+        # Weekly Holiday
+        if weekly_holiday and day_name == weekly_holiday:
+
             return {
                 "is_holiday": True,
                 "is_half_day": False,
@@ -174,7 +190,13 @@ def get_holiday_status(date):
                 "source": "settings",
             }
 
-        if half_day_enabled and half_day and day_name == half_day:
+        # Half Day
+        if (
+            half_day_enabled
+            and half_day
+            and day_name == half_day
+        ):
+
             return {
                 "is_holiday": True,
                 "is_half_day": True,
@@ -183,23 +205,7 @@ def get_holiday_status(date):
                 "source": "settings",
             }
 
-    if date.weekday() == 0:
-        return {
-            "is_holiday": True,
-            "is_half_day": False,
-            "title": "Monday Weekly Holiday",
-            "status": "Holiday",
-            "source": "fallback",
-        }
-
-    if date.weekday() == 4:
-        return {
-            "is_holiday": True,
-            "is_half_day": True,
-            "title": "Friday Half Day",
-            "status": "Half Day",
-            "source": "fallback",
-        }
+    # Normal Working Day
 
     return {
         "is_holiday": False,

@@ -113,7 +113,10 @@ def student_list(request):
         'class_assigned',
         'sibling_of',
         'current_session'
-    ).filter(is_active=True,is_deleted=False).order_by('id')
+    ).filter(
+        is_active=True,
+        is_deleted=False
+    ).order_by('id')
 
     students = apply_session_filter(
         students,
@@ -142,7 +145,9 @@ def student_list(request):
 
     classes = Class.objects.all().order_by('id')
 
-    sections_qs = Student.objects.exclude(
+    sections_qs = Student.objects.filter(
+        is_deleted=False
+    ).exclude(
         section=""
     ).exclude(
         section__isnull=True
@@ -155,7 +160,8 @@ def student_list(request):
     )
 
     sections = sections_qs.values_list(
-        "section", flat=True
+        "section",
+        flat=True
     ).distinct().order_by("section")
 
     return render(request, 'students/student_list.html', {
@@ -167,7 +173,6 @@ def student_list(request):
         'search_query': search_query,
         'selected_session': selected_session,
     })
-
 
 # =========================================================
 # ADD / EDIT / DELETE
@@ -845,15 +850,41 @@ def student_edit(request, pk):
 
 @login_required
 def student_delete(request, pk):
-    student = get_object_or_404(Student, pk=pk)
+
+    # =====================================
+    # DELETE PERMISSION CHECK
+    # =====================================
+
+    if not request.user.is_superuser:
+
+        emp = getattr(request.user, "employee", None)
+
+        if not emp or not emp.is_erp_admin:
+            messages.error(
+                request,
+                "❌ Only ERP Admin or Super Admin can delete students."
+            )
+            return redirect("student_list")
+
+    student = get_object_or_404(
+        Student,
+        pk=pk,
+        is_deleted=False
+    )
 
     if request.method == "POST":
+
         student.is_deleted = True
+        student.is_active = False
         student.deleted_at = timezone.now()
-        student.save(update_fields=[
-            "is_deleted",
-            "deleted_at"
-        ])
+
+        student.save(
+            update_fields=[
+                "is_deleted",
+                "is_active",
+                "deleted_at"
+            ]
+        )
 
         messages.success(
             request,
@@ -869,7 +900,6 @@ def student_delete(request, pk):
             "student": student
         }
     )
-
 
 @login_required
 def recycle_bin(request):
@@ -910,9 +940,7 @@ def recycle_bin(request):
     classes = Class.objects.all().order_by("id")
 
     paginator = Paginator(students, 50)
-
     page_number = request.GET.get("page")
-
     students = paginator.get_page(page_number)
 
     return render(
@@ -927,14 +955,6 @@ def recycle_bin(request):
         }
     )
 
-    return render(
-        request,
-        "students/recycle_bin.html",
-        {
-            "students": students,
-            "selected_session": selected_session,
-        }
-    )
 
 @login_required
 def restore_student(request, pk):
@@ -946,10 +966,13 @@ def restore_student(request, pk):
     )
 
     student.is_deleted = False
+    student.is_active = True
     student.deleted_at = None
+
     student.save(
         update_fields=[
             "is_deleted",
+            "is_active",
             "deleted_at"
         ]
     )
@@ -980,6 +1003,7 @@ def permanent_delete_student(request, pk):
 
     return redirect("recycle_bin")
 
+    
 @login_required
 def student_discontinue(request, pk):
     student = get_object_or_404(Student, pk=pk)
@@ -1712,7 +1736,16 @@ def student_dashboard(request):
         return redirect('student_login')
 
     student = get_object_or_404(Student, pk=student_id)
-    selected_session = str(student.current_session) if student.current_session else ""
+
+    selected_session = (
+        str(student.current_session)
+        if student.current_session
+        else ""
+    )
+
+    # =====================================
+    # ATTENDANCE
+    # =====================================
 
     attendance_total = 0
     attendance_present = 0
@@ -1723,7 +1756,10 @@ def student_dashboard(request):
     try:
         from attendance.models import StudentAttendance
 
-        attendance_qs = StudentAttendance.objects.filter(student=student).order_by('-date')
+        attendance_qs = StudentAttendance.objects.filter(
+            student=student
+        ).order_by('-date')
+
         attendance_qs = apply_session_filter(
             attendance_qs,
             selected_session=selected_session,
@@ -1731,15 +1767,29 @@ def student_dashboard(request):
         )
 
         attendance_total = attendance_qs.count()
-        attendance_present = attendance_qs.filter(status='Present').count()
-        attendance_absent = attendance_qs.filter(status='Absent').count()
+
+        attendance_present = attendance_qs.filter(
+            status='Present'
+        ).count()
+
+        attendance_absent = attendance_qs.filter(
+            status='Absent'
+        ).count()
+
         recent_attendance = attendance_qs[:10]
 
         if attendance_total > 0:
-            attendance_percentage = round((attendance_present / attendance_total) * 100, 2)
+            attendance_percentage = round(
+                (attendance_present / attendance_total) * 100,
+                2
+            )
 
     except Exception:
         pass
+
+    # =====================================
+    # FEES
+    # =====================================
 
     total_paid = 0
     total_due = 0
@@ -1748,31 +1798,49 @@ def student_dashboard(request):
     try:
         from fees.models import Fee
 
-        fee_records = Fee.objects.filter(student=student).order_by('-id')
+        fee_records = Fee.objects.filter(
+            student=student
+        ).order_by('-id')
+
         fee_records = apply_session_filter(
             fee_records,
             selected_session=selected_session,
             academic_session=student.current_session
         )[:10]
 
-        fee_total_qs = Fee.objects.filter(student=student)
+        fee_total_qs = Fee.objects.filter(
+            student=student
+        )
+
         fee_total_qs = apply_session_filter(
             fee_total_qs,
             selected_session=selected_session,
             academic_session=student.current_session
         )
 
-        total_paid = fee_total_qs.aggregate(total=Sum('amount_paid'))['total'] or 0
+        total_paid = (
+            fee_total_qs.aggregate(
+                total=Sum('amount_paid')
+            )['total']
+            or 0
+        )
 
     except Exception:
         pass
+
+    # =====================================
+    # EXAM RESULT
+    # =====================================
 
     exam_records = []
 
     try:
         from exams.models import Result
 
-        exam_records = Result.objects.filter(student=student).order_by('-id')
+        exam_records = Result.objects.filter(
+            student=student
+        ).order_by('-id')
+
         exam_records = apply_session_filter(
             exam_records,
             selected_session=selected_session,
@@ -1780,10 +1848,14 @@ def student_dashboard(request):
         )[:10]
 
     except Exception:
+
         try:
             from exams.models import ExamResult
 
-            exam_records = ExamResult.objects.filter(student=student).order_by('-id')
+            exam_records = ExamResult.objects.filter(
+                student=student
+            ).order_by('-id')
+
             exam_records = apply_session_filter(
                 exam_records,
                 selected_session=selected_session,
@@ -1793,35 +1865,92 @@ def student_dashboard(request):
         except Exception:
             pass
 
+    # =====================================
+    # CLASS TEST
+    # =====================================
+
     class_test_marks = []
 
     try:
         from exams.models import ClassTestSubjectMark
 
-        class_test_marks = ClassTestSubjectMark.objects.filter(
-            student=student
-        ).select_related(
-            "class_test"
-        ).order_by("-class_test__id", "subject")[:20]
+        class_test_marks = (
+            ClassTestSubjectMark.objects
+            .filter(student=student)
+            .select_related("class_test")
+            .order_by("-class_test__id", "subject")[:20]
+        )
 
     except Exception:
         pass
 
-    return render(request, 'students/student_dashboard.html', {
-        'student': student,
-        'attendance_total': attendance_total,
-        'attendance_present': attendance_present,
-        'attendance_absent': attendance_absent,
-        'attendance_percentage': attendance_percentage,
-        'recent_attendance': recent_attendance,
-        'total_paid': total_paid,
-        'total_due': total_due,
-        'fee_records': fee_records,
-        'exam_records': exam_records,
-        'class_test_marks': class_test_marks,
-        'selected_session': selected_session,
-    })
+    # =====================================
+    # COMPLAINTS
+    # =====================================
 
+    complaints = []
+    total_complaints = 0
+    pending_complaints = 0
+    solved_complaints = 0
+    rejected_complaints = 0
+
+    try:
+        from complaints.models import Complaint
+
+        complaints = Complaint.objects.filter(
+            student=student
+        ).order_by("-created_at")
+
+        total_complaints = complaints.count()
+
+        pending_complaints = complaints.filter(
+            status__in=[
+                "PENDING_TEACHER",
+                "PENDING_ADMIN_APPROVAL"
+            ]
+        ).count()
+
+        solved_complaints = complaints.filter(
+            status="SOLVED"
+        ).count()
+
+        rejected_complaints = complaints.filter(
+            status="REJECTED"
+        ).count()
+
+    except Exception:
+        pass
+
+    return render(
+        request,
+        'students/student_dashboard.html',
+        {
+            'student': student,
+
+            'attendance_total': attendance_total,
+            'attendance_present': attendance_present,
+            'attendance_absent': attendance_absent,
+            'attendance_percentage': attendance_percentage,
+            'recent_attendance': recent_attendance,
+
+            'total_paid': total_paid,
+            'total_due': total_due,
+            'fee_records': fee_records,
+
+            'exam_records': exam_records,
+            'class_test_marks': class_test_marks,
+
+            'selected_session': selected_session,
+
+            # Complaint
+            'complaints': complaints,
+            'total_complaints': total_complaints,
+            'pending_complaints': pending_complaints,
+            'solved_complaints': solved_complaints,
+            'rejected_complaints': rejected_complaints,
+        }
+    )
+    
 # =========================================================
 # PARENT LOGIN SYSTEM
 # =========================================================

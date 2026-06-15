@@ -15,7 +15,8 @@
     color:#111827;
 }
 
-.form-control{
+.form-control,
+.form-select{
     border-radius:12px;
     padding:10px;
 }
@@ -41,6 +42,16 @@ label{
     font-weight:700;
 }
 
+.section-title{
+    font-size:18px;
+    font-weight:800;
+    color:#0f172a;
+    border-bottom:2px solid #e5e7eb;
+    padding-bottom:8px;
+    margin-bottom:15px;
+    margin-top:20px;
+}
+
 </style>
 
 <div class="container mt-4">
@@ -51,10 +62,17 @@ label{
             ⚙ General Settings
         </h2>
 
-        <form method="POST"
-              enctype="multipart/form-data">
+        <form method="POST" enctype="multipart/form-data">
 
             {% csrf_token %}
+
+            <!-- ========================= -->
+            <!-- SCHOOL INFORMATION -->
+            <!-- ========================= -->
+
+            <div class="section-title">
+                🏫 School Information
+            </div>
 
             <div class="row g-4">
 
@@ -77,6 +95,18 @@ label{
                     {{ form.principal_name }}
 
                 </div>
+
+            </div>
+
+            <!-- ========================= -->
+            <!-- IMAGES -->
+            <!-- ========================= -->
+
+            <div class="section-title">
+                🖼 School Branding
+            </div>
+
+            <div class="row g-4">
 
                 <div class="col-md-4">
 
@@ -130,6 +160,70 @@ label{
                 </div>
 
             </div>
+
+            <!-- ========================= -->
+            <!-- HOLIDAY SETTINGS -->
+            <!-- ========================= -->
+
+            <div class="section-title">
+                📅 Holiday Settings
+            </div>
+
+            <div class="row g-4">
+
+                <div class="col-md-6">
+
+                    <label>
+                        Weekly Holiday
+                    </label>
+
+                    {{ form.weekly_holiday }}
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label>
+                        Half Day
+                    </label>
+
+                    {{ form.half_day }}
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="form-check mt-4">
+
+                        {{ form.half_day_enabled }}
+
+                        <label class="form-check-label ms-2">
+                            Enable Half Day
+                        </label>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="form-check mt-4">
+
+                        {{ form.count_holiday_attendance }}
+
+                        <label class="form-check-label ms-2">
+                            Count Holiday Attendance
+                        </label>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- ========================= -->
+            <!-- SAVE BUTTON -->
+            <!-- ========================= -->
 
             <div class="mt-4">
 

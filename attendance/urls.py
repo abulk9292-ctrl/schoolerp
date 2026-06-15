@@ -12,6 +12,7 @@ urlpatterns = [
     # TEACHER ATTENDANCE
     # =========================
     path("teachers/", views.teacher_attendance, name="teacher_attendance"),
+    path("teacher/daily-report/", views.teacher_daily_report, name="teacher_daily_report"),
 
     # =========================
     # TEACHER MOBILE GPS + SELFIE
@@ -66,4 +67,5 @@ urlpatterns = [
     path("reset/", views.attendance_reset, name="attendance_reset"),
     path("holiday-reset/", views.holiday_reset, name="holiday_reset"),
     path("holidays/reset/", views.holiday_reset, name="holiday_reset_old"),
+    
 ]

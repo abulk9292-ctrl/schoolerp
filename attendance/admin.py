@@ -21,7 +21,6 @@ class StudentAttendanceAdmin(admin.ModelAdmin):
         "date",
         "section",
         "status",
-        "source",
     )
 
     list_filter = (
@@ -64,7 +63,6 @@ class TeacherAttendanceAdmin(admin.ModelAdmin):
         "status",
         "within_range",
         "distance_meters",
-        "source",
     )
 
     list_filter = (
@@ -72,7 +70,6 @@ class TeacherAttendanceAdmin(admin.ModelAdmin):
         "within_range",
         "session",
         "date",
-        "source",
     )
 
     search_fields = (
@@ -101,8 +98,6 @@ class AttendanceAlertAdmin(admin.ModelAdmin):
         "attendance_status",
         "approval_status",
         "date",
-        "sms_sent",
-        "whatsapp_sent",
     )
 
     list_filter = (
@@ -110,8 +105,6 @@ class AttendanceAlertAdmin(admin.ModelAdmin):
         "approval_status",
         "attendance_status",
         "date",
-        "sms_sent",
-        "whatsapp_sent",
     )
 
     search_fields = (

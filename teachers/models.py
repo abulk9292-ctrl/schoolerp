@@ -11,14 +11,31 @@ class Employee(models.Model):
         related_name='employee'
     )
 
-    employee_id = models.CharField(max_length=20, unique=True, blank=True)
+    employee_id = models.CharField(
+        max_length=20,
+        unique=True,
+        blank=True
+    )
 
     name = models.CharField(max_length=150)
     designation = models.CharField(max_length=100)
-    qualification = models.CharField(max_length=150, blank=True, null=True)
-    subject_specialization = models.CharField(max_length=150, blank=True, null=True)
 
-    # ✅ CLASS TEACHER ASSIGNMENT
+    qualification = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True
+    )
+
+    subject_specialization = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True
+    )
+
+    # ==========================================
+    # CLASS TEACHER ASSIGNMENT
+    # ==========================================
+
     assigned_class = models.ForeignKey(
         'academics.Class',
         on_delete=models.SET_NULL,
@@ -33,16 +50,42 @@ class Employee(models.Model):
         null=True
     )
 
-    phone = models.CharField(max_length=20, blank=True, null=True)
-    aadhaar_number = models.CharField(max_length=30, blank=True, null=True)
+    # ==========================================
+    # BASIC INFO
+    # ==========================================
+
+    phone = models.CharField(
+        max_length=20,
+        blank=True,
+        null=True
+    )
+
+    aadhaar_number = models.CharField(
+        max_length=30,
+        blank=True,
+        null=True
+    )
 
     joining_date = models.DateField()
-    salary = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
-    photo = models.ImageField(upload_to='employees/', blank=True, null=True)
+    salary = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
+    photo = models.ImageField(
+        upload_to='employees/',
+        blank=True,
+        null=True
+    )
+
     is_active = models.BooleanField(default=True)
 
-    # ✅ ERP ACCESS CONTROL
+    # ==========================================
+    # ERP ACCESS CONTROL
+    # ==========================================
+
     is_erp_admin = models.BooleanField(default=False)
 
     can_access_students = models.BooleanField(default=False)
@@ -60,9 +103,9 @@ class Employee(models.Model):
     can_access_backup = models.BooleanField(default=False)
     can_access_settings = models.BooleanField(default=False)
 
-    # =========================
+    # ==========================================
     # RECYCLE BIN
-    # =========================
+    # ==========================================
 
     is_deleted = models.BooleanField(default=False)
 
@@ -84,55 +127,81 @@ class Employee(models.Model):
     class Meta:
         ordering = ["name"]
 
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    
+    # ==========================================
+    # PASSWORD GENERATOR
+    # ==========================================
 
     def get_default_raw_password(self):
         if self.phone:
             return str(self.phone)
+
         if self.employee_id:
             return str(self.employee_id)
+
         return "12345678"
 
+    # ==========================================
+    # AUTO USER CREATION + LOGIN SYNC
+    # ==========================================
+
     def save(self, *args, **kwargs):
-        is_new = self.pk is None
 
         super().save(*args, **kwargs)
 
         if not self.employee_id:
             self.employee_id = f"EMP{self.id}"
-            super().save(update_fields=['employee_id'])
+            super().save(update_fields=["employee_id"])
 
         password = self.get_default_raw_password()
 
-        existing_user = User.objects.filter(username=self.employee_id).first()
+        existing_user = User.objects.filter(
+            username=self.employee_id
+        ).first()
+
+        # --------------------------------------
+        # EXISTING USER FOUND
+        # --------------------------------------
 
         if existing_user and self.user != existing_user:
+
             self.user = existing_user
-            super().save(update_fields=['user'])
+
+            self.user.first_name = self.name
+            self.user.is_active = self.is_active
+            self.user.save()
+
+            super().save(update_fields=["user"])
+
+        # --------------------------------------
+        # CREATE NEW USER
+        # --------------------------------------
 
         elif not self.user:
+
             user = User.objects.create_user(
                 username=self.employee_id,
                 password=password,
-                first_name=self.name
+                first_name=self.name,
             )
+
             user.is_staff = False
             user.is_superuser = False
             user.is_active = self.is_active
             user.save()
 
             self.user = user
-            super().save(update_fields=['user'])
+
+            super().save(update_fields=["user"])
+
+        # --------------------------------------
+        # UPDATE LINKED USER
+        # --------------------------------------
 
         else:
+
             self.user.username = self.employee_id
             self.user.first_name = self.name
             self.user.is_active = self.is_active
-
-            if is_new:
-                self.user.set_password(password)
 
             self.user.save()
 

@@ -168,6 +168,16 @@
     </style>
 </head>
 
+{% if popup_notice %}
+<script>
+window.onload = function() {
+    alert(
+        "{{ popup_notice.title }}\n\n{{ popup_notice.message }}"
+    );
+};
+</script>
+{% endif %}
+
 <body>
 
 <div class="top-bar py-2">
@@ -222,6 +232,7 @@
 
                 <li class="nav-item"><a class="nav-link" href="/site/admission/">Admission</a></li>
                 <li class="nav-item"><a class="nav-link" href="#gallerySection">Gallery</a></li>
+                <li class="nav-item"><a class="nav-link" href="/site/downloads/">Downloads</a></li>
                 <li class="nav-item"><a class="nav-link" href="/site/contact/">Contact</a></li>
 
 
@@ -320,6 +331,7 @@
         <span class="carousel-control-next-icon"></span>
     </button>
 </div>
+
 {% else %}
 <div class="hero-fallback">
     <div class="container">
@@ -415,6 +427,81 @@
 </div>
 {% endif %}
 
+{% if toppers %}
+<div class="container mt-5">
+    <h2 class="section-title">School Toppers</h2>
+
+    <div class="row g-4">
+
+        {% for topper in toppers %}
+        <div class="col-md-3">
+
+            <div class="premium-card text-center">
+
+                {% if topper.photo %}
+                <img src="{{ topper.photo.url }}"
+                     class="img-fluid rounded-circle mb-3"
+                     style="width:150px;height:150px;object-fit:cover;">
+                {% endif %}
+
+                <h5>{{ topper.student_name }}</h5>
+
+                <p>{{ topper.exam_name }}</p>
+
+                <h3>{{ topper.percentage }}%</h3>
+
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+{% endif %}
+
+{% if teachers %}
+<div class="container mt-5">
+    <h2 class="section-title">Our Teachers</h2>
+
+    <div class="row g-4">
+        {% for teacher in teachers %}
+        <div class="col-md-3">
+            <div class="premium-card text-center">
+
+                {% if teacher.photo %}
+                <img src="{{ teacher.photo.url }}"
+                     class="img-fluid rounded-circle mb-3"
+                     style="width:150px;height:150px;object-fit:cover;">
+                {% endif %}
+
+                <h5>{{ teacher.name }}</h5>
+                <p>{{ teacher.designation }}</p>
+                <small>{{ teacher.qualification }}</small>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{% if counters %}
+<div class="container mt-5">
+    <h2 class="section-title">School Statistics</h2>
+
+    <div class="row g-4">
+        {% for c in counters %}
+        <div class="col-md-3">
+            <div class="stat-box">
+                <h2>{{ c.value }}</h2>
+                <p>{{ c.title }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 {% if galleries %}
 <div class="container mt-5" id="gallerySection">
     <h2 class="section-title">School Gallery</h2>
@@ -448,6 +535,38 @@
 </div>
 {% endif %}
 
+{% if testimonials %}
+<div class="container mt-5">
+
+    <h2 class="section-title">
+        Parent Testimonials
+    </h2>
+
+    <div class="row g-4">
+
+        {% for t in testimonials %}
+        <div class="col-md-4">
+
+            <div class="premium-card">
+
+                <h5>{{ t.name }}</h5>
+
+                <p>{{ t.designation }}</p>
+
+                <p>⭐ {{ t.rating }}/5</p>
+
+                <p>{{ t.review }}</p>
+
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
+</div>
+{% endif %}
+
 {% if infrastructures %}
 <div class="container mt-5" id="infraSection">
     <h2 class="section-title">Infrastructure</h2>
@@ -462,6 +581,42 @@
         </div>
         {% endfor %}
     </div>
+</div>
+{% endif %}
+
+{% if downloads %}
+<div class="container mt-5">
+
+    <h2 class="section-title">
+        Downloads
+    </h2>
+
+    <div class="row g-4">
+
+        {% for d in downloads %}
+        <div class="col-md-4">
+
+            <div class="premium-card">
+
+                <h5>{{ d.title }}</h5>
+
+                <p>{{ d.file_type }}</p>
+
+                <a href="{{ d.pdf_file.url }}"
+                   class="btn btn-primary"
+                   target="_blank">
+
+                    Download
+
+                </a>
+
+            </div>
+
+        </div>
+        {% endfor %}
+
+    </div>
+
 </div>
 {% endif %}
 

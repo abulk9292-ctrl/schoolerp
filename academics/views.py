@@ -166,20 +166,81 @@ def class_edit(request, pk):
         form = ClassForm(request.POST, instance=class_obj)
 
         if form.is_valid():
-            form.save()
-            messages.success(request, "✅ Class updated successfully.")
+
+            old_teacher = class_obj.class_teacher
+
+            class_instance = form.save()
+
+            try:
+                from teachers.models import Employee
+
+                # ---------------------------------
+                # OLD TEACHER REMOVE
+                # ---------------------------------
+
+                if (
+                    old_teacher and
+                    old_teacher != class_instance.class_teacher
+                ):
+                    old_teacher.assigned_class = None
+                    old_teacher.assigned_section = ""
+                    old_teacher.save(
+                        update_fields=[
+                            "assigned_class",
+                            "assigned_section"
+                        ]
+                    )
+
+                # ---------------------------------
+                # NEW TEACHER ASSIGN
+                # ---------------------------------
+
+                if class_instance.class_teacher:
+
+                    teacher = class_instance.class_teacher
+
+                    teacher.assigned_class = class_instance
+
+                    if not teacher.assigned_section:
+                        teacher.assigned_section = ""
+
+                    teacher.save(
+                        update_fields=[
+                            "assigned_class",
+                            "assigned_section"
+                        ]
+                    )
+
+            except Exception as e:
+                print("Teacher Sync Error:", e)
+
+            messages.success(
+                request,
+                "✅ Class updated successfully."
+            )
+
             return redirect("class_list")
+
     else:
         form = ClassForm(instance=class_obj)
 
-    classes = Class.objects.select_related("class_teacher").all().order_by("class_name")
+    classes = (
+        Class.objects
+        .select_related("class_teacher")
+        .all()
+        .order_by("class_name")
+    )
 
-    return render(request, "academics/class_list.html", {
-        "classes": classes,
-        "form": form,
-        "edit_mode": True,
-        "class_obj": class_obj,
-    })
+    return render(
+        request,
+        "academics/class_list.html",
+        {
+            "classes": classes,
+            "form": form,
+            "edit_mode": True,
+            "class_obj": class_obj,
+        }
+    )
 
 
 # =========================

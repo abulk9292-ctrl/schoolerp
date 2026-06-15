@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib import messages
 from django.db.models import Count
+from django.db.models import Q
 
 from students.models import Student
 from teachers.models import Employee
@@ -493,42 +494,89 @@ def student_daily_report(request):
     selected_date = request.GET.get("date") or timezone.now().date().isoformat()
     selected_date_obj = parse_date_safe(selected_date)
 
-    selected_class = request.GET.get("class_id")
-    selected_section = request.GET.get("section")
+    selected_class = request.GET.get("class_id", "")
+    selected_section = request.GET.get("section", "")
+    selected_status = request.GET.get("status", "")
+    search = request.GET.get("search", "").strip()
 
     holiday_info = get_holiday_status(selected_date_obj)
+
     classes = Class.objects.all().order_by("class_name")
 
     records = StudentAttendance.objects.select_related(
         "student",
         "student__class_assigned",
         "session",
-    ).filter(date=selected_date_obj)
+    ).filter(
+        date=selected_date_obj
+    )
 
     if active_session:
         records = records.filter(session=active_session)
 
     if selected_class:
-        records = records.filter(student__class_assigned_id=selected_class)
+        records = records.filter(
+            student__class_assigned_id=selected_class
+        )
 
     if selected_section:
-        records = records.filter(student__section=selected_section)
+        records = records.filter(
+            student__section=selected_section
+        )
+
+    if selected_status:
+        records = records.filter(
+            status=selected_status
+        )
+
+    if search:
+        records = records.filter(
+            Q(student__student_name__icontains=search) |
+            Q(student__student_id__icontains=search) |
+            Q(student__registration_no__icontains=search)
+        )
+
+    present_count = records.filter(
+        status="Present"
+    ).count()
+
+    absent_count = records.filter(
+        status="Absent"
+    ).count()
+
+    late_count = records.filter(
+        status="Late"
+    ).count()
+
+    total_count = records.count()
 
     records = sorted(
         list(records),
         key=lambda record: student_numeric_sort_key(record.student),
     )
 
-    return render(request, "attendance/student_daily_report.html", {
-        "records": records,
-        "classes": classes,
-        "selected_date": selected_date,
-        "selected_class": selected_class,
-        "selected_section": selected_section,
-        "holiday_info": holiday_info,
-        "active_session": active_session,
-    })
+    return render(
+        request,
+        "attendance/student_daily_report.html",
+        {
+            "records": records,
+            "classes": classes,
 
+            "selected_date": selected_date,
+            "selected_class": selected_class,
+            "selected_section": selected_section,
+            "selected_status": selected_status,
+            "search": search,
+
+            "holiday_info": holiday_info,
+            "active_session": active_session,
+
+            "present_count": present_count,
+            "absent_count": absent_count,
+            "late_count": late_count,
+            "total_count": total_count,
+        }
+    )
 
 @login_required
 def teacher_daily_report(request):
@@ -536,21 +584,71 @@ def teacher_daily_report(request):
 
     selected_date = request.GET.get("date") or timezone.now().date().isoformat()
     selected_date_obj = parse_date_safe(selected_date)
+
+    selected_status = request.GET.get("status", "")
+    search = request.GET.get("search", "").strip()
+
     holiday_info = get_holiday_status(selected_date_obj)
 
-    records = TeacherAttendance.objects.select_related("employee", "session").filter(date=selected_date_obj)
+    records = TeacherAttendance.objects.select_related(
+        "employee",
+        "session"
+    ).filter(
+        date=selected_date_obj
+    )
 
     if active_session:
-        records = records.filter(session=active_session)
+        records = records.filter(
+            session=active_session
+        )
 
-    records = records.order_by("employee__name")
+    if selected_status:
+        records = records.filter(
+            status=selected_status
+        )
 
-    return render(request, "attendance/teacher_daily_report.html", {
-        "records": records,
-        "selected_date": selected_date,
-        "holiday_info": holiday_info,
-        "active_session": active_session,
-    })
+    if search:
+        records = records.filter(
+            Q(employee__name__icontains=search) |
+            Q(employee__employee_id__icontains=search)
+        )
+
+    present_count = records.filter(
+        status="Present"
+    ).count()
+
+    absent_count = records.filter(
+        status="Absent"
+    ).count()
+
+    late_count = records.filter(
+        status="Late"
+    ).count()
+
+    total_count = records.count()
+
+    records = records.order_by(
+        "employee__name"
+    )
+
+    return render(
+        request,
+        "attendance/teacher_daily_report.html",
+        {
+            "records": records,
+            "selected_date": selected_date,
+            "holiday_info": holiday_info,
+            "active_session": active_session,
+
+            "selected_status": selected_status,
+            "search": search,
+
+            "present_count": present_count,
+            "absent_count": absent_count,
+            "late_count": late_count,
+            "total_count": total_count,
+        }
+    )
 
 
 @login_required

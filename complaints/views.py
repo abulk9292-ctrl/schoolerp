@@ -37,18 +37,13 @@ def is_admin_user(request):
 
 
 def filter_teacher_complaints(employee, qs):
+
     if not employee:
         return qs.none()
-    if employee.is_erp_admin:
-        return qs
-    designation = str(employee.designation or "").lower()
-    if "principal" in designation or "head" in designation:
-        return qs
-    if not employee.assigned_class:
+
+    if not employee.is_active:
         return qs.none()
-    qs = qs.filter(student__class_assigned=employee.assigned_class)
-    if employee.assigned_section:
-        qs = qs.filter(student__section=employee.assigned_section)
+
     return qs
 
 

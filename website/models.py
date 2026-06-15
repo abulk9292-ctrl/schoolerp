@@ -241,3 +241,167 @@ class DownloadFile(models.Model):
 
     def __str__(self):
         return self.title
+
+class WebsiteSetting(models.Model):
+    school_name = models.CharField(
+        max_length=200,
+        default="AL RAHMAN MISSION"
+    )
+
+
+    logo = models.ImageField(
+        upload_to="website/logo/",
+        blank=True,
+        null=True
+    )
+
+    favicon = models.ImageField(
+        upload_to="website/favicon/",
+        blank=True,
+        null=True
+    )
+
+    phone = models.CharField(
+        max_length=30,
+        blank=True
+    )
+
+    email = models.EmailField(
+        blank=True
+    )
+
+    whatsapp_number = models.CharField(
+        max_length=20,
+        blank=True
+    )
+
+    website_url = models.CharField(
+        max_length=200,
+        blank=True
+    )
+
+    address = models.TextField(
+        blank=True
+    )
+
+    facebook = models.URLField(
+        blank=True
+    )
+
+    youtube = models.URLField(
+        blank=True
+    )
+
+    instagram = models.URLField(
+        blank=True
+    )
+
+    about_school = models.TextField(
+        blank=True
+    )
+
+    mission = models.TextField(
+        blank=True
+    )
+
+    vision = models.TextField(
+        blank=True
+    )
+
+    principal_name = models.CharField(
+        max_length=200,
+        blank=True
+    )
+
+    principal_message = models.TextField(
+        blank=True
+    )
+
+    footer_text = models.TextField(
+        blank=True
+    )
+
+    maintenance_mode = models.BooleanField(
+        default=False
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+
+    def __str__(self):
+        return self.school_name
+
+class WebsiteTeacher(models.Model):
+    name = models.CharField(max_length=200)
+    designation = models.CharField(max_length=200)
+    qualification = models.CharField(max_length=200, blank=True)
+    photo = models.ImageField(upload_to='website/teachers/')
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['order', 'name']
+
+    def __str__(self):
+        return self.name
+
+
+class WebsiteTopper(models.Model):
+    student_name = models.CharField(max_length=200)
+    exam_name = models.CharField(max_length=200)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    photo = models.ImageField(upload_to='website/toppers/')
+    order = models.PositiveIntegerField(default=0)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['order', 'student_name']
+
+    def __str__(self):
+        return self.student_name
+
+
+class WebsiteCounter(models.Model):
+    title = models.CharField(max_length=100)
+    value = models.PositiveIntegerField(default=0)
+    icon = models.CharField(max_length=50, blank=True)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.title
+
+
+class Testimonial(models.Model):
+    name = models.CharField(max_length=200)
+    designation = models.CharField(max_length=200, blank=True)
+    photo = models.ImageField(
+        upload_to='website/testimonials/',
+        blank=True,
+        null=True
+    )
+    review = models.TextField()
+    rating = models.IntegerField(default=5)
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
+
+
+class PopupNotice(models.Model):
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+
+    image = models.ImageField(
+        upload_to='website/popup/',
+        blank=True,
+        null=True
+    )
+
+    is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title

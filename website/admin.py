@@ -8,7 +8,13 @@ from .models import (
     SchoolEvent,
     Infrastructure,
     WhyChoose,
-    DownloadFile
+    DownloadFile,
+    WebsiteSetting,
+    WebsiteTeacher,
+    WebsiteTopper,
+    WebsiteCounter,
+    Testimonial,
+    PopupNotice,
 )
 
 
@@ -229,3 +235,117 @@ class DownloadFileAdmin(admin.ModelAdmin):
     list_editable = ('is_active', 'order')
     ordering = ('order', '-created_at')
     readonly_fields = ('created_at',)
+
+# 🔥 Website Setting Admin
+@admin.register(WebsiteSetting)
+class WebsiteSettingAdmin(admin.ModelAdmin):
+    list_display = (
+        'school_name',
+        'phone',
+        'email',
+        'maintenance_mode'
+    )
+
+# ==========================================
+# WEBSITE TEACHER
+# ==========================================
+
+@admin.register(WebsiteTeacher)
+class WebsiteTeacherAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'designation',
+        'is_active',
+        'order'
+    )
+    list_filter = ('is_active',)
+    search_fields = (
+        'name',
+        'designation',
+        'qualification'
+    )
+    list_editable = (
+        'is_active',
+        'order'
+    )
+    ordering = ('order',)
+
+
+# ==========================================
+# WEBSITE TOPPER
+# ==========================================
+
+@admin.register(WebsiteTopper)
+class WebsiteTopperAdmin(admin.ModelAdmin):
+    list_display = (
+        'student_name',
+        'exam_name',
+        'percentage',
+        'is_active',
+        'order'
+    )
+    list_filter = ('is_active',)
+    search_fields = (
+        'student_name',
+        'exam_name'
+    )
+    list_editable = (
+        'is_active',
+        'order'
+    )
+    ordering = ('order',)
+
+
+# ==========================================
+# WEBSITE COUNTER
+# ==========================================
+
+@admin.register(WebsiteCounter)
+class WebsiteCounterAdmin(admin.ModelAdmin):
+    list_display = (
+        'title',
+        'value',
+        'order'
+    )
+    list_editable = (
+        'value',
+        'order'
+    )
+    ordering = ('order',)
+
+
+# ==========================================
+# TESTIMONIAL
+# ==========================================
+
+@admin.register(Testimonial)
+class TestimonialAdmin(admin.ModelAdmin):
+    list_display = (
+        'name',
+        'designation',
+        'rating',
+        'is_active'
+    )
+    list_filter = (
+        'rating',
+        'is_active'
+    )
+    search_fields = (
+        'name',
+        'review'
+    )
+
+
+# ==========================================
+# POPUP NOTICE
+# ==========================================
+
+@admin.register(PopupNotice)
+class PopupNoticeAdmin(admin.ModelAdmin):
+    list_display = (
+        'title',
+        'is_active'
+    )
+    list_editable = (
+        'is_active',
+    )

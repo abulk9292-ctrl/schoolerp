@@ -571,6 +571,7 @@
                     <ul class="nav flex-column submenu" id="attendanceMenu">
                         <li><a href="/attendance/students/" class="nav-link">Student Attendance</a></li>
                         <li><a href="/attendance/students/daily-report/" class="nav-link">Student Daily Report</a></li>
+                        <li><a href="/attendance/teacher/daily-report/" class="nav-link">Teacher Daily Report</a></li>
                         <li><a href="/attendance/students/percentage-report/" class="nav-link">Percentage Report</a></li>
                         <li><a href="/attendance/students/monthly-report/" class="nav-link">Monthly Report</a></li>
                         {% if request.user.is_superuser or request.user.is_staff or emp.is_erp_admin %}
@@ -686,7 +687,71 @@
                 <li><a href="{% url 'manual_backup' %}" class="nav-link"><i class="bi bi-cloud-arrow-down"></i> Backup</a></li>
                 <li><a href="/recycle-bin/">🗑 Recycle Bin Dashboard</a></li>
             {% endif %}
+            <div class="menu-title">Website</div>
 
+            <li>
+                <a class="nav-link menu-toggle" href="#websiteMenu">
+                    <i class="bi bi-globe"></i> Website Management ▾
+                </a>
+            
+                <ul class="nav flex-column submenu" id="websiteMenu">
+            
+                    <li>
+                        <a href="/admin/website/homeslider/" class="nav-link">
+                            🖼 Home Sliders
+                        </a>
+                    </li>
+            
+                    <li>
+                        <a href="/admin/website/notice/" class="nav-link">
+                            📢 Notices
+                        </a>
+                    </li>
+            
+                    <li>
+                        <a href="/admin/website/gallery/" class="nav-link">
+                            📸 Photo / Video Gallery
+                        </a>
+                    </li>
+            
+                    <li>
+                        <a href="/admin/website/schoolevent/" class="nav-link">
+                            🎉 Events
+                        </a>
+                    </li>
+            
+                    <li>
+                        <a href="/admin/website/infrastructure/" class="nav-link">
+                            🏫 Infrastructure
+                        </a>
+                    </li>
+            
+                    <li>
+                        <a href="/admin/website/whychoose/" class="nav-link">
+                            ⭐ Why Choose Us
+                        </a>
+                    </li>
+            
+                    <li>
+                        <a href="/admin/website/downloadfile/" class="nav-link">
+                            📥 Downloads
+                        </a>
+                    </li>
+            
+                    <li>
+                        <a href="/admin/website/contactmessage/" class="nav-link">
+                            📧 Contact Messages
+                        </a>
+                    </li>
+            
+                    <li>
+                        <a href="/admin/website/admission/" class="nav-link">
+                            📝 Online Admissions
+                        </a>
+                    </li>
+            
+                </ul>
+            </li>
             <div class="menu-title">Account</div>
             <li>
                 <form method="post" action="{% url 'logout' %}">

@@ -478,6 +478,37 @@ def employee_edit(request, pk):
         "page_title": "Edit Employee"
     })
 
+# =====================================================
+# EMPLOYEE PASSWORD RESET
+# =====================================================
+
+@login_required
+def employee_reset_password(request, pk):
+
+    if not check_permission(request, "can_access_teachers"):
+        messages.error(request, "❌ Permission Denied")
+        return redirect("dashboard")
+
+    employee = get_object_or_404(Employee, pk=pk)
+
+    if not employee.user:
+        messages.error(
+            request,
+            "❌ No login account linked with this employee."
+        )
+        return redirect("employee_list")
+
+    new_password = employee.get_default_raw_password()
+
+    employee.user.set_password(new_password)
+    employee.user.save()
+
+    messages.success(
+        request,
+        f"✅ Password reset successfully. New Password: {new_password}"
+    )
+
+    return redirect("employee_list")
 
 # =====================================================
 # EMPLOYEE DELETE

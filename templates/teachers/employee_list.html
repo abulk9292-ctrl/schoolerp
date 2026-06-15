@@ -78,7 +78,7 @@
                 <th>Salary</th>
                 <th>Status</th>
                 <th>Permission</th>
-                <th width="170">Action</th>
+                <th width="250">Action</th>
             </tr>
         </thead>
 
@@ -192,6 +192,12 @@
                        onclick="return confirm('Delete this employee?')"
                        class="btn btn-danger btn-sm">
                         Delete
+                    </a>
+
+                    <a href="/teachers/reset-password/{{ e.id }}/"
+                       onclick="return confirm('Reset password for {{ e.name }} ?')"
+                          class="btn btn-secondary btn-sm">
+                            🔑 Reset
                     </a>
                 </td>
             </tr>

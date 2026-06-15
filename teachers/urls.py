@@ -75,6 +75,12 @@ path(
 ),
 
 path(
+    "reset-password/<int:pk>/",
+    views.employee_reset_password,
+    name="employee_reset_password"
+),
+
+path(
     "delete/<int:pk>/",
     views.employee_delete,
     name="employee_delete"

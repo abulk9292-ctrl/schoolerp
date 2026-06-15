@@ -82,6 +82,13 @@ class Student(models.Model):
     is_promoted = models.BooleanField(default=False)
     is_graduated = models.BooleanField(default=False)
 
+    is_deleted = models.BooleanField(default=False)
+
+    deleted_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
     sibling_of = models.ForeignKey(
         'self',
         on_delete=models.SET_NULL,

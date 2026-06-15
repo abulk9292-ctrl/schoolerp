@@ -7,44 +7,125 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
-        body { background:#f4f7fb; font-family:Arial, sans-serif; }
+    :root{
+        --primary:#2563eb;
+        --secondary:#1354ec;
+        --success:#16a34a;
+        --danger:#dc2626;
+        --warning:#f59e0b;
+    }
+    
+    body{
+        background:
+        linear-gradient(135deg,#ce51f7,#4b9bf6,#6bf98a);
+        min-height:100vh;
+        font-family:'Segoe UI',sans-serif;
+        color:#fff;
+    }
 
-        .top {
-            background:linear-gradient(135deg,#003b8f,#0d6efd);
-            color:white;
-            padding:25px;
-        }
+    .top{
+        background:rgba(255,255,255,.08);
+        backdrop-filter:blur(18px);
+        border-bottom:1px solid rgba(255,255,255,.15);
+        padding:25px;
+    }
+    
+    .card-box{
+        background:rgba(255,255,255,.08);
+        backdrop-filter:blur(20px);
+        border:1px solid rgba(255,255,255,.15);
+        border-radius:24px;
+        padding:24px;
+        box-shadow:0 15px 35px rgba(0,0,0,.25);
+        transition:.35s;
+        color:white;
+    }
+    
+    .card-box:hover{
+        transform:translateY(-5px);
+    }
+    
+    .profile-img{
+        width:120px;
+        height:120px;
+        object-fit:cover;
+        border-radius:50%;
+        border:5px solid rgba(255,255,255,.4);
+    }
+    
+    .stat{
+        border-radius:24px;
+        padding:25px;
+        text-align:center;
+        transition:.35s;
+        cursor:pointer;
+        text-decoration:none;
+        display:block;
+        color:white;
+        box-shadow:
+        0 10px 25px rgba(0,0,0,.25);
+    }
+    
+    .stat:hover{
+        transform:
+        translateY(-8px)
+        scale(1.03);
+    }
 
-        .card-box {
-            background:white;
-            border-radius:18px;
-            padding:22px;
-            box-shadow:0 10px 28px rgba(0,0,0,.12);
-            height:100%;
-        }
-
-        .profile-img {
-            width:110px;
-            height:110px;
-            object-fit:cover;
-            border-radius:50%;
-            border:4px solid white;
-        }
-
-        .stat {
-            border-radius:16px;
-            padding:20px;
-            color:white;
+    .stat h3{
+        font-size:32px;
+        font-weight:800;
+    }
+    
+    .stat p{
+        margin:0;
+        font-size:15px;
+        opacity:.9;
+    }
+    
+    .attendance-card{
+        background:linear-gradient(135deg,#2563eb,#60a5fa);
+    }
+    
+    .present-card{
+        background:linear-gradient(135deg,#16a34a,#4ade80);
+    }
+    
+    .absent-card{
+        background:linear-gradient(135deg,#dc2626,#fb7185);
+    }
+    
+    .fee-card{
+        background:linear-gradient(135deg,#f59e0b,#facc15);
+        color:#111;
+    }
+    
+    .quick-btn{
+        border-radius:14px;
+        font-weight:700;
+        margin:5px;
+    }
+    
+    .table{
+        color:white;
+    }
+    
+    .table-dark{
+        background:#0f172a;
+    }
+    
+    .table td,
+    .table th{
+        vertical-align:middle;
+    }
+    
+    @media(max-width:768px){
+        .top .container{
+            flex-direction:column;
             text-align:center;
+            gap:10px;
         }
-
-        .action-btn { margin-left:10px; }
-
-        @media(max-width:768px){
-            .top .container { flex-direction:column; gap:12px; text-align:center; }
-            .action-btn { margin-left:0; margin-top:8px; }
-            .profile-area { text-align:center; }
-        }
+    }
     </style>
 </head>
 
@@ -99,37 +180,73 @@
 
         </div>
     </div>
+    <div class="card-box mb-4">
+
+        <h5 class="fw-bold mb-3">
+            ⚡ Quick Actions
+        </h5>
+    
+        <div class="d-flex flex-wrap">
+    
+            <a href="{% url 'student_complaint_list' %}"
+               class="btn btn-danger quick-btn">
+                📝 Complaint
+            </a>
+    
+            <a href="#"
+               class="btn btn-primary quick-btn">
+                📅 Attendance
+            </a>
+    
+            <a href="#"
+               class="btn btn-success quick-btn">
+                📄 Result
+            </a>
+    
+            <a href="#"
+               class="btn btn-warning quick-btn">
+                💰 Fees
+            </a>
+    
+            <a href="{% url 'student_change_password' %}"
+               class="btn btn-info quick-btn">
+                🔐 Password
+            </a>
+    
+        </div>
+    
+    </div>
 
     <div class="row g-4 mb-4">
-
+    
         <div class="col-6 col-md-3">
-            <div class="stat bg-primary">
+            <a href="#" class="stat attendance-card">
                 <h3>{{ attendance_percentage|default:0 }}%</h3>
-                <p class="mb-0">Attendance</p>
-            </div>
+                <p>Attendance</p>
+            </a>
         </div>
-
+    
         <div class="col-6 col-md-3">
-            <div class="stat bg-success">
+            <a href="#" class="stat present-card">
                 <h3>{{ attendance_present|default:0 }}</h3>
-                <p class="mb-0">Present</p>
-            </div>
+                <p>Present</p>
+            </a>
         </div>
-
+    
         <div class="col-6 col-md-3">
-            <div class="stat bg-danger">
+            <a href="#" class="stat absent-card">
                 <h3>{{ attendance_absent|default:0 }}</h3>
-                <p class="mb-0">Absent</p>
-            </div>
+                <p>Absent</p>
+            </a>
         </div>
-
+    
         <div class="col-6 col-md-3">
-            <div class="stat bg-warning text-dark">
+            <a href="#" class="stat fee-card">
                 <h3>₹ {{ total_paid|default:0 }}</h3>
-                <p class="mb-0">Fees Paid</p>
-            </div>
+                <p>Fees Paid</p>
+            </a>
         </div>
-
+    
     </div>
 
     <div class="row g-4">
@@ -253,10 +370,131 @@
                         </tbody>
                     </table>
                 </div>
-
+ 
             </div>
         </div>
-
+        <div class="col-md-12">
+            <div class="card-box">
+        
+                <h4 class="fw-bold text-danger">
+                    📝 My Complaints
+                </h4>
+ 
+                <div class="row mt-3 mb-3">
+ 
+                    <div class="col-md-3">
+                        <div class="alert alert-primary text-center">
+                            <h4>{{ total_complaints|default:0 }}</h4>
+                            <strong>Total</strong>
+                        </div>
+                    </div>
+        
+                    <div class="col-md-3">
+                        <div class="alert alert-warning text-center">
+                            <h4>{{ pending_complaints|default:0 }}</h4>
+                            <strong>Pending</strong>
+                        </div>
+                    </div>
+        
+                    <div class="col-md-3">
+                        <div class="alert alert-success text-center">
+                            <h4>{{ solved_complaints|default:0 }}</h4>
+                            <strong>Solved</strong>
+                        </div>
+                    </div>
+        
+                    <div class="col-md-3">
+                        <div class="alert alert-danger text-center">
+                            <h4>{{ rejected_complaints|default:0 }}</h4>
+                            <strong>Rejected</strong>
+                        </div>
+                    </div>
+        
+                </div>
+        
+                <div class="table-responsive">
+        
+                    <table class="table table-bordered table-hover">
+        
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Date</th>
+                                <th>Title</th>
+                                <th>Complaint</th>
+                                <th>Status</th>
+                                <th>Teacher Remark</th>
+                                <th>Admin Remark</th>
+                            </tr>
+                        </thead>
+        
+                        <tbody>
+        
+                            {% for complaint in complaints %}
+                            <tr>
+        
+                                <td>
+                                    {{ complaint.created_at|date:"d M Y" }}
+                                </td>
+        
+                                <td>
+                                    {{ complaint.title }}
+                                </td>
+        
+                                <td>
+                                    {{ complaint.description }}
+                                </td>
+        
+                                <td>
+        
+                                    {% if complaint.status == "PENDING_TEACHER" %}
+                                        <span class="badge bg-warning text-dark">
+                                            Pending Teacher
+                                        </span>
+        
+                                    {% elif complaint.status == "PENDING_ADMIN_APPROVAL" %}
+                                        <span class="badge bg-info">
+                                     Submitted To Admin
+                                        </span>
+        
+                                    {% elif complaint.status == "SOLVED" %}
+                                        <span class="badge bg-success">
+                                            Solved
+                                        </span>
+        
+                                    {% elif complaint.status == "REJECTED" %}
+                                        <span class="badge bg-danger">
+                                            Rejected
+                                        </span>
+        
+                                    {% endif %}
+        
+                                </td>
+        
+                                <td>
+                                    {{ complaint.teacher_solution|default:"Waiting teacher remark" }}
+                                </td>
+        
+                                <td>
+                                    {{ complaint.admin_solution|default:"No admin remark" }}
+                                </td>
+        
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">
+                                    No complaints found.
+                                </td>
+                            </tr>
+                            {% endfor %}
+       
+                        </tbody>
+       
+                    </table>
+       
+                </div>
+       
+            </div>
+        </div>
         <div class="col-md-12">
             <div class="card-box">
                 <h4 class="fw-bold text-primary">📄 Result / Exam Records</h4>
