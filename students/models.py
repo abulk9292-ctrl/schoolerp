@@ -143,8 +143,7 @@ class Student(models.Model):
             update_fields.append("login_username")
 
         if not self.login_password:
-            raw_password = self.get_default_raw_password()
-            self.login_password = make_password(raw_password)
+            self.login_password = "PENDING_IMPORT"
             update_fields.append("login_password")
 
         if not self.roll_no:
@@ -163,15 +162,15 @@ class Student(models.Model):
         if update_fields:
             super().save(update_fields=update_fields)
 
-        Parent.objects.get_or_create(
-            student=self,
-            defaults={
-                "username": self.student_id,
-                "father_name": self.father_name,
-                "mother_name": self.mother_name,
-                "phone": self.phone,
-            }
-        )
+        #Parent.objects.get_or_create(
+        #    student=self,
+        #    defaults={
+        #        "username": self.student_id,
+        #        "father_name": self.father_name,
+        #        "mother_name": self.mother_name,
+        #        "phone": self.phone,
+        #    }
+        #)
 
     def __str__(self):
         return f"{self.student_name} ({self.student_id})"
@@ -199,8 +198,7 @@ class Parent(models.Model):
             self.username = self.student.student_id
 
         if not self.password:
-            raw_password = self.student.get_default_raw_password()
-            self.password = make_password(raw_password)
+            self.password = "PENDING_IMPORT"
 
         if not self.father_name:
             self.father_name = self.student.father_name
