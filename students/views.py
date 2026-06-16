@@ -1618,6 +1618,11 @@ def student_import_confirm(request):
 
     df = pd.read_json(StringIO(data_json))
 
+
+    print("=" * 50)
+    print("TOTAL ROWS =", len(df))
+    print("=" * 50)
+
     success_count = 0
     failed_count = 0
     errors = []
