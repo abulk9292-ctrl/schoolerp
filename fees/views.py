@@ -1113,3 +1113,59 @@ def fee_restore(request, pk):
     )
 
     return redirect('fee_recycle_bin')
+
+from website.models import WebsiteSetting
+
+@login_required
+def student_fee_card(request, student_id):
+
+    student = get_object_or_404(
+        Student.objects.select_related(
+            'class_assigned'
+        ),
+        pk=student_id
+    )
+
+    active_session = get_active_session(request)
+
+    fee_records = FeeCollection.objects.filter(
+        student=student,
+        is_deleted=False
+    )
+
+    if active_session:
+        fee_records = fee_records.filter(
+            session=active_session
+        )
+
+    fee_records = fee_records.order_by('payment_date')
+
+    month_data = {}
+
+    months = [
+        "January","February","March",
+        "April","May","June",
+        "July","August","September",
+        "October","November","December"
+    ]
+
+    for month in months:
+        fee = fee_records.filter(
+            fees_month=month
+        ).first()
+
+        month_data[month] = fee
+
+    settings = WebsiteSetting.objects.first()
+
+    return render(
+        request,
+        "fees/student_fee_card.html",
+        {
+            "student": student,
+            "month_data": month_data,
+            "active_session": active_session,
+            "settings": settings,
+            "fee_records": fee_records,
+        }
+    )

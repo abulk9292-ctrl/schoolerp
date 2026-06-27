@@ -218,6 +218,7 @@
                     <a href="{% url 'add_sibling' student.id %}" class="btn btn-success rounded-pill fw-bold">Add Sibling</a>
                     <a href="/exams/report-card/?student_id={{ student.id }}" class="btn btn-dark rounded-pill fw-bold">Print Result</a>
                     <a href="/fees/student-payment-statement/{{ student.id }}/" class="btn btn-warning rounded-pill fw-bold">Fees Statement Print</a>
+                    <a href="{% url 'student_fee_card' student.id %}" class="btn btn-info rounded-pill fw-bold">Fee Card</a>
 
                     {% if student.is_active %}
                         <a href="{% url 'student_discontinue' student.id %}" class="btn btn-danger rounded-pill fw-bold">Discontinue</a>

@@ -1,0 +1,428 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Student Fee Card</title>
+
+<style>
+
+@page{
+    size:A4 portrait;
+    margin:5mm;
+}
+
+body{
+    margin:0;
+    padding:0;
+    font-family:Arial,sans-serif;
+}
+
+.print-sheet{
+    display:flex;
+    flex-wrap:wrap;
+    gap:4mm;
+}
+
+.fee-card{
+    width:calc(50% - 2mm);
+    height:138mm;
+    border:2px solid #000;
+    box-sizing:border-box;
+    overflow:hidden;
+    page-break-inside:avoid;
+}
+
+/* REMOVE THIS OLD BLOCK
+
+.fee-card{
+    width:100%;
+    max-width:1050px;
+    margin:auto;
+    border:1px solid #000;
+}
+
+*/
+
+.header{
+    display:flex;
+    align-items:center;
+    border-bottom:2px solid #000;
+    padding:5px;
+}
+
+.logo{
+    width:70px;
+}
+
+.logo img{
+    width:60px;
+}
+
+.school{
+    flex:1;
+    text-align:center;
+}
+
+.school h1{
+    margin:0;
+    font-size:20px;
+    color:#0a2158;
+    font-weight:800;
+}
+
+.school h5{
+    margin:2px 0;
+    font-size:10px;
+}
+
+.school h3{
+    margin-top:3px;
+    font-size:12px;
+    background:#0a2158;
+    color:#fff;
+    display:inline-block;
+    padding:3px 12px;
+}
+
+.content{
+    display:flex;
+}
+
+.left{
+    width:180px;
+    border-right:1px solid #000;
+    padding:5px;
+}
+
+.photo{
+    width:90px;
+    height:110px;
+    margin:auto;
+    border:1px solid #999;
+}
+
+.photo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+.student-id{
+    margin-top:5px;
+    border:1px solid #000;
+    text-align:center;
+}
+
+.student-id .title{
+    background:#0a2158;
+    color:#fff;
+    padding:3px;
+    font-size:10px;
+}
+
+.student-id .number{
+    padding:3px;
+    font-size:11px;
+    font-weight:bold;
+}
+
+.info{
+    margin-top:5px;
+    font-size:12px;
+    line-height:1.4;
+}
+
+.info b{
+    width:55px;
+    display:inline-block;
+}
+
+.right{
+    flex:1;
+}
+
+.fee-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.fee-table th,
+.fee-table td{
+    border:1px solid #000;
+    text-align:center;
+    font-size:10px;
+    height:26.5px;
+}
+
+.month{
+    background:#c9ffcb;
+}
+
+.row-title{
+    background:#dffcff;
+    width:70px;
+}
+
+.footer{
+    display:flex;
+    border-top:1px solid #000;
+}
+
+.notes{
+    flex:1;
+    padding:5px;
+    font-size:12px;
+}
+
+.seal{
+    width:70px;
+    text-align:center;
+    padding-top:5px;
+}
+
+.seal img{
+    width:50px;
+}
+
+.signature{
+    width:100px;
+    text-align:center;
+    padding-top:5px;
+}
+
+.signature img{
+    width:45px;
+}
+
+.signature p{
+    margin:0;
+    font-size:9px;
+}
+
+.print-btn{
+    text-align:center;
+    margin:10px;
+}
+
+.print-btn button{
+    padding:8px 20px;
+    font-size:15px;
+    cursor:pointer;
+}
+
+@media print{
+
+    .print-btn{
+        display:none;
+    }
+
+    .print-sheet{
+        gap:50;
+    }
+
+    .fee-card{
+        width:100%;
+        height:138mm;
+    }
+
+}
+
+</style>
+</head>
+<body>
+
+<div class="print-btn">
+    <button onclick="window.print()">🖨 Print Fee Card</button>
+</div>
+
+<div class="fee-card">
+
+    <div class="header">
+
+        <div class="logo">
+            <img src="{% static 'images/logo.png' %}">
+        </div>
+
+        <div class="school">
+            <h1>AL RAHMAN MISSION</h1>
+            <h5> 9091215171/alrahmanmission@gmail.com</h5>
+            <h3> STUDENT FEE CARD</h3>
+            <h3> At- Mission More Sapatbari, Po Amalia Ps Chakulia Dist. Uttar dinajpur 733208</h3>
+        </div>
+
+    </div>
+
+    <div class="content">
+
+        <!-- LEFT -->
+
+        <div class="left">
+
+            <div class="photo">
+
+                {% if student.photo %}
+                    <img src="{{ student.photo.url }}">
+                {% else %}
+                    <img src="{% static 'images/id_card_bg.png' %}">
+                {% endif %}
+
+            </div>
+
+            <div class="student-id">
+                <div class="title">STUDENT ID</div>
+                <div class="number">
+                    ARM{{ student.id }}
+                </div>
+            </div>
+
+            <div class="info">
+
+                <div><b>Name:</b> {{ student.student_name }}</div>
+
+                <div>
+                    <b>Class:</b> {{ student.class_assigned }}
+                </div>
+
+                <div>
+                    <b>Roll:</b> {{ student.roll_no }}
+                </div>
+
+                <div>
+                    <b>Father:</b> {{ student.father_name }}
+                </div>
+
+                <div>
+                    <b>Mother:</b> {{ student.mother_name }}
+                </div>
+
+                <div>
+                    <b>Ad.No:</b> {{ student.admission_no }}
+                </div>
+
+                <div>
+                    <b>DOB:</b> {{ student.date_of_birth }}
+                </div>
+
+                <div>
+                    <b>Mob:</b> {{ student.mobile }}
+                </div>
+
+                <div>
+                    <b>Address:</b><br>
+                    {{ student.address }}
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- RIGHT -->
+
+        <div class="right">
+
+            <table class="fee-table">
+
+                <tr>
+                    <th class="row-title">Months</th>
+                    <th class="month">January</th>
+                    <th class="month">February</th>
+                    <th class="month">March</th>
+                    <th class="month">April</th>
+                    <th class="month">May</th>
+                    <th class="month">June</th>
+                </tr>
+
+                <tr>
+                    <td class="row-title">Total Due</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+
+                <tr>
+                    <td class="row-title">Paid Amt</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+
+                <tr>
+                    <td class="row-title">Due</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+
+                <tr>
+                    <td class="row-title">Date</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+
+                <tr>
+                    <td class="row-title">Collector Sign</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+
+                <tr>
+                    <th class="row-title">Months</th>
+                    <th class="month">July</th>
+                    <th class="month">August</th>
+                    <th class="month">September</th>
+                    <th class="month">October</th>
+                    <th class="month">November</th>
+                    <th class="month">December</th>
+                </tr>
+
+                <tr>
+                    <td class="row-title">Total Due</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+
+                <tr>
+                    <td class="row-title">Paid Amt</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+
+                <tr>
+                    <td class="row-title">Due</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+
+                <tr>
+                    <td class="row-title">Date</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+
+                <tr>
+                    <td class="row-title">Collector Sign</td>
+                    <td></td><td></td><td></td><td></td><td></td><td></td>
+                </tr>
+
+            </table>
+
+            <div class="footer">
+
+                <div class="notes">
+
+                    <b>NOTE:</b><br>
+
+                    • This card must be presented during fee payment.<br>
+                    • This card is non-transferable.<br>
+                    • In case of loss, immediately inform school authority.
+
+                </div>
+                <div class="seal">
+                    <img src="{% static 'images/round_seal.png' %}">
+                </div>
+                <div class="signature">
+
+                    <img src="{% static 'images/principal_sign.png' %}">
+                    <p>Principal Signature</p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -94,4 +94,22 @@ urlpatterns = [
         views.fee_permanent_delete,
         name='fee_permanent_delete'
     ),
+
+    path(
+        'fee-card/<int:student_id>/',
+        views.student_fee_card,
+        name='student_fee_card'
+    ),
+
+    # path(
+    #     'student-fee-card-print/<int:student_id>/',
+    #     views.student_fee_card_print,
+    #     name='student_fee_card_print'
+    # ),
+
+    path(
+        'student-fee-card/<int:student_id>/',
+        views.student_fee_card,
+        name='student_fee_card'
+    ),
 ]
